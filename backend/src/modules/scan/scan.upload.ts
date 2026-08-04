@@ -10,8 +10,6 @@ const maxUploadSizeBytes = 5 * 1024 * 1024;
 const maxImageDimension = 4096;
 const maxImagePixels = 16_777_216;
 
-type SupportedImageFormat = "jpeg" | "png" | "webp";
-
 type SaveCheckInPhotoInput = {
   tenantName: string;
   sessionId: string;
@@ -20,11 +18,10 @@ type SaveCheckInPhotoInput = {
 
 const browserMimeTypeAllowList = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-const formatToExtension: Record<SupportedImageFormat, string> = {
-  jpeg: "jpg",
-  png: "png",
-  webp: "webp",
-};
+// Check-in photos are always re-encoded to WebP on save, regardless of the
+// uploaded format, since it gives noticeably smaller files than JPEG/PNG at
+// comparable quality and there's no need to preserve the original format.
+const outputExtension = "webp";
 
 export const checkInPhotoUpload = multer({
   storage: multer.memoryStorage(),
@@ -82,23 +79,8 @@ async function normalizeImageBuffer(file: Express.Multer.File) {
 
   image = image.rotate();
 
-  if (format === "jpeg") {
-    return {
-      buffer: await image.jpeg({ quality: 88, mozjpeg: true }).toBuffer(),
-      format,
-    };
-  }
-
-  if (format === "png") {
-    return {
-      buffer: await image.png({ compressionLevel: 9, palette: true }).toBuffer(),
-      format,
-    };
-  }
-
   return {
     buffer: await image.webp({ quality: 88 }).toBuffer(),
-    format,
   };
 }
 
@@ -106,7 +88,7 @@ export async function saveCheckInPhoto({ tenantName, sessionId, file }: SaveChec
   const normalizedImage = await normalizeImageBuffer(file);
   const organizationSegment = slugifySegment(tenantName);
   const sessionSegment = slugifySegment(sessionId);
-  const filename = `${randomUUID()}.${formatToExtension[normalizedImage.format]}`;
+  const filename = `${randomUUID()}.${outputExtension}`;
   const relativeDirectory = path.join(organizationSegment, "check-ins", sessionSegment);
   const relativePath = path.join(relativeDirectory, filename);
   const absoluteDirectory = path.join(uploadRootDir, relativeDirectory);
