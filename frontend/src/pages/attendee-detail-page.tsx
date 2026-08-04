@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import { Mail } from "lucide-react";
+import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { BrandBadge } from "../components/brand/brand-badge";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -40,6 +42,8 @@ export function AttendeeDetailPage() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [imageInputKey, setImageInputKey] = useState(0);
   const [removeProfileImage, setRemoveProfileImage] = useState(false);
+  const [sendQrEmailOpen, setSendQrEmailOpen] = useState(false);
+  const [qrEmailToast, setQrEmailToast] = useState("");
   const attendeeQuery = useQuery({
     queryKey: ["attendee", id],
     queryFn: async () => unwrapResponse<AttendeeDetail>(await api.get(`/attendees/${id}`)),
@@ -93,6 +97,15 @@ export function AttendeeDetailPage() {
     setImageInputKey((value) => value + 1);
     setRemoveProfileImage(false);
   }, [attendee, reset]);
+
+  useEffect(() => {
+    if (!qrEmailToast) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setQrEmailToast(""), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [qrEmailToast]);
 
   useEffect(() => {
     if (!profileImageFile) {
@@ -188,9 +201,33 @@ export function AttendeeDetailPage() {
                 <Badge>{attendee.phone ?? "No phone"}</Badge>
                 <Badge>Created {formatDate(attendee.createdAt)}</Badge>
               </div>
+
+              <Button
+                className="mt-5 w-full sm:w-auto"
+                icon={<Mail className="size-4" />}
+                onClick={() => setSendQrEmailOpen(true)}
+                type="button"
+              >
+                Send QR email
+              </Button>
+
+              {qrEmailToast ? (
+                <div className="mt-4 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                  {qrEmailToast}
+                </div>
+              ) : null}
             </div>
           </div>
         </Card>
+
+        <SendQrEmailsModal
+          attendeeIds={[attendee.id]}
+          onClose={() => setSendQrEmailOpen(false)}
+          onSent={() => setQrEmailToast(`QR code email is being sent to ${attendee.firstName} ${attendee.surname}.`)}
+          open={sendQrEmailOpen}
+          recipientLabel={`${attendee.firstName} ${attendee.surname}`}
+          totalAttendees={1}
+        />
 
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-6">

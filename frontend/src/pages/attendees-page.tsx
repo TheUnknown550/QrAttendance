@@ -55,6 +55,7 @@ export function AttendeesPage() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [imageInputKey, setImageInputKey] = useState(0);
   const [sendQrEmailsOpen, setSendQrEmailsOpen] = useState(false);
+  const [qrEmailsToast, setQrEmailsToast] = useState("");
   const deferredSearch = useDeferredValue(search);
   const {
     register,
@@ -128,6 +129,15 @@ export function AttendeesPage() {
       setPage(pagination.totalPages);
     }
   }, [page, pagination]);
+
+  useEffect(() => {
+    if (!qrEmailsToast) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setQrEmailsToast(""), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [qrEmailsToast]);
 
   return (
     <div className="grid gap-6 xl:grid-cols-[0.72fr_1.28fr]">
@@ -228,12 +238,12 @@ export function AttendeesPage() {
             <h2 className="mt-2 text-3xl font-semibold text-slate-900">{pagination?.total ?? 0}</h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
             <Button
+              className="w-full sm:w-auto"
               icon={<Mail className="size-4" />}
               onClick={() => setSendQrEmailsOpen(true)}
               type="button"
-              variant="secondary"
             >
               Send QR emails
             </Button>
@@ -253,8 +263,19 @@ export function AttendeesPage() {
           </div>
         </div>
 
+        {qrEmailsToast ? (
+          <div className="mt-4 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {qrEmailsToast}
+          </div>
+        ) : null}
+
         <SendQrEmailsModal
           onClose={() => setSendQrEmailsOpen(false)}
+          onSent={(recipientCount) =>
+            setQrEmailsToast(
+              `Sending QR codes to ${recipientCount} attendee${recipientCount === 1 ? "" : "s"}. This runs in the background and may take a few minutes for large lists.`,
+            )
+          }
           open={sendQrEmailsOpen}
           totalAttendees={pagination?.total ?? 0}
         />

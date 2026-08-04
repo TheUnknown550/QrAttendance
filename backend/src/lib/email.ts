@@ -25,6 +25,9 @@ type AttendeeQrCodeMailPayload = {
   to: string;
   firstName: string;
   surname: string;
+  attendeeOrganizationName?: string | null;
+  attendeeType?: string | null;
+  attendeeNumber?: number | null;
   organizationName: string;
   eventName: string;
   eventDate?: string | null;
@@ -317,22 +320,37 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
   const safeEventDate = payload.eventDate ? escapeHtml(payload.eventDate) : null;
   const safeEventLocation = payload.eventLocation ? escapeHtml(payload.eventLocation) : null;
   const safeMessage = payload.message ? escapeHtml(payload.message) : null;
+  const safeAttendeeOrganizationName = payload.attendeeOrganizationName
+    ? escapeHtml(payload.attendeeOrganizationName)
+    : null;
+  const safeAttendeeType = payload.attendeeType ? escapeHtml(payload.attendeeType) : null;
+  const safeAttendeeNumber = payload.attendeeNumber != null ? String(payload.attendeeNumber) : null;
 
-  const detailRows = [
+  function buildDetailRowsHtml(rows: Array<{ label: string; value: string } | null>) {
+    return rows
+      .filter((row): row is { label: string; value: string } => row !== null)
+      .map(
+        (row) => `
+          <tr>
+            <td style="padding:6px 0;font-size:13px;color:#64748b;width:110px;vertical-align:top;">${row.label}</td>
+            <td style="padding:6px 0;font-size:13px;color:#0f172a;font-weight:600;">${row.value}</td>
+          </tr>
+        `,
+      )
+      .join("");
+  }
+
+  const eventDetailRowsHtml = buildDetailRowsHtml([
     safeEventDate ? { label: "Date", value: safeEventDate } : null,
     safeEventLocation ? { label: "Location", value: safeEventLocation } : null,
-  ].filter((row): row is { label: string; value: string } => row !== null);
+  ]);
 
-  const detailRowsHtml = detailRows
-    .map(
-      (row) => `
-        <tr>
-          <td style="padding:6px 0;font-size:13px;color:#64748b;width:90px;">${row.label}</td>
-          <td style="padding:6px 0;font-size:13px;color:#0f172a;font-weight:600;">${row.value}</td>
-        </tr>
-      `,
-    )
-    .join("");
+  const ticketDetailRowsHtml = buildDetailRowsHtml([
+    { label: "Name", value: safeFullName },
+    safeAttendeeOrganizationName ? { label: "Organization", value: safeAttendeeOrganizationName } : null,
+    safeAttendeeType ? { label: "Type", value: safeAttendeeType } : null,
+    safeAttendeeNumber ? { label: "Ticket #", value: safeAttendeeNumber } : null,
+  ]);
 
   const html = `
     <div style="display:none;opacity:0;overflow:hidden;max-height:0;max-width:0;">
@@ -369,12 +387,15 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
                         </p>
 
                         ${
-                          detailRowsHtml
-                            ? `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:20px;">
+                          eventDetailRowsHtml
+                            ? `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:16px;">
                                 <tr>
                                   <td style="padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+                                    <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;font-weight:700;">
+                                      Event details
+                                    </p>
                                     <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                                      ${detailRowsHtml}
+                                      ${eventDetailRowsHtml}
                                     </table>
                                   </td>
                                 </tr>
@@ -382,7 +403,7 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
                             : ""
                         }
 
-                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:20px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:16px;">
                           <tr>
                             <td align="center" style="padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;">
                               <img
@@ -393,6 +414,19 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
                               <p style="margin:14px 0 0;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">
                                 Scan at check-in
                               </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:16px;">
+                          <tr>
+                            <td style="padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+                              <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;font-weight:700;">
+                                Ticket holder
+                              </p>
+                              <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                ${ticketDetailRowsHtml}
+                              </table>
                             </td>
                           </tr>
                         </table>
@@ -436,6 +470,12 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
     "",
     payload.eventDate ? `Date: ${payload.eventDate}` : "",
     payload.eventLocation ? `Location: ${payload.eventLocation}` : "",
+    "",
+    "Ticket holder:",
+    `Name: ${fullName}`,
+    payload.attendeeOrganizationName ? `Organization: ${payload.attendeeOrganizationName}` : "",
+    payload.attendeeType ? `Type: ${payload.attendeeType}` : "",
+    payload.attendeeNumber != null ? `Ticket #: ${payload.attendeeNumber}` : "",
     payload.message ? `\n${payload.message}` : "",
     "",
     `Hosted by ${payload.organizationName} via EventQR`,

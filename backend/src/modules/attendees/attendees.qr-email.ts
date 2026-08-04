@@ -24,6 +24,9 @@ type QrEmailAttendee = {
   id: string;
   firstName: string;
   surname: string;
+  organizationName: string | null;
+  attendeeType: string | null;
+  attendeeNumber: number | null;
   email: string;
   qrToken: string;
 };
@@ -41,6 +44,9 @@ async function dispatchAttendeeQrEmails(
         to: attendee.email,
         firstName: attendee.firstName,
         surname: attendee.surname,
+        attendeeOrganizationName: attendee.organizationName,
+        attendeeType: attendee.attendeeType,
+        attendeeNumber: attendee.attendeeNumber,
         organizationName,
         qrPngBuffer,
         ...eventDetails,
@@ -74,19 +80,30 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     where: {
       organizationId,
       deletedAt: null,
+      ...(body.attendeeIds && body.attendeeIds.length > 0 ? { id: { in: body.attendeeIds } } : {}),
     },
     select: {
       id: true,
       firstName: true,
       surname: true,
+      organizationName: true,
+      attendeeType: true,
+      attendeeNumber: true,
       email: true,
       qrToken: true,
     },
   });
 
   if (attendees.length === 0) {
-    throw new ApiError(400, "No attendees found to email");
+    throw new ApiError(
+      404,
+      body.attendeeIds && body.attendeeIds.length > 0
+        ? "Attendee not found"
+        : "No attendees found to email",
+    );
   }
+
+  const { attendeeIds, ...eventDetails } = body;
 
   await touchOrganizationActivity(organizationId);
 
@@ -99,7 +116,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     ),
   );
 
-  void dispatchAttendeeQrEmails(attendees, organization.name, body).catch((error) => {
+  void dispatchAttendeeQrEmails(attendees, organization.name, eventDetails).catch((error) => {
     console.error("Bulk attendee QR email dispatch failed", error);
   });
 });

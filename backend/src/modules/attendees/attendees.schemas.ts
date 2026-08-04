@@ -43,4 +43,5 @@ export const sendQrEmailsSchema = z.object({
   eventDate: optionalString,
   eventLocation: optionalString,
   message: optionalString,
+  attendeeIds: z.array(z.string().uuid()).optional(),
 });
