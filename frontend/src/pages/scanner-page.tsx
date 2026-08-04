@@ -34,6 +34,7 @@ export function ScannerPage() {
   const isPublicScanner = Boolean(token);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [lastResult, setLastResult] = useState<ScanResult | null>(null);
+  const [pendingQrToken, setPendingQrToken] = useState("");
   const [scannerError, setScannerError] = useState("");
   const [manualToken, setManualToken] = useState("");
   const [shareFeedback, setShareFeedback] = useState("");
@@ -112,6 +113,27 @@ export function ScannerPage() {
     ? new URL(shareLinkQuery.data.path, window.location.origin).toString()
     : "";
 
+  const lookupMutation = useMutation({
+    mutationFn: async (payload: CheckInPayload | { qrToken: string }) =>
+      isPublicScanner
+        ? unwrapResponse<ScanResult>(await api.post(`/public/scan/${token}/lookup`, payload))
+        : unwrapResponse<ScanResult>(await api.post("/scan/lookup", payload)),
+    onSuccess: (result) => {
+      setLastResult(result);
+      setPaused(true);
+
+      if (result.status === "found") {
+        // Wait for the user to press "Check in" before recording attendance.
+        return;
+      }
+
+      if (resumeTimeoutRef.current) {
+        window.clearTimeout(resumeTimeoutRef.current);
+      }
+      resumeTimeoutRef.current = window.setTimeout(() => setPaused(false), 2200);
+    },
+  });
+
   const checkInMutation = useMutation({
     mutationFn: async (payload: CheckInPayload | { qrToken: string }) =>
       isPublicScanner
@@ -119,7 +141,6 @@ export function ScannerPage() {
         : unwrapResponse<ScanResult>(await api.post("/scan/check-in", payload)),
     onSuccess: (result) => {
       setLastResult(result);
-      setPaused(true);
       if (resumeTimeoutRef.current) {
         window.clearTimeout(resumeTimeoutRef.current);
       }
@@ -128,7 +149,7 @@ export function ScannerPage() {
   });
 
   function submitToken(qrToken: string) {
-    if (!currentSessionId || checkInMutation.isPending || !qrToken) {
+    if (!currentSessionId || lookupMutation.isPending || checkInMutation.isPending || !qrToken) {
       return;
     }
 
@@ -138,7 +159,8 @@ export function ScannerPage() {
 
     recentTokenRef.current = qrToken;
     setScannerError("");
-    checkInMutation.mutate(isPublicScanner ? { qrToken } : { qrToken, eventSessionId: currentSessionId }, {
+    setPendingQrToken(qrToken);
+    lookupMutation.mutate(isPublicScanner ? { qrToken } : { qrToken, eventSessionId: currentSessionId }, {
       onSettled: () => {
         if (recentTokenTimeoutRef.current) window.clearTimeout(recentTokenTimeoutRef.current);
         recentTokenTimeoutRef.current = window.setTimeout(() => {
@@ -146,6 +168,26 @@ export function ScannerPage() {
         }, 1800);
       },
     });
+  }
+
+  function confirmCheckIn() {
+    if (!currentSessionId || !pendingQrToken || checkInMutation.isPending) {
+      return;
+    }
+
+    checkInMutation.mutate(
+      isPublicScanner ? { qrToken: pendingQrToken } : { qrToken: pendingQrToken, eventSessionId: currentSessionId },
+    );
+  }
+
+  function dismissReview() {
+    if (resumeTimeoutRef.current) {
+      window.clearTimeout(resumeTimeoutRef.current);
+    }
+    setLastResult(null);
+    setPendingQrToken("");
+    setPaused(false);
+    recentTokenRef.current = "";
   }
 
   function pushShareFeedback(message: string) {
@@ -252,7 +294,7 @@ export function ScannerPage() {
           <div className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white px-6 pb-10 pt-5 shadow-2xl">
             <button
               className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
-              onClick={() => setLastResult(null)}
+              onClick={dismissReview}
               type="button"
             >
               ✕
@@ -272,7 +314,7 @@ export function ScannerPage() {
                 )}
               </div>
               <p className="text-base font-semibold capitalize text-slate-900">
-                {lastResult.status.replaceAll("_", " ")}
+                {lastResult.status === "found" ? "Ready to check in" : lastResult.status.replaceAll("_", " ")}
               </p>
             </div>
 
@@ -300,6 +342,23 @@ export function ScannerPage() {
                   </div>
                 </div>
               )
+            ) : null}
+
+            {lastResult.status === "found" ? (
+              <div className="mt-5 flex gap-3">
+                <Button className="flex-1" onClick={dismissReview} type="button" variant="secondary">
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  disabled={checkInMutation.isPending}
+                  icon={<CircleCheckBig className="size-4" />}
+                  onClick={confirmCheckIn}
+                  type="button"
+                >
+                  {checkInMutation.isPending ? "Checking in..." : "Check in"}
+                </Button>
+              </div>
             ) : null}
           </div>
         ) : null}
@@ -465,7 +524,7 @@ export function ScannerPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-lg font-semibold capitalize text-slate-900">
-                    {lastResult.status.replaceAll("_", " ")}
+                    {lastResult.status === "found" ? "Ready to check in" : lastResult.status.replaceAll("_", " ")}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
                     {lastResult.checkedInAt ? formatDate(lastResult.checkedInAt) : "No timestamp available"}
@@ -492,6 +551,23 @@ export function ScannerPage() {
                   </div>
                 </div>
               ) : null}
+
+              {lastResult.status === "found" ? (
+                <div className="mt-5 flex gap-3">
+                  <Button className="flex-1" onClick={dismissReview} type="button" variant="secondary">
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    disabled={checkInMutation.isPending}
+                    icon={<CircleCheckBig className="size-4" />}
+                    onClick={confirmCheckIn}
+                    type="button"
+                  >
+                    {checkInMutation.isPending ? "Checking in..." : "Check in"}
+                  </Button>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="mt-6 rounded-[8px] bg-[var(--color-surface-soft)] p-5 text-sm text-slate-500">
@@ -499,9 +575,9 @@ export function ScannerPage() {
             </div>
           )}
 
-          {checkInMutation.isError ? (
+          {lookupMutation.isError || checkInMutation.isError ? (
             <p className="mt-4 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {getErrorMessage(checkInMutation.error)}
+              {getErrorMessage(lookupMutation.error ?? checkInMutation.error)}
             </p>
           ) : null}
         </Card>

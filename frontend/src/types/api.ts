@@ -166,7 +166,7 @@ export type PaginatedResult<T> = {
 };
 
 export type ScanResult = {
-  status: "success" | "already_checked_in" | "invalid_qr" | "wrong_event_session";
+  status: "found" | "success" | "already_checked_in" | "invalid_qr" | "wrong_event_session";
   attendee?: {
     id: string;
     firstName: string;

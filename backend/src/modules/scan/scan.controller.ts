@@ -57,6 +57,89 @@ async function ensurePublicScanToken(sessionId: string) {
   return updatedSession.publicScanToken!;
 }
 
+async function performLookup(eventSessionId: string, organizationId: string, qrToken: string) {
+  const [session, attendee] = await Promise.all([
+    prisma.eventSession.findFirst({
+      where: {
+        id: eventSessionId,
+        eventSeries: {
+          organizationId,
+        },
+      },
+    }),
+    prisma.attendee.findFirst({
+      where: {
+        qrToken,
+      },
+    }),
+  ]);
+
+  if (!session) {
+    return {
+      statusCode: 200,
+      body: successResponse(
+        {
+          status: "wrong_event_session",
+        },
+        "Event session not found",
+      ),
+    };
+  }
+
+  if (!attendee) {
+    return {
+      statusCode: 200,
+      body: successResponse(
+        {
+          status: "invalid_qr",
+        },
+        "Invalid QR",
+      ),
+    };
+  }
+
+  if (attendee.organizationId !== organizationId) {
+    return {
+      statusCode: 200,
+      body: successResponse(
+        {
+          status: "wrong_event_session",
+        },
+        "Attendee does not belong to this event organization",
+      ),
+    };
+  }
+
+  const existingRecord = await prisma.attendanceRecord.findUnique({
+    where: {
+      attendeeId_eventSessionId: {
+        attendeeId: attendee.id,
+        eventSessionId: session.id,
+      },
+    },
+  });
+
+  return {
+    statusCode: 200,
+    body: successResponse(
+      {
+        status: existingRecord ? "already_checked_in" : "found",
+        attendee: {
+          id: attendee.id,
+          firstName: attendee.firstName,
+          surname: attendee.surname,
+          organizationName: attendee.organizationName,
+          attendeeType: attendee.attendeeType,
+          email: attendee.email,
+          profileImageUrl: attendee.profileImageUrl,
+        },
+        checkedInAt: existingRecord?.checkedInAt ?? null,
+      },
+      existingRecord ? "Attendee already checked in" : "Attendee found",
+    ),
+  };
+}
+
 async function performCheckIn(eventSessionId: string, organizationId: string, qrToken: string) {
   const [session, attendee] = await Promise.all([
     prisma.eventSession.findFirst({
@@ -250,6 +333,14 @@ export const getPublicScannerSession = asyncHandler(async (request, response) =>
   );
 });
 
+export const lookupAttendee = asyncHandler(async (request, response) => {
+  const body = checkInSchema.parse(request.body);
+  const organizationId = request.auth!.organizationId as string;
+  const result = await performLookup(body.eventSessionId, organizationId, body.qrToken);
+
+  response.status(result.statusCode).json(result.body);
+});
+
 export const checkIn = asyncHandler(async (request, response) => {
   const body = checkInSchema.parse(request.body);
   const organizationId = request.auth!.organizationId as string;
@@ -258,10 +349,7 @@ export const checkIn = asyncHandler(async (request, response) => {
   response.status(result.statusCode).json(result.body);
 });
 
-export const publicCheckIn = asyncHandler(async (request, response) => {
-  const token = request.params.token as string;
-  const body = publicCheckInSchema.parse(request.body);
-
+async function resolvePublicSession(token: string) {
   const session = await prisma.eventSession.findUnique({
     where: {
       publicScanToken: token,
@@ -278,6 +366,23 @@ export const publicCheckIn = asyncHandler(async (request, response) => {
   if (!session) {
     throw new ApiError(404, "Scanner link not found");
   }
+
+  return session;
+}
+
+export const publicLookupAttendee = asyncHandler(async (request, response) => {
+  const token = request.params.token as string;
+  const body = publicCheckInSchema.parse(request.body);
+  const session = await resolvePublicSession(token);
+
+  const result = await performLookup(session.id, session.eventSeries.organizationId, body.qrToken);
+  response.status(result.statusCode).json(result.body);
+});
+
+export const publicCheckIn = asyncHandler(async (request, response) => {
+  const token = request.params.token as string;
+  const body = publicCheckInSchema.parse(request.body);
+  const session = await resolvePublicSession(token);
 
   const result = await performCheckIn(session.id, session.eventSeries.organizationId, body.qrToken);
   response.status(result.statusCode).json(result.body);
