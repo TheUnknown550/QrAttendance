@@ -200,12 +200,13 @@ export function DashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <img
-                      alt={item.name}
+                      alt={`${item.firstName} ${item.surname}`}
                       className="size-11 rounded-[12px] object-cover ring-1 ring-[var(--color-border)]"
                       src={resolveMediaUrl(item.profileImageUrl) ?? "https://placehold.co/120x120/f7f5f0/334155?text=QR"}
                     />
                     <div>
-                      <p className="font-medium text-slate-900">{item.name}</p>
+                      <p className="font-medium text-slate-900">{item.firstName} {item.surname}</p>
+                      <p className="text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
                       <p className="text-sm text-slate-500">{item.email}</p>
                     </div>
                   </div>

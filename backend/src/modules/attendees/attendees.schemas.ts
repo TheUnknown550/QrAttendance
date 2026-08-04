@@ -25,7 +25,10 @@ const optionalAttendeeNumber = z
   });
 
 export const createAttendeeSchema = z.object({
-  name: z.string().trim().min(1),
+  firstName: z.string().trim().min(1),
+  surname: z.string().trim().min(1),
+  organizationName: z.string().trim().min(1),
+  attendeeType: z.string().trim().min(1),
   email: z.email(),
   phone: optionalString,
   attendeeNumber: optionalAttendeeNumber,

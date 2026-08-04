@@ -184,7 +184,10 @@ export const getEventSession = asyncHandler(async (request, response) => {
             attendee: {
               select: {
                 id: true,
-                name: true,
+                firstName: true,
+                surname: true,
+                organizationName: true,
+                attendeeType: true,
                 email: true,
                 phone: true,
                 attendeeNumber: true,
@@ -218,7 +221,10 @@ export const getEventSession = asyncHandler(async (request, response) => {
           },
         },
         {
-          name: "asc",
+          firstName: "asc",
+        },
+        {
+          surname: "asc",
         },
       ],
     }),

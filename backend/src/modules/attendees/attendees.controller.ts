@@ -12,7 +12,10 @@ function getRequestBody(request: { body?: Record<string, unknown> }) {
   const body = request.body ?? {};
 
   return {
-    name: typeof body.name === "string" ? body.name : undefined,
+    firstName: typeof body.firstName === "string" ? body.firstName : undefined,
+    surname: typeof body.surname === "string" ? body.surname : undefined,
+    organizationName: typeof body.organizationName === "string" ? body.organizationName : undefined,
+    attendeeType: typeof body.attendeeType === "string" ? body.attendeeType : undefined,
     email: typeof body.email === "string" ? body.email : undefined,
     phone: typeof body.phone === "string" ? body.phone : undefined,
     attendeeNumber:
@@ -38,7 +41,25 @@ export const listAttendees = asyncHandler(async (request, response) => {
       ? {
           OR: [
             {
-              name: {
+              firstName: {
+                contains: search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              surname: {
+                contains: search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              organizationName: {
+                contains: search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              attendeeType: {
                 contains: search,
                 mode: "insensitive" as const,
               },
@@ -112,8 +133,8 @@ export const createAttendee = asyncHandler(async (request, response) => {
   }
 
   const image = await saveAttendeeImage({
-    attendeeName: body.name,
-    organizationName: organization.name,
+    attendeeName: `${body.firstName} ${body.surname}`,
+    tenantName: organization.name,
     file: request.file,
   });
 
@@ -193,8 +214,8 @@ export const updateAttendee = asyncHandler(async (request, response) => {
   }
 
   const image = await saveAttendeeImage({
-    attendeeName: body.name ?? existing.name,
-    organizationName: organization.name,
+    attendeeName: `${body.firstName ?? existing.firstName} ${body.surname ?? existing.surname}`,
+    tenantName: organization.name,
     file: request.file,
   });
   const shouldRemoveProfileImage = removeProfileImage && !image?.publicUrl;

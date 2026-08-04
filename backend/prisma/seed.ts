@@ -118,24 +118,27 @@ async function main() {
   );
 
   const attendeeSeeds = [
-    ["Ava Johnson", "ava.johnson@example.com"],
-    ["Liam Carter", "liam.carter@example.com"],
-    ["Mia Thompson", "mia.thompson@example.com"],
-    ["Noah Patel", "noah.patel@example.com"],
-    ["Emma Nguyen", "emma.nguyen@example.com"],
-    ["Lucas Kim", "lucas.kim@example.com"],
-    ["Sophia Rivera", "sophia.rivera@example.com"],
-    ["Ethan Brooks", "ethan.brooks@example.com"],
-    ["Olivia Perez", "olivia.perez@example.com"],
-    ["James Morris", "james.morris@example.com"],
+    ["Ava", "Johnson", "Acme Corp", "Guest", "ava.johnson@example.com"],
+    ["Liam", "Carter", "Acme Corp", "Staff", "liam.carter@example.com"],
+    ["Mia", "Thompson", "Globex Inc", "VIP", "mia.thompson@example.com"],
+    ["Noah", "Patel", "Globex Inc", "Guest", "noah.patel@example.com"],
+    ["Emma", "Nguyen", "Initech", "Guest", "emma.nguyen@example.com"],
+    ["Lucas", "Kim", "Initech", "Speaker", "lucas.kim@example.com"],
+    ["Sophia", "Rivera", "Umbrella Co", "Guest", "sophia.rivera@example.com"],
+    ["Ethan", "Brooks", "Umbrella Co", "Staff", "ethan.brooks@example.com"],
+    ["Olivia", "Perez", "Stark Industries", "VIP", "olivia.perez@example.com"],
+    ["James", "Morris", "Stark Industries", "Guest", "james.morris@example.com"],
   ];
 
   const attendees = await Promise.all(
-    attendeeSeeds.map(([name, email], index) =>
+    attendeeSeeds.map(([firstName, surname, organizationName, attendeeType, email], index) =>
       prisma.attendee.create({
         data: {
           organizationId: organization.id,
-          name,
+          firstName,
+          surname,
+          organizationName,
+          attendeeType,
           email,
           phone: `555-010${index}`,
           profileImageUrl: `https://i.pravatar.cc/300?img=${index + 10}`,

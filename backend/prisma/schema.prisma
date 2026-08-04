@@ -148,19 +148,22 @@ model EventSession {
 }
 
 model Attendee {
-  id              String             @id @default(uuid()) @db.Uuid
-  organizationId  String             @db.Uuid
-  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  name            String
-  email           String
-  phone           String?
-  attendeeNumber  Int?               @map("attendee_number")
-  profileImageUrl String?
-  qrToken         String             @unique
-  deletedAt       DateTime?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  attendance      AttendanceRecord[]
+  id               String             @id @default(uuid()) @db.Uuid
+  organizationId   String             @db.Uuid
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  firstName        String
+  surname          String
+  organizationName String             @map("organization_name")
+  attendeeType     String             @map("attendee_type")
+  email            String
+  phone            String?
+  attendeeNumber   Int?               @map("attendee_number")
+  profileImageUrl  String?
+  qrToken          String             @unique
+  deletedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  attendance       AttendanceRecord[]
 
   @@index([organizationId])
   @@map("attendees")

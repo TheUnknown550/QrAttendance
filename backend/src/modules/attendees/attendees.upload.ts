@@ -14,7 +14,7 @@ type SupportedImageFormat = "jpeg" | "png" | "webp";
 
 type SaveAttendeeImageInput = {
   attendeeName: string;
-  organizationName: string;
+  tenantName: string;
   file?: Express.Multer.File | null;
 };
 
@@ -104,7 +104,7 @@ async function normalizeImageBuffer(file: Express.Multer.File) {
 
 export async function saveAttendeeImage({
   attendeeName,
-  organizationName,
+  tenantName,
   file,
 }: SaveAttendeeImageInput) {
   if (!file) {
@@ -112,7 +112,7 @@ export async function saveAttendeeImage({
   }
 
   const normalizedImage = await normalizeImageBuffer(file);
-  const organizationSegment = slugifySegment(organizationName);
+  const organizationSegment = slugifySegment(tenantName);
   const attendeeSegment = slugifySegment(attendeeName);
   const filename = `${attendeeSegment}-${randomUUID()}.${formatToExtension[normalizedImage.format]}`;
   const relativeDirectory = path.join(organizationSegment, attendeeSegment);

@@ -129,7 +129,10 @@ async function performCheckIn(eventSessionId: string, organizationId: string, qr
           status: "already_checked_in",
           attendee: {
             id: attendee.id,
-            name: attendee.name,
+            firstName: attendee.firstName,
+            surname: attendee.surname,
+            organizationName: attendee.organizationName,
+            attendeeType: attendee.attendeeType,
             email: attendee.email,
             profileImageUrl: attendee.profileImageUrl,
           },
@@ -156,7 +159,10 @@ async function performCheckIn(eventSessionId: string, organizationId: string, qr
         status: "success",
         attendee: {
           id: attendee.id,
-          name: attendee.name,
+          firstName: attendee.firstName,
+          surname: attendee.surname,
+          organizationName: attendee.organizationName,
+          attendeeType: attendee.attendeeType,
           email: attendee.email,
           profileImageUrl: attendee.profileImageUrl,
         },

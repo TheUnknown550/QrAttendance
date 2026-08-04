@@ -138,7 +138,10 @@ export type AttendanceHistory = {
 
 export type Attendee = {
   id: string;
-  name: string;
+  firstName: string;
+  surname: string;
+  organizationName: string;
+  attendeeType: string;
   email: string;
   phone?: string | null;
   attendeeNumber?: number | null;
@@ -166,7 +169,10 @@ export type ScanResult = {
   status: "success" | "already_checked_in" | "invalid_qr" | "wrong_event_session";
   attendee?: {
     id: string;
-    name: string;
+    firstName: string;
+    surname: string;
+    organizationName: string;
+    attendeeType: string;
     email?: string;
     profileImageUrl?: string | null;
   };
@@ -204,7 +210,10 @@ export type PublicScannerSession = {
 export type ReportItem = {
   attendeeId: string;
   profileImageUrl?: string | null;
-  name: string;
+  firstName: string;
+  surname: string;
+  organizationName: string;
+  attendeeType: string;
   email: string;
   attendedSessions: number;
   totalSessions: number;

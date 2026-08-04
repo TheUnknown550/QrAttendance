@@ -14,7 +14,10 @@ import { resolveMediaUrl } from "../lib/utils";
 import type { Attendee, PaginatedResult } from "../types/api";
 
 const attendeeSchema = z.object({
-  name: z.string().min(1),
+  firstName: z.string().min(1),
+  surname: z.string().min(1),
+  organizationName: z.string().min(1),
+  attendeeType: z.string().min(1),
   email: z.email(),
   phone: z.string().optional(),
   attendeeNumber: z
@@ -81,7 +84,10 @@ export function AttendeesPage() {
           "/attendees",
           (() => {
             const formData = new FormData();
-            formData.append("name", values.name);
+            formData.append("firstName", values.firstName);
+            formData.append("surname", values.surname);
+            formData.append("organizationName", values.organizationName);
+            formData.append("attendeeType", values.attendeeType);
             formData.append("email", values.email);
             if (values.phone) {
               formData.append("phone", values.phone);
@@ -132,9 +138,31 @@ export function AttendeesPage() {
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Full name</span>
-            <Input placeholder="Alex Morgan" {...register("name")} />
-            {errors.name ? <p className="mt-2 text-xs text-rose-500">{errors.name.message}</p> : null}
+            <span className="mb-2 block text-sm font-medium text-slate-600">Name</span>
+            <Input placeholder="Alex" {...register("firstName")} />
+            {errors.firstName ? <p className="mt-2 text-xs text-rose-500">{errors.firstName.message}</p> : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Surname</span>
+            <Input placeholder="Morgan" {...register("surname")} />
+            {errors.surname ? <p className="mt-2 text-xs text-rose-500">{errors.surname.message}</p> : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+            <Input placeholder="Acme Corp" {...register("organizationName")} />
+            {errors.organizationName ? (
+              <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
+            ) : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee</span>
+            <Input placeholder="Guest" {...register("attendeeType")} />
+            {errors.attendeeType ? (
+              <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
+            ) : null}
           </label>
 
           <label className="block">
@@ -202,7 +230,7 @@ export function AttendeesPage() {
                 setSearch(event.target.value);
                 setPage(1);
               }}
-              placeholder="Search name, email, phone"
+              placeholder="Search name, organization, type, email, phone"
               value={search}
             />
           </div>
@@ -227,7 +255,7 @@ export function AttendeesPage() {
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <img
-                    alt={attendee.name}
+                    alt={`${attendee.firstName} ${attendee.surname}`}
                     className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
                     src={
                       resolveMediaUrl(attendee.profileImageUrl) ??
@@ -241,7 +269,10 @@ export function AttendeesPage() {
                           #{attendee.attendeeNumber}
                         </span>
                       ) : null}
-                      {attendee.name}
+                      {attendee.firstName} {attendee.surname}
+                    </p>
+                    <p className="truncate text-sm text-slate-500">
+                      {attendee.organizationName} &middot; {attendee.attendeeType}
                     </p>
                     <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                   </div>
@@ -285,7 +316,7 @@ export function AttendeesPage() {
             >
               <div className="flex items-center gap-3">
                 <img
-                  alt={attendee.name}
+                  alt={`${attendee.firstName} ${attendee.surname}`}
                   className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
                   src={
                     resolveMediaUrl(attendee.profileImageUrl) ??
@@ -299,7 +330,10 @@ export function AttendeesPage() {
                         #{attendee.attendeeNumber}
                       </span>
                     ) : null}
-                    {attendee.name}
+                    {attendee.firstName} {attendee.surname}
+                  </p>
+                  <p className="truncate text-sm text-slate-500">
+                    {attendee.organizationName} &middot; {attendee.attendeeType}
                   </p>
                   <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                 </div>

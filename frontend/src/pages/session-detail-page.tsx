@@ -119,9 +119,14 @@ export function SessionDetailPage() {
           return true;
         }
 
-        return [attendee.name, attendee.email, attendee.phone ?? ""].some((value) =>
-          value.toLowerCase().includes(normalizedSearch),
-        );
+        return [
+          attendee.firstName,
+          attendee.surname,
+          attendee.organizationName,
+          attendee.attendeeType,
+          attendee.email,
+          attendee.phone ?? "",
+        ].some((value) => value.toLowerCase().includes(normalizedSearch));
       })
       .map((attendee) => ({
         attendee,
@@ -141,7 +146,12 @@ export function SessionDetailPage() {
           return byNumber;
         }
 
-        return left.attendee.name.localeCompare(right.attendee.name);
+        const bySurname = left.attendee.surname.localeCompare(right.attendee.surname);
+        if (bySurname !== 0) {
+          return bySurname;
+        }
+
+        return left.attendee.firstName.localeCompare(right.attendee.firstName);
       });
   }, [attendedById, deferredSearch, session?.allAttendees]);
 
@@ -319,12 +329,13 @@ export function SessionDetailPage() {
               <div key={attendee.id} className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
                 <div className="flex items-start gap-3">
                   <img
-                    alt={attendee.name}
+                    alt={`${attendee.firstName} ${attendee.surname}`}
                     className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
                     src={resolveMediaUrl(attendee.profileImageUrl) ?? "https://placehold.co/120x120/f7f5f0/334155?text=QR"}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-slate-900">{attendee.name}</p>
+                    <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
+                    <p className="truncate text-xs text-slate-500">{attendee.organizationName} &middot; {attendee.attendeeType}</p>
                     <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                     <p className="mt-2 text-xs text-slate-500">{attendee.phone ?? "No phone"}</p>
                   </div>
@@ -389,12 +400,13 @@ function AttendeeAttendanceRow({
     <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] items-center gap-4 bg-white px-5 py-4">
       <div className="flex min-w-0 items-center gap-3">
         <img
-          alt={attendee.name}
+          alt={`${attendee.firstName} ${attendee.surname}`}
           className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
           src={resolveMediaUrl(attendee.profileImageUrl) ?? "https://placehold.co/120x120/f7f5f0/334155?text=QR"}
         />
         <div className="min-w-0">
-          <p className="truncate font-medium text-slate-900">{attendee.name}</p>
+          <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
+          <p className="truncate text-xs text-slate-500">{attendee.organizationName} &middot; {attendee.attendeeType}</p>
           <p className="truncate text-sm text-slate-500">{attendee.email}</p>
           <p className="truncate text-xs text-slate-400">{attendee.phone ?? "No phone"}</p>
         </div>

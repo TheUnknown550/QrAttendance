@@ -87,7 +87,7 @@ export function AttendanceReportPage() {
             >
               <div className="flex items-center gap-3">
                 <img
-                  alt={item.name}
+                  alt={`${item.firstName} ${item.surname}`}
                   className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
                   src={
                     resolveMediaUrl(item.profileImageUrl) ??
@@ -95,7 +95,8 @@ export function AttendanceReportPage() {
                   }
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-900">{item.name}</p>
+                  <p className="truncate font-medium text-slate-900">{item.firstName} {item.surname}</p>
+                  <p className="truncate text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
                   <p className="truncate text-sm text-slate-500">{item.email}</p>
                 </div>
               </div>
@@ -166,7 +167,7 @@ export function AttendanceReportPage() {
                   <td className="sticky left-0 z-10 bg-white px-5 py-4">
                     <div className="flex min-w-0 items-center gap-3">
                       <img
-                        alt={item.name}
+                        alt={`${item.firstName} ${item.surname}`}
                         className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
                         src={
                           resolveMediaUrl(item.profileImageUrl) ??
@@ -174,7 +175,8 @@ export function AttendanceReportPage() {
                         }
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-900">{item.name}</p>
+                        <p className="truncate font-medium text-slate-900">{item.firstName} {item.surname}</p>
+                        <p className="truncate text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
                         <p className="truncate text-sm text-slate-500">{item.email}</p>
                       </div>
                     </div>

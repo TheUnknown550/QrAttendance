@@ -15,7 +15,10 @@ import { formatDate, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, AttendeeDetail } from "../types/api";
 
 const updateAttendeeSchema = z.object({
-  name: z.string().min(1),
+  firstName: z.string().min(1),
+  surname: z.string().min(1),
+  organizationName: z.string().min(1),
+  attendeeType: z.string().min(1),
   email: z.email(),
   phone: z.string().optional(),
   attendeeNumber: z
@@ -77,7 +80,10 @@ export function AttendeeDetailPage() {
     }
 
     reset({
-      name: attendee.name,
+      firstName: attendee.firstName,
+      surname: attendee.surname,
+      organizationName: attendee.organizationName,
+      attendeeType: attendee.attendeeType,
       email: attendee.email,
       phone: attendee.phone ?? "",
       attendeeNumber: attendee.attendeeNumber != null ? String(attendee.attendeeNumber) : "",
@@ -108,7 +114,10 @@ export function AttendeeDetailPage() {
           `/attendees/${id}`,
           (() => {
             const formData = new FormData();
-            formData.append("name", values.name);
+            formData.append("firstName", values.firstName);
+            formData.append("surname", values.surname);
+            formData.append("organizationName", values.organizationName);
+            formData.append("attendeeType", values.attendeeType);
             formData.append("email", values.email);
             if (values.phone) {
               formData.append("phone", values.phone);
@@ -158,16 +167,20 @@ export function AttendeeDetailPage() {
         <Card>
           <div className="flex flex-wrap items-start gap-4">
             <img
-              alt={attendee.name}
+              alt={`${attendee.firstName} ${attendee.surname}`}
               className="size-24 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
               src={currentImageSrc}
             />
             <div className="flex-1">
               <p className="text-sm font-semibold text-slate-900">Attendee</p>
-              <h1 className="mt-2 break-words font-display text-3xl font-semibold text-slate-900">{attendee.name}</h1>
+              <h1 className="mt-2 break-words font-display text-3xl font-semibold text-slate-900">
+                {attendee.firstName} {attendee.surname}
+              </h1>
               <p className="mt-2 break-words text-sm text-slate-500">{attendee.email}</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {attendee.attendeeNumber != null ? <Badge>#{attendee.attendeeNumber}</Badge> : null}
+                <Badge>{attendee.organizationName}</Badge>
+                <Badge>{attendee.attendeeType}</Badge>
                 <Badge>{attendee.phone ?? "No phone"}</Badge>
                 <Badge>Created {formatDate(attendee.createdAt)}</Badge>
               </div>
@@ -185,7 +198,7 @@ export function AttendeeDetailPage() {
             {qrCodeDataUrl ? (
               <a
                 className="rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-white"
-                download={`${attendee.name.replace(/\s+/g, "-").toLowerCase()}-qr.png`}
+                download={`${`${attendee.firstName}-${attendee.surname}`.replace(/\s+/g, "-").toLowerCase()}-qr.png`}
                 href={qrCodeDataUrl}
               >
                 Download QR
@@ -195,7 +208,9 @@ export function AttendeeDetailPage() {
 
           <div className="mt-6 flex flex-col items-start gap-4 md:flex-row">
             <div className="rounded-[8px] bg-slate-50 p-4">
-              {qrCodeDataUrl ? <img alt={`${attendee.name} QR`} className="size-64" src={qrCodeDataUrl} /> : null}
+              {qrCodeDataUrl ? (
+                <img alt={`${attendee.firstName} ${attendee.surname} QR`} className="size-64" src={qrCodeDataUrl} />
+              ) : null}
             </div>
             <div className="flex-1 rounded-[8px] bg-[var(--color-surface-soft)] p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Raw token</p>
@@ -218,9 +233,31 @@ export function AttendeeDetailPage() {
             onSubmit={handleSubmit((values) => updateMutation.mutate(values))}
           >
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Full name</span>
-              <Input {...register("name")} />
-              {errors.name ? <p className="mt-2 text-xs text-rose-500">{errors.name.message}</p> : null}
+              <span className="mb-2 block text-sm font-medium text-slate-600">Name</span>
+              <Input {...register("firstName")} />
+              {errors.firstName ? <p className="mt-2 text-xs text-rose-500">{errors.firstName.message}</p> : null}
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">Surname</span>
+              <Input {...register("surname")} />
+              {errors.surname ? <p className="mt-2 text-xs text-rose-500">{errors.surname.message}</p> : null}
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+              <Input {...register("organizationName")} />
+              {errors.organizationName ? (
+                <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
+              ) : null}
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee</span>
+              <Input {...register("attendeeType")} />
+              {errors.attendeeType ? (
+                <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
+              ) : null}
             </label>
 
             <label className="block">

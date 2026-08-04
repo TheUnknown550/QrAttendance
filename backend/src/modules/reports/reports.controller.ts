@@ -45,7 +45,10 @@ async function buildAttendanceReport(seriesId: string, organizationId: string) {
         },
       },
       {
-        name: "asc",
+        firstName: "asc",
+      },
+      {
+        surname: "asc",
       },
     ],
   });
@@ -62,7 +65,10 @@ async function buildAttendanceReport(seriesId: string, organizationId: string) {
     return {
       attendeeId: attendee.id,
       profileImageUrl: attendee.profileImageUrl,
-      name: attendee.name,
+      firstName: attendee.firstName,
+      surname: attendee.surname,
+      organizationName: attendee.organizationName,
+      attendeeType: attendee.attendeeType,
       email: attendee.email,
       attendedSessions,
       totalSessions,
@@ -102,7 +108,10 @@ function buildReportRowsForExport(report: Awaited<ReturnType<typeof buildAttenda
     );
 
     return {
-      attendeeName: item.name,
+      firstName: item.firstName,
+      surname: item.surname,
+      organizationName: item.organizationName,
+      attendeeType: item.attendeeType,
       email: item.email,
       attendedCount: item.attendedSessions,
       totalSessions: item.totalSessions,
