@@ -153,8 +153,8 @@ model Attendee {
   organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   firstName        String
   surname          String
-  organizationName String             @map("organization_name")
-  attendeeType     String             @map("attendee_type")
+  organizationName String?            @map("organization_name")
+  attendeeType     String?            @map("attendee_type")
   email            String
   phone            String?
   attendeeNumber   Int?               @map("attendee_number")

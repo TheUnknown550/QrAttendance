@@ -17,8 +17,8 @@ import type { Attendee, AttendeeDetail } from "../types/api";
 const updateAttendeeSchema = z.object({
   firstName: z.string().min(1),
   surname: z.string().min(1),
-  organizationName: z.string().min(1),
-  attendeeType: z.string().min(1),
+  organizationName: z.string().optional(),
+  attendeeType: z.string().optional(),
   email: z.email(),
   phone: z.string().optional(),
   attendeeNumber: z
@@ -82,8 +82,8 @@ export function AttendeeDetailPage() {
     reset({
       firstName: attendee.firstName,
       surname: attendee.surname,
-      organizationName: attendee.organizationName,
-      attendeeType: attendee.attendeeType,
+      organizationName: attendee.organizationName ?? "",
+      attendeeType: attendee.attendeeType ?? "",
       email: attendee.email,
       phone: attendee.phone ?? "",
       attendeeNumber: attendee.attendeeNumber != null ? String(attendee.attendeeNumber) : "",
@@ -116,8 +116,12 @@ export function AttendeeDetailPage() {
             const formData = new FormData();
             formData.append("firstName", values.firstName);
             formData.append("surname", values.surname);
-            formData.append("organizationName", values.organizationName);
-            formData.append("attendeeType", values.attendeeType);
+            if (values.organizationName) {
+              formData.append("organizationName", values.organizationName);
+            }
+            if (values.attendeeType) {
+              formData.append("attendeeType", values.attendeeType);
+            }
             formData.append("email", values.email);
             if (values.phone) {
               formData.append("phone", values.phone);
@@ -179,8 +183,8 @@ export function AttendeeDetailPage() {
               <p className="mt-2 break-words text-sm text-slate-500">{attendee.email}</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {attendee.attendeeNumber != null ? <Badge>#{attendee.attendeeNumber}</Badge> : null}
-                <Badge>{attendee.organizationName}</Badge>
-                <Badge>{attendee.attendeeType}</Badge>
+                {attendee.organizationName ? <Badge>{attendee.organizationName}</Badge> : null}
+                {attendee.attendeeType ? <Badge>{attendee.attendeeType}</Badge> : null}
                 <Badge>{attendee.phone ?? "No phone"}</Badge>
                 <Badge>Created {formatDate(attendee.createdAt)}</Badge>
               </div>
@@ -245,7 +249,7 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">Organization name (optional)</span>
               <Input {...register("organizationName")} />
               {errors.organizationName ? (
                 <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
@@ -253,7 +257,7 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee (optional)</span>
               <Input {...register("attendeeType")} />
               {errors.attendeeType ? (
                 <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>

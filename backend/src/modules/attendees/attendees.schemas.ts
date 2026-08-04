@@ -27,8 +27,8 @@ const optionalAttendeeNumber = z
 export const createAttendeeSchema = z.object({
   firstName: z.string().trim().min(1),
   surname: z.string().trim().min(1),
-  organizationName: z.string().trim().min(1),
-  attendeeType: z.string().trim().min(1),
+  organizationName: optionalString,
+  attendeeType: optionalString,
   email: z.email(),
   phone: optionalString,
   attendeeNumber: optionalAttendeeNumber,

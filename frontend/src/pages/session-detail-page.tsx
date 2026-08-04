@@ -11,7 +11,7 @@ import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { cn, formatDate, resolveMediaUrl } from "../lib/utils";
+import { cn, formatAttendeeOrgType, formatDate, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, EventSession, EventSessionDetail } from "../types/api";
 
 const sessionSchema = z.object({
@@ -122,8 +122,8 @@ export function SessionDetailPage() {
         return [
           attendee.firstName,
           attendee.surname,
-          attendee.organizationName,
-          attendee.attendeeType,
+          attendee.organizationName ?? "",
+          attendee.attendeeType ?? "",
           attendee.email,
           attendee.phone ?? "",
         ].some((value) => value.toLowerCase().includes(normalizedSearch));
@@ -335,7 +335,7 @@ export function SessionDetailPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
-                    <p className="truncate text-xs text-slate-500">{attendee.organizationName} &middot; {attendee.attendeeType}</p>
+                    <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}</p>
                     <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                     <p className="mt-2 text-xs text-slate-500">{attendee.phone ?? "No phone"}</p>
                   </div>
@@ -406,7 +406,7 @@ function AttendeeAttendanceRow({
         />
         <div className="min-w-0">
           <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
-          <p className="truncate text-xs text-slate-500">{attendee.organizationName} &middot; {attendee.attendeeType}</p>
+          <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}</p>
           <p className="truncate text-sm text-slate-500">{attendee.email}</p>
           <p className="truncate text-xs text-slate-400">{attendee.phone ?? "No phone"}</p>
         </div>

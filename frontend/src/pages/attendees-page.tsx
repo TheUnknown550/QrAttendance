@@ -10,14 +10,14 @@ import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { resolveMediaUrl } from "../lib/utils";
+import { formatAttendeeOrgType, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, PaginatedResult } from "../types/api";
 
 const attendeeSchema = z.object({
   firstName: z.string().min(1),
   surname: z.string().min(1),
-  organizationName: z.string().min(1),
-  attendeeType: z.string().min(1),
+  organizationName: z.string().optional(),
+  attendeeType: z.string().optional(),
   email: z.email(),
   phone: z.string().optional(),
   attendeeNumber: z
@@ -86,8 +86,12 @@ export function AttendeesPage() {
             const formData = new FormData();
             formData.append("firstName", values.firstName);
             formData.append("surname", values.surname);
-            formData.append("organizationName", values.organizationName);
-            formData.append("attendeeType", values.attendeeType);
+            if (values.organizationName) {
+              formData.append("organizationName", values.organizationName);
+            }
+            if (values.attendeeType) {
+              formData.append("attendeeType", values.attendeeType);
+            }
             formData.append("email", values.email);
             if (values.phone) {
               formData.append("phone", values.phone);
@@ -150,7 +154,7 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">Organization name (optional)</span>
             <Input placeholder="Acme Corp" {...register("organizationName")} />
             {errors.organizationName ? (
               <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
@@ -158,7 +162,7 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee (optional)</span>
             <Input placeholder="Guest" {...register("attendeeType")} />
             {errors.attendeeType ? (
               <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
@@ -272,7 +276,7 @@ export function AttendeesPage() {
                       {attendee.firstName} {attendee.surname}
                     </p>
                     <p className="truncate text-sm text-slate-500">
-                      {attendee.organizationName} &middot; {attendee.attendeeType}
+                      {formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}
                     </p>
                     <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                   </div>
@@ -333,7 +337,7 @@ export function AttendeesPage() {
                     {attendee.firstName} {attendee.surname}
                   </p>
                   <p className="truncate text-sm text-slate-500">
-                    {attendee.organizationName} &middot; {attendee.attendeeType}
+                    {formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}
                   </p>
                   <p className="truncate text-sm text-slate-500">{attendee.email}</p>
                 </div>

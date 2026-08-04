@@ -140,8 +140,8 @@ export type Attendee = {
   id: string;
   firstName: string;
   surname: string;
-  organizationName: string;
-  attendeeType: string;
+  organizationName?: string | null;
+  attendeeType?: string | null;
   email: string;
   phone?: string | null;
   attendeeNumber?: number | null;
@@ -171,8 +171,8 @@ export type ScanResult = {
     id: string;
     firstName: string;
     surname: string;
-    organizationName: string;
-    attendeeType: string;
+    organizationName?: string | null;
+    attendeeType?: string | null;
     email?: string;
     profileImageUrl?: string | null;
   };
@@ -212,8 +212,8 @@ export type ReportItem = {
   profileImageUrl?: string | null;
   firstName: string;
   surname: string;
-  organizationName: string;
-  attendeeType: string;
+  organizationName?: string | null;
+  attendeeType?: string | null;
   email: string;
   attendedSessions: number;
   totalSessions: number;

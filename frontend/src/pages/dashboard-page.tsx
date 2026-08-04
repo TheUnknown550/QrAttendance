@@ -13,7 +13,7 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { api, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { formatDate, formatPercentage, resolveMediaUrl } from "../lib/utils";
+import { formatAttendeeOrgType, formatDate, formatPercentage, resolveMediaUrl } from "../lib/utils";
 import type { EventSeries, PaginatedResult, SeriesReport } from "../types/api";
 
 export function DashboardPage() {
@@ -206,7 +206,7 @@ export function DashboardPage() {
                     />
                     <div>
                       <p className="font-medium text-slate-900">{item.firstName} {item.surname}</p>
-                      <p className="text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
+                      <p className="text-xs text-slate-500">{formatAttendeeOrgType(item.organizationName, item.attendeeType)}</p>
                       <p className="text-sm text-slate-500">{item.email}</p>
                     </div>
                   </div>

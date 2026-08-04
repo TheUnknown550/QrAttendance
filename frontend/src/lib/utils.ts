@@ -42,3 +42,7 @@ export function resolveMediaUrl(value?: string | null) {
 
   return `${origin}/${value}`;
 }
+
+export function formatAttendeeOrgType(organizationName?: string | null, attendeeType?: string | null) {
+  return [organizationName, attendeeType].filter(Boolean).join(" · ") || "No organization or type";
+}

@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { api, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { formatDate, formatPercentage, resolveMediaUrl } from "../lib/utils";
+import { formatAttendeeOrgType, formatDate, formatPercentage, resolveMediaUrl } from "../lib/utils";
 import type { SeriesReport } from "../types/api";
 
 export function AttendanceReportPage() {
@@ -96,7 +96,7 @@ export function AttendanceReportPage() {
                 />
                 <div className="min-w-0">
                   <p className="truncate font-medium text-slate-900">{item.firstName} {item.surname}</p>
-                  <p className="truncate text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
+                  <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(item.organizationName, item.attendeeType)}</p>
                   <p className="truncate text-sm text-slate-500">{item.email}</p>
                 </div>
               </div>
@@ -176,7 +176,7 @@ export function AttendanceReportPage() {
                       />
                       <div className="min-w-0">
                         <p className="truncate font-medium text-slate-900">{item.firstName} {item.surname}</p>
-                        <p className="truncate text-xs text-slate-500">{item.organizationName} &middot; {item.attendeeType}</p>
+                        <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(item.organizationName, item.attendeeType)}</p>
                         <p className="truncate text-sm text-slate-500">{item.email}</p>
                       </div>
                     </div>
