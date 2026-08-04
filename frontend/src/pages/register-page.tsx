@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { LockKeyhole, Mail, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { BrandBadge } from "../components/brand/brand-badge";
@@ -10,6 +11,8 @@ import { BrandLogo } from "../components/brand/brand-logo";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { LanguageToggle } from "../components/ui/language-toggle";
+import { ThemeToggle } from "../components/ui/theme-toggle";
 import { Seo } from "../components/seo/seo";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -26,73 +29,20 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const registerSideContent = {
-  terms: {
-    title: "Terms of Service",
-    body: `Last updated May 20, 2026
-
-These Terms of Service govern access to and use of EventQR, a QR attendance platform powered by Magitecx, including the website, dashboard, scanner tools, reports, exports, documentation, and related support services.
-
-By creating an account, joining a workspace, using a scanner link, or otherwise accessing the service, you agree to these Terms. If you use EventQR on behalf of an organization, you represent that you are authorized to bind that organization to these Terms.
-
-Accounts and roles:
-Users create individual accounts first and may then create or join one or more organizations. Organizations may assign roles such as owner, admin, or member. You are responsible for actions taken through your account and for keeping your credentials secure. You must provide accurate information and update account details when they change.
-
-Acceptable use:
-You may use EventQR only for legitimate attendance, event operations, workspace collaboration, and related administrative purposes. You may not misuse the service, interfere with scanner or reporting operations, attempt unauthorized access, upload malicious files, abuse public scan links, scrape data without permission, or use the platform to violate privacy, intellectual property, or other legal rights. We may suspend or restrict access if we reasonably believe an account or workspace is being used unlawfully, abusively, or in a way that threatens the service or other users.
-
-Workspace data:
-Your organization is responsible for the attendee, event, and attendance data it creates, imports, or uploads into EventQR. You represent that you have the right to upload attendee information and profile images and to use those records for your organization’s attendance workflows. We provide the software service and related operational tooling, but you remain responsible for your internal consent, notice, and data handling obligations to your attendees and staff.
-
-Deletion and inactivity:
-EventQR includes an automatic organization-level cleanup lifecycle intended to reduce unused data and storage overhead. By default, a workspace may be marked inactive after 75 days without meaningful activity and may be permanently deleted after 90 days from the last real activity if inactivity continues. Activity can include login, switching organizations, attendee changes, event and session changes, invite actions, attendance scans, scanner share-link generation, and certain organization-setting actions. When a workspace is permanently deleted, organization-scoped data may be removed, including event series, event sessions, attendees, attendance records, invites, organization memberships for that workspace, and stored attendee profile images. User accounts are not automatically deleted when a workspace is purged. Users may continue using other organizations associated with their accounts. Replaced, removed, or orphaned uploaded files may also be deleted earlier as part of routine file management and security cleanup.
-
-Intellectual property:
-EventQR, its software, branding, interface design, documentation, and related service materials remain the property of Magitecx or its licensors, except for customer-provided content. You retain rights to the content and data your organization uploads, subject to the rights needed for us to host, process, display, export, secure, and support that content within the service.
-
-Availability and changes:
-We may update, improve, modify, or discontinue features as the product evolves. We may also suspend portions of the service for maintenance, security, or operational reasons. We aim to operate the service professionally, but we do not guarantee uninterrupted availability, error-free performance, or compatibility with every device, browser, or camera environment.
-
-Disclaimers and limitation of liability:
-To the maximum extent permitted by law, EventQR is provided on an “as is” and “as available” basis without warranties of merchantability, fitness for a particular purpose, or non-infringement. To the maximum extent permitted by law, Magitecx will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, goodwill, data, or business opportunities arising from or related to use of the service. To the maximum extent permitted by law, any direct liability related to the service will be limited to the amount paid, if any, for the applicable service period directly preceding the event giving rise to the claim.
-
-Contact and updates:
-Questions about these Terms can be sent to support@magitecx.com. We may update these Terms from time to time. Continued use of EventQR after an update becomes effective constitutes acceptance of the revised Terms.`,
-  },
-  privacy: {
-    title: "Privacy Policy",
-    body: `Last updated May 20, 2026
-
-This Privacy Policy explains how EventQR, powered by Magitecx, collects, uses, stores, and deletes information when you use the EventQR website, dashboard, scanner flows, support channels, and related services.
-
-EventQR is designed for organizations that manage attendees, recurring event series, attendance check-ins, and reporting. By using the service, you acknowledge that your organization may upload attendee information and attendance data into the platform.
-
-Data we collect:
-We collect account data such as name, email address, password hash, organization memberships, role assignments, and account activity needed to authenticate and manage access. We collect organization data such as workspace names, join codes, invite records, event series, event sessions, settings, inactivity status, and scheduled deletion metadata. We collect attendee data such as attendee names, email addresses, phone numbers, profile images, QR tokens, and attendance history created by the organization using the service. We also collect technical and support data such as browser and device information, IP-derived operational logs, password reset requests, and messages you send to support.
-
-How we use data:
-We use personal and workspace data to provide authentication, organization membership, scanner flows, attendee management, reports, exports, and support operations. We also use data to maintain service security, investigate misuse, send service emails such as password resets and inactivity warnings, and improve the reliability of the platform. We do not sell attendee or account personal information.
-
-Sharing:
-We share data only as needed to operate the service, such as with infrastructure, email, hosting, database, and security providers acting on our behalf. Password reset and notification emails are sent through Resend. We may also disclose information if reasonably necessary to comply with law, enforce our Terms, prevent fraud, or protect users, EventQR, Magitecx, or the public.
-
-Retention and deletion:
-EventQR stores organization data for as long as the workspace remains active or until it is removed under the product’s inactivity lifecycle or an administrative deletion action. By default, organizations may be marked inactive after 75 days without meaningful workspace activity and may be permanently deleted after 90 days from the last real activity if inactivity continues. When an organization is permanently deleted, organization-scoped data may be removed, including attendees, event series, event sessions, attendance records, invites, workspace memberships for that organization, and stored attendee profile images. User accounts are not automatically deleted when an organization is purged. Replaced or removed attendee profile images may be deleted earlier as part of file cleanup and storage management.
-
-Security:
-We use access controls, password hashing, secure token flows, protected dashboard routes, and server-side validation in support of the service. Attendee profile images are validated and re-encoded server-side, and only supported image formats are accepted by the current upload flow. No system is completely secure, and you are responsible for safeguarding your account credentials.
-
-Your choices:
-Users can update account details, change passwords, switch organizations, and manage workspace records according to their role permissions. Organization administrators control most attendee and event data inside their workspaces, including updates, exports, and deletions.
-
-Contact:
-Questions about this Privacy Policy or privacy-related requests can be sent to support@magitecx.com. This document is a product-facing policy draft and should be reviewed for your business entity details, local law requirements, and final publication requirements before production launch.`,
-  },
-} as const;
-
 export function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { auth, isInitializing } = useAuth();
+  const registerSideContent = {
+    terms: {
+      title: t("auth.register.legal.terms.title"),
+      body: t("auth.register.legal.terms.body"),
+    },
+    privacy: {
+      title: t("auth.register.legal.privacy.title"),
+      body: t("auth.register.legal.privacy.body"),
+    },
+  } as const;
   const [activeDocument, setActiveDocument] = useState<keyof typeof registerSideContent | null>(null);
   const {
     register,
@@ -121,18 +71,22 @@ export function RegisterPage() {
   return (
     <div className="min-h-screen px-4 py-6">
       <Seo
-        description="Create your EventQR account, then create or join an organization to manage recurring event attendance with QR check-ins."
+        description={t("auth.register.seoDescription")}
         noindex
         pathname="/register"
-        title="Create Account"
+        title={t("auth.register.seoTitle")}
       />
+      <div className="fixed right-3 top-3 z-50 flex items-center gap-2 lg:right-6 lg:top-6">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between pr-24 lg:pr-28">
           <Link className="font-display text-2xl font-semibold text-slate-900" to="/">
             EventQR
           </Link>
           <Link to="/login">
-            <Button variant="ghost">Login</Button>
+            <Button variant="ghost">{t("siteHeader.login")}</Button>
           </Link>
         </div>
 
@@ -141,16 +95,16 @@ export function RegisterPage() {
             <div className="flex items-center gap-3">
               <BrandLogo imageClassName="h-12" />
               <div>
-                <p className="text-sm font-semibold text-slate-900">Register</p>
-                <p className="text-sm text-slate-500">Create account first</p>
+                <p className="text-sm font-semibold text-slate-900">{t("auth.register.eyebrow")}</p>
+                <p className="text-sm text-slate-500">{t("auth.register.eyebrowSub")}</p>
               </div>
             </div>
 
-            <h1 className="mt-6 font-display text-4xl font-semibold text-slate-900">Create account</h1>
+            <h1 className="mt-6 font-display text-4xl font-semibold text-slate-900">{t("auth.register.title")}</h1>
 
             <form className="mt-8 grid gap-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Name</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.register.name")}</span>
                 <div className="relative">
                   <UserRound className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
                   <Input className="pl-11" placeholder="Jordan Lee" {...register("name")} />
@@ -159,7 +113,7 @@ export function RegisterPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Email</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
                   <Input autoComplete="email" className="pl-11" placeholder="jordan@example.com" {...register("email")} />
@@ -168,13 +122,13 @@ export function RegisterPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Password</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.password")}</span>
                 <div className="relative">
                   <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
                   <Input
                     autoComplete="new-password"
                     className="pl-11"
-                    placeholder="At least 6 characters"
+                    placeholder={t("auth.register.passwordPlaceholder")}
                     type="password"
                     {...register("password")}
                   />
@@ -189,21 +143,21 @@ export function RegisterPage() {
                   {...register("acceptedTerms")}
                 />
                 <span className="text-sm leading-6 text-slate-600">
-                  I agree to the{" "}
+                  {t("auth.register.agreeToThe")}{" "}
                   <button
                     className="font-medium text-amber-700 hover:text-amber-800"
                     onClick={() => setActiveDocument("terms")}
                     type="button"
                   >
-                    Terms of Service
+                    {t("auth.login.termsOfService")}
                   </button>{" "}
-                  and{" "}
+                  {t("auth.register.and")}{" "}
                   <button
                     className="font-medium text-amber-700 hover:text-amber-800"
                     onClick={() => setActiveDocument("privacy")}
                     type="button"
                   >
-                    Privacy Policy
+                    {t("auth.login.privacyPolicy")}
                   </button>
                   .
                 </span>
@@ -219,7 +173,7 @@ export function RegisterPage() {
               ) : null}
 
               <Button className="mt-2 w-full py-3 text-base" disabled={mutation.isPending} type="submit">
-                {mutation.isPending ? "Creating..." : "Create account"}
+                {mutation.isPending ? t("auth.register.creating") : t("siteHeader.createAccount")}
               </Button>
             </form>
 
@@ -227,10 +181,10 @@ export function RegisterPage() {
               <BrandBadge compact />
               <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
                 <Link className="hover:text-slate-900" to="/privacy">
-                  Privacy Policy
+                  {t("auth.login.privacyPolicy")}
                 </Link>
                 <Link className="hover:text-slate-900" to="/terms">
-                  Terms of Service
+                  {t("auth.login.termsOfService")}
                 </Link>
               </div>
             </div>
@@ -242,11 +196,11 @@ export function RegisterPage() {
                 <>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Agreement</p>
+                      <p className="text-sm font-semibold text-slate-900">{t("auth.register.agreement")}</p>
                       <h2 className="mt-2 font-display text-4xl font-semibold text-slate-900">{sideDocument.title}</h2>
                     </div>
                     <button
-                      aria-label="Close document"
+                      aria-label={t("auth.register.closeDocument")}
                       className="rounded-[8px] bg-[var(--color-surface-soft)] p-2 text-slate-500 transition hover:text-slate-900"
                       onClick={() => setActiveDocument(null)}
                       type="button"
@@ -260,9 +214,14 @@ export function RegisterPage() {
                 </>
               ) : (
                 <>
-                  <h2 className="font-display text-4xl font-semibold text-slate-900">After sign up</h2>
+                  <h2 className="font-display text-4xl font-semibold text-slate-900">{t("auth.register.afterSignUp")}</h2>
                   <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                    {["Create workspace", "Join by code", "Open invite link", "Start scanning"].map((item) => (
+                    {[
+                      t("auth.register.steps.createWorkspace"),
+                      t("auth.register.steps.joinByCode"),
+                      t("auth.register.steps.openInviteLink"),
+                      t("auth.register.steps.startScanning"),
+                    ].map((item) => (
                       <div
                         key={item}
                         className="rounded-[8px] bg-[var(--color-surface-soft)] p-5"
@@ -277,11 +236,11 @@ export function RegisterPage() {
 
             <Card className="flex items-center justify-between gap-4 p-6">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Already have an account?</p>
-                <p className="text-sm text-slate-500">Go straight to login.</p>
+                <p className="text-sm font-semibold text-slate-900">{t("auth.register.alreadyHaveAccount")}</p>
+                <p className="text-sm text-slate-500">{t("auth.register.goToLogin")}</p>
               </div>
               <Link to="/login">
-                <Button variant="secondary">Login</Button>
+                <Button variant="secondary">{t("siteHeader.login")}</Button>
               </Link>
             </Card>
           </div>

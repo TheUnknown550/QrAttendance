@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Download } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -10,6 +11,7 @@ import { formatAttendeeOrgType, formatDate, formatPercentage, resolveMediaUrl } 
 import type { SeriesReport } from "../types/api";
 
 export function AttendanceReportPage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const { auth } = useAuth();
 
@@ -32,7 +34,7 @@ export function AttendanceReportPage() {
   }
 
   if (!reportQuery.data) {
-    return <Card>Loading report...</Card>;
+    return <Card>{t("attendanceReport.loading")}</Card>;
   }
 
   const report = reportQuery.data;
@@ -41,11 +43,11 @@ export function AttendanceReportPage() {
     <Card>
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
-          <p className="text-sm font-semibold text-slate-900">Attendance report</p>
+          <p className="text-sm font-semibold text-slate-900">{t("attendanceReport.eyebrow")}</p>
           <h1 className="mt-2 break-words font-display text-4xl font-semibold text-slate-900">{report.series.name}</h1>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Badge>{report.sessions.length} sessions</Badge>
-            <Badge>{report.items.length} attendees</Badge>
+            <Badge>{t("attendanceReport.sessionsCount", { count: report.sessions.length })}</Badge>
+            <Badge>{t("attendanceReport.attendeesCount", { count: report.items.length })}</Badge>
           </div>
         </div>
 
@@ -61,7 +63,7 @@ export function AttendanceReportPage() {
             }
             variant="secondary"
           >
-            Export CSV
+            {t("attendanceReport.exportCsv")}
           </Button>
           <Button
             icon={<Download className="size-4" />}
@@ -73,7 +75,7 @@ export function AttendanceReportPage() {
               )
             }
           >
-            Export Excel
+            {t("attendanceReport.exportExcel")}
           </Button>
         </div>
       </div>
@@ -117,7 +119,7 @@ export function AttendanceReportPage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-900">
-                          {sessionInfo?.title ?? "Session"}
+                          {sessionInfo?.title ?? t("attendanceReport.session")}
                         </p>
                         <p className="text-xs text-slate-400">
                           {sessionInfo?.sessionDate ? formatDate(sessionInfo.sessionDate) : ""}
@@ -127,7 +129,7 @@ export function AttendanceReportPage() {
                         {session.checkInPhotoUrl ? (
                           <a href={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined} rel="noreferrer" target="_blank">
                             <img
-                              alt="Check-in proof"
+                              alt={t("attendanceReport.checkInProof")}
                               className="size-9 rounded-[6px] object-cover ring-1 ring-[var(--color-border)]"
                               src={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined}
                             />
@@ -140,7 +142,7 @@ export function AttendanceReportPage() {
                               : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"
                           }
                         >
-                          {session.attended ? "Joined" : "Missed"}
+                          {session.attended ? t("attendanceReport.joined") : t("attendanceReport.missed")}
                         </span>
                       </div>
                     </div>
@@ -155,10 +157,12 @@ export function AttendanceReportPage() {
           <table className="min-w-full border-collapse text-left">
             <thead className="bg-[var(--color-surface-soft)] text-xs uppercase tracking-[0.22em] text-slate-500">
               <tr>
-                <th className="sticky left-0 z-20 min-w-[280px] bg-[var(--color-surface-soft)] px-5 py-4">Attendee</th>
-                <th className="min-w-[110px] px-4 py-4">Attended</th>
-                <th className="min-w-[110px] px-4 py-4">Total</th>
-                <th className="min-w-[140px] px-4 py-4">Attendance %</th>
+                <th className="sticky left-0 z-20 min-w-[280px] bg-[var(--color-surface-soft)] px-5 py-4">
+                  {t("session.attendee")}
+                </th>
+                <th className="min-w-[110px] px-4 py-4">{t("attendanceReport.attended")}</th>
+                <th className="min-w-[110px] px-4 py-4">{t("attendanceReport.total")}</th>
+                <th className="min-w-[140px] px-4 py-4">{t("attendanceReport.attendancePercent")}</th>
                 {report.sessions.map((session) => (
                   <th key={session.id} className="min-w-[180px] px-4 py-4">
                     <div className="space-y-1">
@@ -214,7 +218,7 @@ export function AttendanceReportPage() {
                               target="_blank"
                             >
                               <img
-                                alt="Check-in proof"
+                                alt={t("attendanceReport.checkInProof")}
                                 className="size-9 rounded-[6px] object-cover ring-1 ring-[var(--color-border)]"
                                 src={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined}
                               />
@@ -227,11 +231,11 @@ export function AttendanceReportPage() {
                                 : "text-sm font-semibold text-slate-600"
                             }
                           >
-                            {session.attended ? "Joined" : "Missed"}
+                            {session.attended ? t("attendanceReport.joined") : t("attendanceReport.missed")}
                           </p>
                         </div>
                         <p className="mt-1 text-xs text-slate-400">
-                          {session.checkedInAt ? formatDate(session.checkedInAt) : "No check-in"}
+                          {session.checkedInAt ? formatDate(session.checkedInAt) : t("attendanceReport.noCheckIn")}
                         </p>
                       </div>
                     </td>

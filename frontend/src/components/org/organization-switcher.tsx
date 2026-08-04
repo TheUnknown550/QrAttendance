@@ -1,5 +1,6 @@
 import { ChevronDown, ArrowRightLeft, PlusCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, unwrapResponse } from "../../lib/api";
@@ -14,6 +15,7 @@ type OrganizationSwitcherProps = {
 };
 
 export function OrganizationSwitcher({ className, compact = false }: OrganizationSwitcherProps) {
+  const { t } = useTranslation();
   const { auth, activeMembership, setAuthState } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -71,7 +73,7 @@ export function OrganizationSwitcher({ className, compact = false }: Organizatio
   }
 
   const memberships = auth?.memberships ?? [];
-  const currentName = activeMembership?.organizationName ?? "No active organization";
+  const currentName = activeMembership?.organizationName ?? t("appShell.noActiveOrganization");
   const currentRole = activeMembership?.role?.toLowerCase() ?? "";
 
   const containerClassName = useMemo(
@@ -95,7 +97,7 @@ export function OrganizationSwitcher({ className, compact = false }: Organizatio
           variant="secondary"
         >
           <span className="min-w-0 truncate">
-            {compact ? currentName : `Workspace: ${currentName}`}
+            {compact ? currentName : t("organizationSwitcher.workspaceName", { name: currentName })}
           </span>
         </Button>
       </div>
@@ -103,9 +105,11 @@ export function OrganizationSwitcher({ className, compact = false }: Organizatio
       {open ? (
         <div className={panelClassName}>
           <div className="border-b border-[var(--color-border)] px-4 py-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current workspace</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("organizationSwitcher.currentWorkspace")}</p>
             <p className="mt-2 break-words text-sm font-semibold text-slate-900">{currentName}</p>
-            {currentRole ? <p className="mt-1 text-xs text-slate-500">{currentRole} access</p> : null}
+            {currentRole ? (
+              <p className="mt-1 text-xs text-slate-500">{t("organizationSwitcher.roleAccess", { role: currentRole })}</p>
+            ) : null}
           </div>
 
           <div className="max-h-72 overflow-y-auto p-2">
@@ -130,25 +134,29 @@ export function OrganizationSwitcher({ className, compact = false }: Organizatio
                       {membership.role.toLowerCase()}
                     </span>
                   </span>
-                  {active ? <span className="text-xs font-semibold text-emerald-700">Active</span> : null}
+                  {active ? (
+                    <span className="text-xs font-semibold text-emerald-700">{t("organizationSwitcher.active")}</span>
+                  ) : null}
                 </button>
               );
             })}
 
             {memberships.length === 0 ? (
-              <div className="px-3 py-6 text-center text-sm text-slate-500">No organizations available.</div>
+              <div className="px-3 py-6 text-center text-sm text-slate-500">
+                {t("organizationSwitcher.noOrganizationsAvailable")}
+              </div>
             ) : null}
           </div>
 
           <div className="grid gap-2 border-t border-[var(--color-border)] p-3">
             <Link to="/app/onboarding">
               <Button className="w-full justify-start" icon={<PlusCircle className="size-4" />} variant="secondary">
-                Create or join
+                {t("organizationSwitcher.createOrJoin")}
               </Button>
             </Link>
             <Link to="/app/settings/organization">
               <Button className="w-full justify-start" icon={<ArrowRightLeft className="size-4" />} variant="ghost">
-                Manage workspace
+                {t("organizationSwitcher.manageWorkspace")}
               </Button>
             </Link>
           </div>

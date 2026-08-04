@@ -1,26 +1,33 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { BrandLogo } from "../brand/brand-logo";
 import { Button } from "../ui/button";
+import { LanguageToggle } from "../ui/language-toggle";
 import { ThemeToggle } from "../ui/theme-toggle";
 
 interface SiteHeaderProps {
   eyebrow: string;
 }
 
-const headerLinks = [
-  { to: "/", label: "Home" },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-  { to: "/docs", label: "Docs" },
-  { to: "/privacy", label: "Privacy" },
-  { to: "/terms", label: "Terms" },
-  { to: "/help", label: "Help / FAQ" },
-];
-
 export function SiteHeader({ eyebrow }: SiteHeaderProps) {
+  const { t } = useTranslation();
+
+  const headerLinks = [
+    { to: "/", label: t("siteHeader.home") },
+    { to: "/about", label: t("siteHeader.about") },
+    { to: "/contact", label: t("siteHeader.contact") },
+    { to: "/docs", label: t("siteHeader.docs") },
+    { to: "/privacy", label: t("siteHeader.privacy") },
+    { to: "/terms", label: t("siteHeader.terms") },
+    { to: "/help", label: t("siteHeader.helpFaq") },
+  ];
+
   return (
     <>
-      <ThemeToggle className="fixed right-3 top-3 z-50 lg:right-6 lg:top-6" />
+      <div className="fixed right-3 top-3 z-50 flex items-center gap-2 lg:right-6 lg:top-6">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <header className="rounded-[10px] bg-[var(--color-panel)] px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur sm:px-5">
         <div className="flex flex-wrap items-start justify-between gap-4 pr-14 sm:items-center sm:pr-16">
           <div className="flex min-w-0 items-center gap-3">
@@ -41,10 +48,10 @@ export function SiteHeader({ eyebrow }: SiteHeaderProps) {
 
           <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end sm:gap-3">
             <Link className="flex-1 sm:flex-none" to="/login">
-              <Button className="w-full" variant="ghost">Login</Button>
+              <Button className="w-full" variant="ghost">{t("siteHeader.login")}</Button>
             </Link>
             <Link className="flex-1 sm:flex-none" to="/register">
-              <Button className="w-full">Create account</Button>
+              <Button className="w-full">{t("siteHeader.createAccount")}</Button>
             </Link>
           </div>
         </div>

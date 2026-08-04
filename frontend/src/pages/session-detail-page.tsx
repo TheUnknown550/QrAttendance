@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarClock, CheckCircle2, Radio, Search, Trash2, XCircle } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { Badge } from "../components/ui/badge";
@@ -15,6 +16,7 @@ import { cn, formatAttendeeOrgType, formatDate, resolveMediaUrl } from "../lib/u
 import type { Attendee, EventSeriesSettings, EventSession, EventSessionDetail } from "../types/api";
 
 function AttendeeRosterMeta({ attendee, settings }: { attendee: Attendee; settings: EventSeriesSettings }) {
+  const { t } = useTranslation();
   const orgAndType = formatAttendeeOrgType(
     settings.showOrganizationName ? attendee.organizationName : undefined,
     settings.showAttendeeType ? attendee.attendeeType : undefined,
@@ -27,10 +29,10 @@ function AttendeeRosterMeta({ attendee, settings }: { attendee: Attendee; settin
       ) : null}
       {settings.showEmail ? <p className="truncate text-sm text-slate-500">{attendee.email}</p> : null}
       {settings.showPhone ? (
-        <p className="truncate text-xs text-slate-500">{attendee.phone ?? "No phone"}</p>
+        <p className="truncate text-xs text-slate-500">{attendee.phone ?? t("session.noPhone")}</p>
       ) : null}
       {settings.showAttendeeNumber && attendee.attendeeNumber != null ? (
-        <p className="truncate text-xs text-slate-500">Ticket #{attendee.attendeeNumber}</p>
+        <p className="truncate text-xs text-slate-500">{t("scanner.ticketNumber", { number: attendee.attendeeNumber })}</p>
       ) : null}
     </>
   );
@@ -48,6 +50,7 @@ export function SessionDetailPage() {
   const { id = "", sessionId = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { auth } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [search, setSearch] = useState("");
@@ -178,7 +181,7 @@ export function SessionDetailPage() {
   }, [attendedById, deferredSearch, session?.allAttendees]);
 
   if (!session) {
-    return <Card>{sessionQuery.isError ? getErrorMessage(sessionQuery.error) : "Loading session..."}</Card>;
+    return <Card>{sessionQuery.isError ? getErrorMessage(sessionQuery.error) : t("session.loading")}</Card>;
   }
 
   return (
@@ -186,15 +189,15 @@ export function SessionDetailPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold text-slate-900">Session</p>
+            <p className="text-sm font-semibold text-slate-900">{t("session.eyebrow")}</p>
             <h1 className="mt-2 break-words font-display text-4xl font-semibold text-slate-900">{session.title}</h1>
             <p className="mt-4 text-base leading-7 text-slate-500">
-              {session.description ?? "No description set for this session."}
+              {session.description ?? t("session.noDescription")}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Badge>{formatDate(session.sessionDate)}</Badge>
-              <Badge>{session._count?.attendance ?? 0} attendees marked attended</Badge>
-              <Badge>Created {formatDate(session.createdAt)}</Badge>
+              <Badge>{t("session.attendeesMarkedAttended", { count: session._count?.attendance ?? 0 })}</Badge>
+              <Badge>{t("session.created", { date: formatDate(session.createdAt) })}</Badge>
             </div>
           </div>
 
@@ -203,27 +206,27 @@ export function SessionDetailPage() {
               className="rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-white"
               to={`/app/event-series/${session.eventSeries.id}`}
             >
-              Back to {session.eventSeries.name}
+              {t("session.backTo", { name: session.eventSeries.name })}
             </Link>
             <Link to={`/app/scanner?session=${sessionId}`}>
               <Button className="w-full" icon={<Radio className="size-4" />}>
-                Open scanner
+                {t("appShell.openScanner")}
               </Button>
             </Link>
             <Button onClick={() => setIsEditing((value) => !value)} type="button" variant="secondary">
-              {isEditing ? "Cancel edit" : "Edit"}
+              {isEditing ? t("session.cancelEdit") : t("common.edit")}
             </Button>
             <Button
               icon={<Trash2 className="size-4" />}
               onClick={() => {
-                if (window.confirm(`Delete ${session.title} and all of its attendance records?`)) {
+                if (window.confirm(t("session.confirmDelete", { title: session.title }))) {
                   deleteMutation.mutate();
                 }
               }}
               type="button"
               variant="danger"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? t("eventSeries.detail.deleting") : t("common.delete")}
             </Button>
           </div>
         </div>
@@ -237,18 +240,18 @@ export function SessionDetailPage() {
                 <CalendarClock className="size-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Details</p>
-                <p className="text-sm text-slate-500">Event session overview</p>
+                <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.details")}</p>
+                <p className="text-sm text-slate-500">{t("session.overview")}</p>
               </div>
             </div>
 
             <div className="mt-6 space-y-4">
               <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Series</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("eventSeries.detail.eyebrow")}</p>
                 <p className="mt-2 font-medium text-slate-900">{session.eventSeries.name}</p>
               </div>
               <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Scheduled for</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("session.scheduledFor")}</p>
                 <p className="mt-2 font-medium text-slate-900">{formatDate(session.sessionDate)}</p>
               </div>
             </div>
@@ -256,21 +259,21 @@ export function SessionDetailPage() {
 
           {isEditing ? (
             <Card>
-              <p className="text-sm font-semibold text-slate-900">Edit session</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Update details</h2>
+              <p className="text-sm font-semibold text-slate-900">{t("session.editSession")}</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("session.updateDetails")}</h2>
 
               <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => updateMutation.mutate(values))}>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">Session title</span>
+                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
                   <Input {...register("title")} />
                   {errors.title ? <p className="mt-2 text-xs text-rose-500">{errors.title.message}</p> : null}
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">Description</span>
+                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
                   <Input {...register("description")} />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">Session date and time</span>
+                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionDateAndTime")}</span>
                   <Input type="datetime-local" {...register("sessionDate")} />
                   {errors.sessionDate ? <p className="mt-2 text-xs text-rose-500">{errors.sessionDate.message}</p> : null}
                 </label>
@@ -285,9 +288,9 @@ export function SessionDetailPage() {
                   </p>
                 ) : null}
                 <div className="flex flex-wrap gap-3">
-                  <Button type="submit">{updateMutation.isPending ? "Saving..." : "Save changes"}</Button>
+                  <Button type="submit">{updateMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveChanges")}</Button>
                   <Button onClick={() => setIsEditing(false)} type="button" variant="ghost">
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               </form>
@@ -298,7 +301,7 @@ export function SessionDetailPage() {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Attendance directory</p>
+              <p className="text-sm font-semibold text-slate-900">{t("session.attendanceDirectory")}</p>
               <h2 className="mt-2 text-3xl font-semibold text-slate-900">{session.allAttendees.length}</h2>
             </div>
 
@@ -307,7 +310,7 @@ export function SessionDetailPage() {
               <Input
                 className="pl-11"
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search attendees"
+                placeholder={t("session.searchAttendees")}
                 value={search}
               />
             </div>
@@ -321,10 +324,10 @@ export function SessionDetailPage() {
 
           <div className="mt-6 hidden overflow-hidden rounded-[10px] bg-[var(--color-surface-soft)] md:block">
             <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] border-b border-[var(--color-border)] px-5 py-3 text-xs uppercase tracking-[0.22em] text-slate-500">
-              <span>Attendee</span>
-              <span>Status</span>
-              <span>Last update</span>
-              <span className="text-right">Action</span>
+              <span>{t("session.attendee")}</span>
+              <span>{t("session.status")}</span>
+              <span>{t("session.lastUpdate")}</span>
+              <span className="text-right">{t("session.action")}</span>
             </div>
 
             <div className="divide-y divide-[var(--color-border)] [content-visibility:auto]">
@@ -347,7 +350,7 @@ export function SessionDetailPage() {
               ))}
 
               {attendeeRows.length === 0 ? (
-                <p className="p-5 text-sm text-slate-500">No attendees match the current search.</p>
+                <p className="p-5 text-sm text-slate-500">{t("session.noAttendeesMatch")}</p>
               ) : null}
             </div>
           </div>
@@ -374,7 +377,7 @@ export function SessionDetailPage() {
                       attendanceRecord ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600",
                     )}
                   >
-                    {attendanceRecord ? "Attended" : "Not attended"}
+                    {attendanceRecord ? t("session.attended") : t("session.notAttended")}
                   </span>
                   <Button
                     disabled={markAttendedMutation.isPending || markNotAttendedMutation.isPending}
@@ -389,19 +392,19 @@ export function SessionDetailPage() {
                     type="button"
                     variant={attendanceRecord ? "ghost" : "secondary"}
                   >
-                    {attendanceRecord ? "Mark not attended" : "Mark attended"}
+                    {attendanceRecord ? t("session.markNotAttended") : t("session.markAttended")}
                   </Button>
                 </div>
 
                 <p className="mt-3 text-xs text-slate-500">
-                  {attendanceRecord ? `Marked ${formatDate(attendanceRecord.checkedInAt)}` : "No attendance recorded yet."}
+                  {attendanceRecord ? t("session.marked", { date: formatDate(attendanceRecord.checkedInAt) }) : t("session.noAttendanceRecorded")}
                 </p>
               </div>
             ))}
 
             {attendeeRows.length === 0 ? (
               <p className="rounded-[8px] bg-[var(--color-surface-soft)] p-5 text-sm text-slate-500">
-                No attendees match the current search.
+                {t("session.noAttendeesMatch")}
               </p>
             ) : null}
           </div>
@@ -424,6 +427,8 @@ function AttendeeAttendanceRow({
   onToggle: () => void;
   settings: EventSeriesSettings;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] items-center gap-4 bg-white px-5 py-4">
       <div className="flex min-w-0 items-center gap-3">
@@ -445,7 +450,7 @@ function AttendeeAttendanceRow({
             attendanceRecord ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600",
           )}
         >
-          {attendanceRecord ? "Attended" : "Not attended"}
+          {attendanceRecord ? t("session.attended") : t("session.notAttended")}
         </span>
       </div>
 
@@ -461,7 +466,7 @@ function AttendeeAttendanceRow({
           type="button"
           variant={attendanceRecord ? "ghost" : "secondary"}
         >
-          {attendanceRecord ? "Mark not attended" : "Mark attended"}
+          {attendanceRecord ? t("session.markNotAttended") : t("session.markAttended")}
         </Button>
       </div>
     </div>

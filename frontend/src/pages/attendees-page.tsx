@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, Plus, Search, Upload, Users } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { BulkImportModal } from "../components/attendees/bulk-import-modal";
@@ -14,23 +15,6 @@ import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatAttendeeOrgType, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, PaginatedResult } from "../types/api";
-
-const attendeeSchema = z.object({
-  firstName: z.string().min(1),
-  surname: z.string().min(1),
-  organizationName: z.string().optional(),
-  attendeeType: z.string().optional(),
-  email: z.email(),
-  phone: z.string().optional(),
-  attendeeNumber: z
-    .string()
-    .optional()
-    .refine((value) => !value || /^\d+$/.test(value.trim()), {
-      message: "Attendee number must be a whole number",
-    }),
-});
-
-type AttendeeFormValues = z.infer<typeof attendeeSchema>;
 
 function normalizeAttendeeResult(data: PaginatedResult<Attendee> | Attendee[] | undefined) {
   if (Array.isArray(data)) {
@@ -50,6 +34,7 @@ function normalizeAttendeeResult(data: PaginatedResult<Attendee> | Attendee[] | 
 
 export function AttendeesPage() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { auth } = useAuth();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -59,6 +44,24 @@ export function AttendeesPage() {
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [qrEmailsToast, setQrEmailsToast] = useState("");
   const deferredSearch = useDeferredValue(search);
+
+  const attendeeSchema = z.object({
+    firstName: z.string().min(1),
+    surname: z.string().min(1),
+    organizationName: z.string().optional(),
+    attendeeType: z.string().optional(),
+    email: z.email(),
+    phone: z.string().optional(),
+    attendeeNumber: z
+      .string()
+      .optional()
+      .refine((value) => !value || /^\d+$/.test(value.trim()), {
+        message: t("attendees.attendeeNumberWholeNumber"),
+      }),
+  });
+
+  type AttendeeFormValues = z.infer<typeof attendeeSchema>;
+
   const {
     register,
     handleSubmit,
@@ -149,26 +152,26 @@ export function AttendeesPage() {
             <Users className="size-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-900">Attendees</p>
-            <p className="text-sm text-slate-500">Create profile</p>
+            <p className="text-sm font-semibold text-slate-900">{t("attendees.eyebrow")}</p>
+            <p className="text-sm text-slate-500">{t("attendees.createProfile")}</p>
           </div>
         </div>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Name</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.name")}</span>
             <Input placeholder="Alex" {...register("firstName")} />
             {errors.firstName ? <p className="mt-2 text-xs text-rose-500">{errors.firstName.message}</p> : null}
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Surname</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.surname")}</span>
             <Input placeholder="Morgan" {...register("surname")} />
             {errors.surname ? <p className="mt-2 text-xs text-rose-500">{errors.surname.message}</p> : null}
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Organization name (optional)</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.organizationNameOptional")}</span>
             <Input placeholder="Acme Corp" {...register("organizationName")} />
             {errors.organizationName ? (
               <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
@@ -176,7 +179,7 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee (optional)</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.typeOfAttendeeOptional")}</span>
             <Input placeholder="Guest" {...register("attendeeType")} />
             {errors.attendeeType ? (
               <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
@@ -184,21 +187,21 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Email</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
             <Input placeholder="alex@example.com" {...register("email")} />
             {errors.email ? <p className="mt-2 text-xs text-rose-500">{errors.email.message}</p> : null}
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Phone</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.phone")}</span>
             <Input placeholder="555-0101" {...register("phone")} />
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Attendee number</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.attendeeNumber")}</span>
             <Input
               inputMode="numeric"
-              placeholder="Optional, e.g. 1"
+              placeholder={t("attendees.attendeeNumberPlaceholder")}
               type="number"
               min={0}
               {...register("attendeeNumber")}
@@ -209,7 +212,7 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Photo</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.photo")}</span>
             <Input
               key={imageInputKey}
               accept="image/*"
@@ -217,7 +220,7 @@ export function AttendeesPage() {
               type="file"
             />
             {profileImageFile ? (
-              <p className="mt-2 text-xs text-slate-500">Selected: {profileImageFile.name}</p>
+              <p className="mt-2 text-xs text-slate-500">{t("attendees.selected", { name: profileImageFile.name })}</p>
             ) : null}
           </label>
 
@@ -228,7 +231,7 @@ export function AttendeesPage() {
           ) : null}
 
           <Button className="w-full" icon={<Plus className="size-4" />} type="submit">
-            {mutation.isPending ? "Creating..." : "Create attendee"}
+            {mutation.isPending ? t("attendees.creating") : t("attendees.createAttendee")}
           </Button>
         </form>
       </Card>
@@ -236,7 +239,7 @@ export function AttendeesPage() {
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Directory</p>
+            <p className="text-sm font-semibold text-slate-900">{t("attendees.directory")}</p>
             <h2 className="mt-2 text-3xl font-semibold text-slate-900">{pagination?.total ?? 0}</h2>
           </div>
 
@@ -248,7 +251,7 @@ export function AttendeesPage() {
               type="button"
               variant="secondary"
             >
-              Bulk import
+              {t("attendees.bulkImport")}
             </Button>
 
             <Button
@@ -257,7 +260,7 @@ export function AttendeesPage() {
               onClick={() => setSendQrEmailsOpen(true)}
               type="button"
             >
-              Send QR emails
+              {t("attendees.sendQrEmails")}
             </Button>
 
             <div className="relative w-full max-w-sm">
@@ -268,7 +271,7 @@ export function AttendeesPage() {
                   setSearch(event.target.value);
                   setPage(1);
                 }}
-                placeholder="Search name, organization, type, email, phone"
+                placeholder={t("attendees.searchPlaceholder")}
                 value={search}
               />
             </div>
@@ -284,9 +287,7 @@ export function AttendeesPage() {
         <SendQrEmailsModal
           onClose={() => setSendQrEmailsOpen(false)}
           onSent={(recipientCount) =>
-            setQrEmailsToast(
-              `Sending QR codes to ${recipientCount} attendee${recipientCount === 1 ? "" : "s"}. This runs in the background and may take a few minutes for large lists.`,
-            )
+            setQrEmailsToast(t("attendees.sendingQrCodesToast", { count: recipientCount }))
           }
           open={sendQrEmailsOpen}
           totalAttendees={pagination?.total ?? 0}
@@ -296,9 +297,9 @@ export function AttendeesPage() {
 
         <div className="mt-6 hidden overflow-hidden rounded-[10px] bg-[var(--color-surface-soft)] md:block">
           <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_140px] border-b border-[var(--color-border)] px-5 py-3 text-xs uppercase tracking-[0.22em] text-slate-500">
-            <span>Attendee</span>
-            <span>Contact</span>
-            <span className="text-right">Actions</span>
+            <span>{t("session.attendee")}</span>
+            <span>{t("attendees.contact")}</span>
+            <span className="text-right">{t("attendees.actions")}</span>
           </div>
 
           <div className="divide-y divide-[var(--color-border)] [content-visibility:auto]">
@@ -337,9 +338,9 @@ export function AttendeesPage() {
                 </div>
 
                 <div className="min-w-0 text-sm text-slate-500">
-                  <p className="truncate">{attendee.phone ?? "No phone"}</p>
+                  <p className="truncate">{attendee.phone ?? t("session.noPhone")}</p>
                   <p className="truncate text-xs uppercase tracking-[0.16em] text-slate-400">
-                    QR token ready
+                    {t("attendees.qrTokenReady")}
                   </p>
                 </div>
 
@@ -348,14 +349,14 @@ export function AttendeesPage() {
                     className="inline-flex rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-white"
                     to={`/app/attendees/${attendee.id}`}
                   >
-                    Open
+                    {t("attendees.open")}
                   </Link>
                 </div>
               </div>
             ))}
 
             {!attendeesQuery.isError && attendees.length === 0 ? (
-              <p className="p-5 text-sm text-slate-500">No attendees match the current search.</p>
+              <p className="p-5 text-sm text-slate-500">{t("attendees.noAttendeesMatch")}</p>
             ) : null}
           </div>
         </div>
@@ -399,14 +400,14 @@ export function AttendeesPage() {
 
               <div className="mt-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm text-slate-600">{attendee.phone ?? "No phone"}</p>
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">QR ready</p>
+                  <p className="truncate text-sm text-slate-600">{attendee.phone ?? t("session.noPhone")}</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{t("attendees.qrReady")}</p>
                 </div>
                 <Link
                   className="inline-flex rounded-[8px] bg-white px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-[var(--color-surface-soft)]"
                   to={`/app/attendees/${attendee.id}`}
                 >
-                  Open
+                  {t("attendees.open")}
                 </Link>
               </div>
             </div>
@@ -414,7 +415,7 @@ export function AttendeesPage() {
 
           {!attendeesQuery.isError && attendees.length === 0 ? (
             <p className="rounded-[8px] bg-[var(--color-surface-soft)] p-5 text-sm text-slate-500">
-              No attendees match the current search.
+              {t("attendees.noAttendeesMatch")}
             </p>
           ) : null}
         </div>
@@ -422,7 +423,7 @@ export function AttendeesPage() {
         {pagination && pagination.totalPages > 1 ? (
           <div className="mt-6 flex items-center justify-between gap-3 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3">
             <p className="text-sm text-slate-500">
-              Page {pagination.page} of {pagination.totalPages}
+              {t("attendees.pageOf", { page: pagination.page, totalPages: pagination.totalPages })}
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -432,7 +433,7 @@ export function AttendeesPage() {
                 type="button"
                 variant="ghost"
               >
-                Previous
+                {t("attendees.previous")}
               </Button>
               <Button
                 disabled={pagination.page >= pagination.totalPages || attendeesQuery.isFetching}
@@ -441,7 +442,7 @@ export function AttendeesPage() {
                 type="button"
                 variant="secondary"
               >
-                Next
+                {t("attendees.next")}
               </Button>
             </div>
           </div>

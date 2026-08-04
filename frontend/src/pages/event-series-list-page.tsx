@@ -4,6 +4,7 @@ import { CalendarDays, Plus, Settings2, Sheet, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -24,6 +25,7 @@ type CreateSeriesValues = z.infer<typeof createSeriesSchema>;
 
 export function EventSeriesListPage() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { auth } = useAuth();
   const [showNewEventForm, setShowNewEventForm] = useState(false);
 
@@ -56,17 +58,17 @@ export function EventSeriesListPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Event Series</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold text-slate-900">Event Series</h1>
+            <p className="text-sm font-semibold text-slate-900">{t("eventSeries.list.eyebrow")}</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold text-slate-900">{t("eventSeries.list.title")}</h1>
             <p className="mt-2 text-sm text-slate-500">
-              Create an event series, then open it to manage its sessions and settings.
+              {t("eventSeries.list.subtitle")}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Link to="/app/settings/organization">
               <Button icon={<Settings2 className="size-4" />} variant="secondary">
-                Org settings
+                {t("eventSeries.list.orgSettings")}
               </Button>
             </Link>
             <Button
@@ -74,7 +76,7 @@ export function EventSeriesListPage() {
               onClick={() => setShowNewEventForm((value) => !value)}
               type="button"
             >
-              Create series
+              {t("eventSeries.list.createSeries")}
             </Button>
           </div>
         </div>
@@ -82,7 +84,7 @@ export function EventSeriesListPage() {
         {showNewEventForm ? (
           <div className="mt-6 rounded-[8px] border border-[var(--color-border)] p-5">
             <div className="mb-5 flex items-center justify-between">
-              <p className="font-semibold text-slate-900">New event series</p>
+              <p className="font-semibold text-slate-900">{t("eventSeries.list.newEventSeries")}</p>
               <button
                 className="text-slate-400 hover:text-slate-600"
                 onClick={() => setShowNewEventForm(false)}
@@ -96,14 +98,14 @@ export function EventSeriesListPage() {
               onSubmit={seriesForm.handleSubmit((v) => createSeriesMutation.mutate(v))}
             >
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Event name</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.eventName")}</span>
                 <Input placeholder="AI Workshop Series" {...seriesForm.register("name")} />
                 {seriesForm.formState.errors.name ? (
                   <p className="mt-2 text-xs text-rose-500">{seriesForm.formState.errors.name.message}</p>
                 ) : null}
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Description</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
                 <Input
                   placeholder="Internal recurring training program"
                   {...seriesForm.register("description")}
@@ -111,11 +113,11 @@ export function EventSeriesListPage() {
               </label>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">Start date</span>
+                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.startDate")}</span>
                   <Input type="datetime-local" {...seriesForm.register("startDate")} />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">End date</span>
+                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.endDate")}</span>
                   <Input type="datetime-local" {...seriesForm.register("endDate")} />
                 </label>
               </div>
@@ -126,10 +128,10 @@ export function EventSeriesListPage() {
               ) : null}
               <div className="flex flex-wrap gap-3">
                 <Button icon={<Plus className="size-4" />} type="submit">
-                  {createSeriesMutation.isPending ? "Creating..." : "Create event"}
+                  {createSeriesMutation.isPending ? t("eventSeries.list.creating") : t("eventSeries.list.createEvent")}
                 </Button>
                 <Button onClick={() => setShowNewEventForm(false)} type="button" variant="ghost">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </form>
@@ -138,8 +140,8 @@ export function EventSeriesListPage() {
       </Card>
 
       <Card>
-        <p className="text-sm font-semibold text-slate-900">All series</p>
-        <h2 className="mt-2 text-2xl font-semibold text-slate-900">{series.length} available</h2>
+        <p className="text-sm font-semibold text-slate-900">{t("eventSeries.list.allSeries")}</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("eventSeries.list.available", { count: series.length })}</h2>
 
         <div className="mt-6 space-y-3">
           {series.map((item) => (
@@ -150,13 +152,13 @@ export function EventSeriesListPage() {
               <Link className="min-w-0 flex-1" to={`/app/event-series/${item.id}`}>
                 <h3 className="truncate font-semibold text-slate-900">{item.name}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {(item._count?.sessions ?? item.sessions?.length ?? 0)} sessions
-                  {item.startDate ? ` · Starts ${formatDate(item.startDate)}` : ""}
+                  {t("eventSeries.sessionsCount", { count: item._count?.sessions ?? item.sessions?.length ?? 0 })}
+                  {item.startDate ? ` · ${t("eventSeries.starts", { date: formatDate(item.startDate) })}` : ""}
                 </p>
               </Link>
               <Link to={`/app/reports/event-series/${item.id}`}>
                 <Button icon={<Sheet className="size-4" />} type="button" variant="secondary">
-                  Report
+                  {t("dashboard.report")}
                 </Button>
               </Link>
             </div>
@@ -165,15 +167,15 @@ export function EventSeriesListPage() {
           {!seriesQuery.isLoading && series.length === 0 ? (
             <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-8 text-center">
               <CalendarDays className="mx-auto size-8 text-slate-300" />
-              <p className="mt-3 text-sm font-medium text-slate-600">No events yet</p>
-              <p className="mt-1 text-sm text-slate-400">Create your first event series to get started.</p>
+              <p className="mt-3 text-sm font-medium text-slate-600">{t("eventSeries.list.noEventsYet")}</p>
+              <p className="mt-1 text-sm text-slate-400">{t("eventSeries.list.createFirstHint")}</p>
               <Button
                 className="mt-6"
                 icon={<Plus className="size-4" />}
                 onClick={() => setShowNewEventForm(true)}
                 type="button"
               >
-                Create event
+                {t("eventSeries.list.createEvent")}
               </Button>
             </div>
           ) : null}

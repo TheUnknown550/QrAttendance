@@ -3,20 +3,12 @@ import { useMutation } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { api, getErrorMessage, unwrapResponse } from "../../lib/api";
 import { Button } from "../ui/button";
 import { Dialog } from "../ui/dialog";
 import { Input } from "../ui/input";
-
-const sendQrEmailsSchema = z.object({
-  eventName: z.string().trim().min(1, "Event name is required"),
-  eventDate: z.string().optional(),
-  eventLocation: z.string().optional(),
-  message: z.string().optional(),
-});
-
-type SendQrEmailsValues = z.infer<typeof sendQrEmailsSchema>;
 
 type SendQrEmailsResult = {
   recipientCount: number;
@@ -42,7 +34,17 @@ export function SendQrEmailsModal({
   recipientLabel,
   onSent,
 }: Props) {
+  const { t } = useTranslation();
   const recipientCount = attendeeIds ? attendeeIds.length : totalAttendees;
+
+  const sendQrEmailsSchema = z.object({
+    eventName: z.string().trim().min(1, t("sendQrEmailsModal.eventNameRequired")),
+    eventDate: z.string().optional(),
+    eventLocation: z.string().optional(),
+    message: z.string().optional(),
+  });
+
+  type SendQrEmailsValues = z.infer<typeof sendQrEmailsSchema>;
 
   const {
     register,
@@ -72,35 +74,37 @@ export function SendQrEmailsModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const buttonLabel = recipientLabel ? `Send to ${recipientLabel}` : `Send to ${recipientCount} attendee${recipientCount === 1 ? "" : "s"}`;
+  const buttonLabel = recipientLabel
+    ? t("sendQrEmailsModal.sendToName", { name: recipientLabel })
+    : t("sendQrEmailsModal.sendToCount", { count: recipientCount });
 
   return (
-    <Dialog onClose={onClose} open={open} title="Send QR code email">
+    <Dialog onClose={onClose} open={open} title={t("sendQrEmailsModal.title")}>
       <form className="space-y-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
         <p className="text-sm text-slate-500">
           {recipientLabel
-            ? `${recipientLabel} will receive their personal check-in QR code by email, along with the event details you enter below.`
-            : "Every attendee in your directory will receive their personal check-in QR code by email, along with the event details you enter below."}
+            ? t("sendQrEmailsModal.descriptionSingle", { name: recipientLabel })
+            : t("sendQrEmailsModal.descriptionAll")}
         </p>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-600">Event name</span>
+          <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.eventName")}</span>
           <Input placeholder="Product Launch Night" {...register("eventName")} />
           {errors.eventName ? <p className="mt-2 text-xs text-rose-500">{errors.eventName.message}</p> : null}
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-600">Date (optional)</span>
+          <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.dateOptional")}</span>
           <Input placeholder="Saturday, 12 September 2026 · 6:00 PM" {...register("eventDate")} />
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-600">Location (optional)</span>
+          <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.locationOptional")}</span>
           <Input placeholder="The Grand Hall, 123 Main St" {...register("eventLocation")} />
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-600">Custom message (optional)</span>
+          <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.customMessageOptional")}</span>
           <textarea
             className="w-full rounded-[8px] border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-amber-500/30"
             placeholder="Doors open 30 minutes before start. Please arrive early to avoid queues."
@@ -117,15 +121,15 @@ export function SendQrEmailsModal({
 
         <div className="flex flex-wrap gap-3">
           <Button disabled={mutation.isPending || recipientCount === 0} icon={<Mail className="size-4" />} type="submit">
-            {mutation.isPending ? "Sending..." : buttonLabel}
+            {mutation.isPending ? t("sendQrEmailsModal.sending") : buttonLabel}
           </Button>
           <Button onClick={onClose} type="button" variant="ghost">
-            Cancel
+            {t("common.cancel")}
           </Button>
         </div>
 
         {recipientCount === 0 ? (
-          <p className="text-xs text-slate-500">Add attendees before sending QR code emails.</p>
+          <p className="text-xs text-slate-500">{t("sendQrEmailsModal.addAttendeesFirst")}</p>
         ) : null}
       </form>
     </Dialog>

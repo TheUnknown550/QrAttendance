@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, LockKeyhole, Mail, QrCode, ScanLine, Sheet } from "lucide-react";
 import { startTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { BrandBadge } from "../components/brand/brand-badge";
@@ -10,6 +11,8 @@ import { BrandLogo } from "../components/brand/brand-logo";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { LanguageToggle } from "../components/ui/language-toggle";
+import { ThemeToggle } from "../components/ui/theme-toggle";
 import { Seo } from "../components/seo/seo";
 import { api, getErrorMessage, getPendingInviteToken, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
@@ -24,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { auth, isInitializing, login } = useAuth();
   const {
     register,
@@ -52,19 +56,23 @@ export function LoginPage() {
   return (
     <div className="min-h-screen px-4 py-6">
       <Seo
-        description="Log in to EventQR to manage attendee QR codes, event sessions, scanner flows, and attendance reports."
+        description={t("auth.login.seoDescription")}
         noindex
         pathname="/login"
-        title="Login"
+        title={t("auth.login.seoTitle")}
       />
+      <div className="fixed right-3 top-3 z-50 flex items-center gap-2 lg:right-6 lg:top-6">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between pr-24 lg:pr-28">
           <Link className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900" to="/">
             <ArrowLeft className="size-4" />
-            Back
+            {t("common.back")}
           </Link>
           <Link to="/register">
-            <Button variant="secondary">Register</Button>
+            <Button variant="secondary">{t("auth.login.register")}</Button>
           </Link>
         </div>
 
@@ -73,16 +81,16 @@ export function LoginPage() {
             <div className="flex items-center gap-3">
               <BrandLogo imageClassName="h-12" />
               <div>
-                <p className="text-sm font-semibold text-slate-900">Login</p>
-                <p className="text-sm text-slate-500">Account access</p>
+                <p className="text-sm font-semibold text-slate-900">{t("auth.login.eyebrow")}</p>
+                <p className="text-sm text-slate-500">{t("auth.login.eyebrowSub")}</p>
               </div>
             </div>
 
-            <h1 className="mt-6 font-display text-4xl font-semibold text-slate-900">Welcome back</h1>
+            <h1 className="mt-6 font-display text-4xl font-semibold text-slate-900">{t("auth.login.title")}</h1>
 
             <form className="mt-8 space-y-4" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Email</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
                   <Input autoComplete="email" className="pl-11" {...register("email")} />
@@ -91,7 +99,7 @@ export function LoginPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Password</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.password")}</span>
                 <div className="relative">
                   <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
                   <Input
@@ -113,11 +121,11 @@ export function LoginPage() {
               ) : null}
 
               <Button className="w-full" disabled={mutation.isPending} type="submit">
-                {mutation.isPending ? "Signing in..." : "Log in"}
+                {mutation.isPending ? t("auth.login.signingIn") : t("auth.login.logIn")}
               </Button>
               <div className="text-center">
                 <Link className="text-sm font-medium text-amber-700 hover:text-amber-800" to="/forgot-password">
-                  Forgot password?
+                  {t("auth.login.forgotPassword")}
                 </Link>
               </div>
             </form>
@@ -126,10 +134,10 @@ export function LoginPage() {
               <BrandBadge compact />
               <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
                 <Link className="hover:text-slate-900" to="/privacy">
-                  Privacy Policy
+                  {t("auth.login.privacyPolicy")}
                 </Link>
                 <Link className="hover:text-slate-900" to="/terms">
-                  Terms of Service
+                  {t("auth.login.termsOfService")}
                 </Link>
               </div>
             </div>
@@ -137,11 +145,11 @@ export function LoginPage() {
 
           <div className="grid gap-6">
             <Card className="p-8">
-              <h2 className="font-display text-4xl font-semibold text-slate-900">Scan. Track. Export.</h2>
+              <h2 className="font-display text-4xl font-semibold text-slate-900">{t("auth.login.tagline")}</h2>
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
                 {[
                   { title: "QR", icon: QrCode },
-                  { title: "Check-in", icon: ScanLine },
+                  { title: t("auth.login.checkIn"), icon: ScanLine },
                   { title: "Excel", icon: Sheet },
                 ].map((item) => (
                   <div key={item.title} className="rounded-[8px] bg-[var(--color-surface-soft)] p-5">
@@ -156,11 +164,11 @@ export function LoginPage() {
 
             <Card className="flex items-center justify-between gap-4 p-6">
               <div>
-                <p className="text-sm font-semibold text-slate-900">New here?</p>
-                <p className="text-sm text-slate-500">Create account first. Join or create workspace after.</p>
+                <p className="text-sm font-semibold text-slate-900">{t("auth.login.newHere")}</p>
+                <p className="text-sm text-slate-500">{t("auth.login.newHereHint")}</p>
               </div>
               <Link to="/register">
-                <Button variant="secondary">Create account</Button>
+                <Button variant="secondary">{t("siteHeader.createAccount")}</Button>
               </Link>
             </Card>
           </div>

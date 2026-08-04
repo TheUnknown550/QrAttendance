@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CalendarRange, ChevronRight, Percent, QrCode, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -10,6 +11,7 @@ import { formatAttendeeOrgType, formatDate, formatPercentage, resolveMediaUrl } 
 import type { EventSeries, PaginatedResult, SeriesReport } from "../types/api";
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const { auth } = useAuth();
   const attendeesQuery = useQuery({
     queryKey: ["attendees-summary", auth?.activeOrganizationId],
@@ -52,19 +54,19 @@ export function DashboardPage() {
     <div className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="p-6">
-          <p className="text-sm font-semibold text-slate-500">Dashboard</p>
-          <h1 className="mt-3 font-display text-4xl font-semibold text-slate-900">Attendance ops</h1>
+          <p className="text-sm font-semibold text-slate-500">{t("dashboard.eyebrow")}</p>
+          <h1 className="mt-3 font-display text-4xl font-semibold text-slate-900">{t("dashboard.title")}</h1>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-500">Lead series</p>
+              <p className="text-sm font-semibold text-slate-500">{t("dashboard.leadSeries")}</p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-                {seriesList[0]?.name ?? "No series"}
+                {seriesList[0]?.name ?? t("dashboard.noSeries")}
               </h2>
             </div>
-            {seriesList[0] ? <Badge>{seriesList[0].sessions.length} sessions</Badge> : null}
+            {seriesList[0] ? <Badge>{t("dashboard.sessionsCount", { count: seriesList[0].sessions.length })}</Badge> : null}
           </div>
 
           {seriesList[0] ? (
@@ -85,26 +87,26 @@ export function DashboardPage() {
                 className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-amber-700"
                 to={`/app/event-series/${seriesList[0].id}`}
               >
-                Open
+                {t("dashboard.open")}
                 <ChevronRight className="size-4" />
               </Link>
             </>
           ) : (
-            <p className="mt-4 text-sm text-slate-500">Create your first series.</p>
+            <p className="mt-4 text-sm text-slate-500">{t("dashboard.createFirstSeries")}</p>
           )}
         </Card>
       </section>
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: "Attendees", value: attendeeCount, icon: Users },
-          { label: "Series", value: seriesList.length, icon: CalendarRange },
+          { label: t("dashboard.stats.attendees"), value: attendeeCount, icon: Users },
+          { label: t("dashboard.stats.series"), value: seriesList.length, icon: CalendarRange },
           {
-            label: "Sessions",
+            label: t("dashboard.stats.sessions"),
             value: seriesList.reduce((total, item) => total + item.sessions.length, 0),
             icon: QrCode,
           },
-          { label: "Attendance", value: formatPercentage(averageAttendance || 0), icon: Percent },
+          { label: t("dashboard.stats.attendance"), value: formatPercentage(averageAttendance || 0), icon: Percent },
         ].map((item) => (
           <Card key={item.label} className="p-5">
             <div className="flex items-start justify-between">
@@ -123,10 +125,10 @@ export function DashboardPage() {
       <section>
         <Card className="p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-slate-900">Top attendance</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{t("dashboard.topAttendance")}</h2>
             {primarySeriesId ? (
               <Link to={`/app/reports/event-series/${primarySeriesId}`}>
-                <Button variant="secondary">Report</Button>
+                <Button variant="secondary">{t("dashboard.report")}</Button>
               </Link>
             ) : null}
           </div>
@@ -163,7 +165,7 @@ export function DashboardPage() {
                   </div>
                 </div>
               ))}
-            {reportItems.length === 0 ? <p className="text-sm text-slate-500">No report data yet.</p> : null}
+            {reportItems.length === 0 ? <p className="text-sm text-slate-500">{t("dashboard.noReportData")}</p> : null}
           </div>
         </Card>
       </section>

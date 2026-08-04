@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { BrandBadge } from "../brand/brand-badge";
 import { SiteHeader } from "../public/site-header";
@@ -32,6 +33,8 @@ export function LegalPageLayout({
   structuredData,
   children,
 }: LegalPageLayoutProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen px-4 py-20 text-[var(--color-text)] lg:px-6 lg:py-5">
       <Seo description={description} pathname={pathname} structuredData={structuredData} title={title} />
@@ -41,7 +44,9 @@ export function LegalPageLayout({
         <section className="grid gap-6 py-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <Card className="h-fit p-5 lg:sticky lg:top-5">
             <p className="text-sm font-semibold text-slate-900">{title}</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">Updated {updatedAt}</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">
+              {t("legalPageLayout.updated", { date: updatedAt })}
+            </p>
             <div className="mt-5 space-y-2">
               {toc.map((item) => (
                 <a
@@ -61,9 +66,9 @@ export function LegalPageLayout({
         <footer className="py-6">
           <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Questions?</p>
+              <p className="text-sm font-semibold text-slate-900">{t("legalPageLayout.questions")}</p>
               <p className="text-sm text-slate-500">
-                Contact{" "}
+                {t("legalPageLayout.contact")}{" "}
                 <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">
                   support@magitecx.com
                 </a>
@@ -71,19 +76,19 @@ export function LegalPageLayout({
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
               <Link className="hover:text-slate-900" to="/about">
-                About
+                {t("landing.footer.about")}
               </Link>
               <Link className="hover:text-slate-900" to="/contact">
-                Contact
+                {t("landing.footer.contact")}
               </Link>
               <Link className="hover:text-slate-900" to="/help">
-                Help / FAQ
+                {t("landing.footer.helpFaq")}
               </Link>
               <Link className="hover:text-slate-900" to="/privacy">
-                Privacy Policy
+                {t("landing.footer.privacyPolicy")}
               </Link>
               <Link className="hover:text-slate-900" to="/terms">
-                Terms of Service
+                {t("landing.footer.termsOfService")}
               </Link>
               <BrandBadge compact />
             </div>

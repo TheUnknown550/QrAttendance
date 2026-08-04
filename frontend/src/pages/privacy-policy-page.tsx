@@ -1,24 +1,27 @@
 import { FileLock, Mail, ScanSearch, ShieldCheck, UserRound } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card } from "../components/ui/card";
 import { LegalPageLayout } from "../components/legal/legal-page-layout";
 import { buildBreadcrumbStructuredData, buildOrganizationStructuredData } from "../lib/seo";
 
-const toc = [
-  { id: "overview", label: "Overview" },
-  { id: "data-we-collect", label: "Data We Collect" },
-  { id: "how-we-use-data", label: "How We Use Data" },
-  { id: "sharing", label: "Sharing" },
-  { id: "retention", label: "Retention + Deletion" },
-  { id: "security", label: "Security" },
-  { id: "choices", label: "Your Choices" },
-  { id: "contact", label: "Contact" },
-];
-
 export function PrivacyPolicyPage() {
+  const { t } = useTranslation();
+
+  const toc = [
+    { id: "overview", label: t("privacy.toc.overview") },
+    { id: "data-we-collect", label: t("privacy.toc.dataWeCollect") },
+    { id: "how-we-use-data", label: t("privacy.toc.howWeUseData") },
+    { id: "sharing", label: t("privacy.toc.sharing") },
+    { id: "retention", label: t("privacy.toc.retention") },
+    { id: "security", label: t("privacy.toc.security") },
+    { id: "choices", label: t("privacy.toc.choices") },
+    { id: "contact", label: t("privacy.toc.contact") },
+  ];
+
   return (
     <LegalPageLayout
       description="Read how EventQR collects, uses, stores, and deletes account, workspace, attendee, and attendance data."
-      eyebrow="Privacy Policy"
+      eyebrow={t("privacy.eyebrow")}
       pathname="/privacy"
       structuredData={[
         buildOrganizationStructuredData(),
@@ -32,7 +35,7 @@ export function PrivacyPolicyPage() {
           name: "Privacy Policy",
         },
       ]}
-      title="Privacy Policy"
+      title={t("privacy.eyebrow")}
       toc={toc}
       updatedAt="May 20, 2026"
     >
@@ -42,21 +45,13 @@ export function PrivacyPolicyPage() {
             <FileLock className="size-5" />
           </div>
           <div>
-            <h1 className="font-display text-4xl font-semibold text-slate-900">Privacy Policy</h1>
-            <p className="mt-2 text-sm text-slate-500">Last updated May 20, 2026</p>
+            <h1 className="font-display text-4xl font-semibold text-slate-900">{t("privacy.eyebrow")}</h1>
+            <p className="mt-2 text-sm text-slate-500">{t("privacy.lastUpdated")}</p>
           </div>
         </div>
         <div className="mt-5 space-y-3 text-sm leading-7 text-slate-600">
-          <p>
-            This Privacy Policy explains how EventQR, powered by Magitecx, collects, uses, stores, and deletes
-            information when you use the EventQR website, dashboard, scanner flows, support channels, and related
-            services.
-          </p>
-          <p>
-            EventQR is designed for organizations that manage attendees, recurring event series, attendance check-ins,
-            and reporting. By using the service, you acknowledge that your organization may upload attendee information
-            and attendance data into the platform.
-          </p>
+          <p>{t("privacy.overview.p1")}</p>
+          <p>{t("privacy.overview.p2")}</p>
         </div>
       </Card>
 
@@ -65,36 +60,24 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
             <UserRound className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Data we collect</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.dataWeCollect.title")}</h2>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-            <p className="text-sm font-semibold text-slate-900">Account data</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Name, email address, password hash, organization memberships, role assignments, and account activity
-              needed to authenticate and manage access.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("privacy.dataWeCollect.accountData.title")}</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">{t("privacy.dataWeCollect.accountData.body")}</p>
           </div>
           <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-            <p className="text-sm font-semibold text-slate-900">Organization data</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Workspace names, join codes, invite records, event series, event sessions, settings, inactivity status,
-              and scheduled deletion metadata.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("privacy.dataWeCollect.organizationData.title")}</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">{t("privacy.dataWeCollect.organizationData.body")}</p>
           </div>
           <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-            <p className="text-sm font-semibold text-slate-900">Attendee data</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Attendee names, email addresses, phone numbers, profile images, QR tokens, and attendance history
-              created by the organization using the service.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("privacy.dataWeCollect.attendeeData.title")}</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">{t("privacy.dataWeCollect.attendeeData.body")}</p>
           </div>
           <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-            <p className="text-sm font-semibold text-slate-900">Technical and support data</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Browser and device information, IP-derived operational logs, password reset requests, and messages you
-              send to support.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("privacy.dataWeCollect.technicalData.title")}</p>
+            <p className="mt-2 text-sm leading-7 text-slate-600">{t("privacy.dataWeCollect.technicalData.body")}</p>
           </div>
         </div>
       </Card>
@@ -104,12 +87,12 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-emerald-50 p-3 text-emerald-700">
             <ScanSearch className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">How we use data</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.howWeUseData.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>We use personal and workspace data to provide authentication, organization membership, scanner flows, attendee management, reports, exports, and support operations.</p>
-          <p>We also use data to maintain service security, investigate misuse, send service emails such as password resets and inactivity warnings, and improve the reliability of the platform.</p>
-          <p>We do not sell attendee or account personal information.</p>
+          <p>{t("privacy.howWeUseData.p1")}</p>
+          <p>{t("privacy.howWeUseData.p2")}</p>
+          <p>{t("privacy.howWeUseData.p3")}</p>
         </div>
       </Card>
 
@@ -118,12 +101,12 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-violet-50 p-3 text-violet-700">
             <Mail className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Sharing and service providers</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.sharing.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>We share data only as needed to operate the service, such as with infrastructure, email, hosting, database, and security providers acting on our behalf.</p>
-          <p>At the time of this draft, password reset and notification emails are sent through Resend. Additional sub-processors may be used for hosting, database operations, and file storage as the service evolves.</p>
-          <p>We may also disclose information if reasonably necessary to comply with law, enforce our Terms, prevent fraud, or protect users, EventQR, Magitecx, or the public.</p>
+          <p>{t("privacy.sharing.p1")}</p>
+          <p>{t("privacy.sharing.p2")}</p>
+          <p>{t("privacy.sharing.p3")}</p>
         </div>
       </Card>
 
@@ -132,14 +115,14 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-rose-50 p-3 text-rose-700">
             <ShieldCheck className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Retention and deletion</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.retention.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>EventQR stores organization data for as long as the workspace remains active or until it is removed under the product’s inactivity lifecycle or an administrative deletion action.</p>
-          <p>By default, organizations may be marked inactive after 75 days without meaningful workspace activity and may be permanently deleted after 90 days from the last real activity if inactivity continues.</p>
-          <p>When an organization is permanently deleted, organization-scoped data may be removed, including attendees, event series, event sessions, attendance records, invites, workspace memberships for that organization, and stored attendee profile images.</p>
-          <p>User accounts are not automatically deleted when an organization is purged. A user may continue using other organizations linked to the same account.</p>
-          <p>Replaced or removed attendee profile images may be deleted earlier as part of file cleanup and storage management.</p>
+          <p>{t("privacy.retention.p1")}</p>
+          <p>{t("privacy.retention.p2")}</p>
+          <p>{t("privacy.retention.p3")}</p>
+          <p>{t("privacy.retention.p4")}</p>
+          <p>{t("privacy.retention.p5")}</p>
         </div>
       </Card>
 
@@ -148,12 +131,12 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-slate-100 p-3 text-slate-700">
             <ShieldCheck className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Security</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.security.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>We use access controls, password hashing, secure token flows, protected dashboard routes, and server-side validation in support of the service.</p>
-          <p>Attendee profile images are validated and re-encoded server-side, and only supported image formats are accepted by the current upload flow.</p>
-          <p>No system is completely secure. You are responsible for safeguarding your account credentials and limiting access within your organization appropriately.</p>
+          <p>{t("privacy.security.p1")}</p>
+          <p>{t("privacy.security.p2")}</p>
+          <p>{t("privacy.security.p3")}</p>
         </div>
       </Card>
 
@@ -162,12 +145,12 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-indigo-50 p-3 text-indigo-700">
             <UserRound className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Your choices</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.choices.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>Users can update account details, change passwords, switch organizations, and manage workspace records according to their role permissions.</p>
-          <p>Organization administrators control most attendee and event data inside their workspaces, including updates, exports, and deletions.</p>
-          <p>If you need support regarding your data, contact support using the email listed below.</p>
+          <p>{t("privacy.choices.p1")}</p>
+          <p>{t("privacy.choices.p2")}</p>
+          <p>{t("privacy.choices.p3")}</p>
         </div>
       </Card>
 
@@ -176,11 +159,17 @@ export function PrivacyPolicyPage() {
           <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
             <Mail className="size-5" />
           </div>
-          <h2 className="text-3xl font-semibold text-slate-900">Contact</h2>
+          <h2 className="text-3xl font-semibold text-slate-900">{t("privacy.contact.title")}</h2>
         </div>
         <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-          <p>Questions about this Privacy Policy or privacy-related requests can be sent to <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">support@magitecx.com</a>.</p>
-          <p>This document is a product-facing policy draft and should be reviewed for your business entity details, local law requirements, and final publication requirements before production launch.</p>
+          <p>
+            {t("privacy.contact.p1")}{" "}
+            <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">
+              support@magitecx.com
+            </a>
+            .
+          </p>
+          <p>{t("privacy.contact.p2")}</p>
         </div>
       </Card>
     </LegalPageLayout>

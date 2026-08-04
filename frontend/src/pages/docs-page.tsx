@@ -8,6 +8,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { BrandBadge } from "../components/brand/brand-badge";
 import { SiteHeader } from "../components/public/site-header";
@@ -15,18 +16,20 @@ import { Seo } from "../components/seo/seo";
 import { Card } from "../components/ui/card";
 import { buildBreadcrumbStructuredData, buildOrganizationStructuredData } from "../lib/seo";
 
-const toc = [
-  { id: "overview", label: "Overview" },
-  { id: "accounts", label: "Accounts + Workspaces" },
-  { id: "attendance", label: "Attendance Flow" },
-  { id: "scanner", label: "Scanner + Share Links" },
-  { id: "reports", label: "Reports + Export" },
-  { id: "security", label: "Security + Data Rules" },
-  { id: "deletion", label: "Deletion + Retention" },
-  { id: "automation", label: "Automation + Emails" },
-];
-
 export function DocsPage() {
+  const { t } = useTranslation();
+
+  const toc = [
+    { id: "overview", label: t("docs.toc.overview") },
+    { id: "accounts", label: t("docs.toc.accounts") },
+    { id: "attendance", label: t("docs.toc.attendance") },
+    { id: "scanner", label: t("docs.toc.scanner") },
+    { id: "reports", label: t("docs.toc.reports") },
+    { id: "security", label: t("docs.toc.security") },
+    { id: "deletion", label: t("docs.toc.deletion") },
+    { id: "automation", label: t("docs.toc.automation") },
+  ];
+
   return (
     <div className="min-h-screen px-4 py-20 text-[var(--color-text)] lg:px-6 lg:py-5">
       <Seo
@@ -49,11 +52,11 @@ export function DocsPage() {
         title="Docs"
       />
       <div className="mx-auto max-w-[1320px]">
-        <SiteHeader eyebrow="Documentation" />
+        <SiteHeader eyebrow={t("docs.eyebrow")} />
 
         <section className="grid gap-6 py-8 lg:grid-cols-[280px_minmax(0,1fr)]">
           <Card className="h-fit p-5 lg:sticky lg:top-5">
-            <p className="text-sm font-semibold text-slate-900">Contents</p>
+            <p className="text-sm font-semibold text-slate-900">{t("docs.contents")}</p>
             <div className="mt-4 space-y-2">
               {toc.map((item) => (
                 <a
@@ -73,12 +76,9 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
                   <BookOpen className="size-5" />
                 </div>
-                <h1 className="font-display text-4xl font-semibold text-slate-900">EventQR product docs</h1>
+                <h1 className="font-display text-4xl font-semibold text-slate-900">{t("docs.overview.title")}</h1>
               </div>
-              <p className="mt-4 text-sm leading-7 text-slate-600">
-                EventQR is a multi-organization QR attendance platform for recurring workshops and event series.
-                Organizations manage attendees, run session check-ins, and export attendance outcomes.
-              </p>
+              <p className="mt-4 text-sm leading-7 text-slate-600">{t("docs.overview.body")}</p>
             </Card>
 
             <Card className="p-7" id="accounts">
@@ -86,12 +86,12 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-sky-50 p-3 text-sky-700">
                   <Building2 className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Accounts and workspaces</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.accounts.title")}</h2>
               </div>
               <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-                <p>Users create accounts first, then create or join one or more organizations (workspaces).</p>
-                <p>A user can switch active workspace from the sidebar selector at any time.</p>
-                <p>All event series, sessions, attendees, and attendance actions are scoped to the active organization.</p>
+                <p>{t("docs.accounts.p1")}</p>
+                <p>{t("docs.accounts.p2")}</p>
+                <p>{t("docs.accounts.p3")}</p>
               </div>
             </Card>
 
@@ -100,13 +100,13 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-emerald-50 p-3 text-emerald-700">
                   <Users className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Attendance model</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.attendance.title")}</h2>
               </div>
               <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-                <p>Attendees belong to an organization, not to a single event.</p>
-                <p>Event series contain sessions. Check-ins create attendance records at attendee+session level.</p>
+                <p>{t("docs.attendance.p1")}</p>
+                <p>{t("docs.attendance.p2")}</p>
                 <p>
-                  Series report percentages are calculated as:
+                  {t("docs.attendance.p3")}
                   <span className="ml-2 font-mono text-slate-900">attendedSessions / totalSessions * 100</span>
                 </p>
               </div>
@@ -117,20 +117,16 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
                   <ScanLine className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Scanner and share links</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.scanner.title")}</h2>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Internal scanner</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Staff choose a session, scan QR codes, and get immediate success/duplicate/invalid feedback.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.scanner.internal.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.scanner.internal.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Public scan page</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Session-specific share links open a scan-only page (`/scan/:token`) for phone-based operations.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.scanner.public.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.scanner.public.body")}</p>
                 </div>
               </div>
             </Card>
@@ -140,11 +136,11 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-violet-50 p-3 text-violet-700">
                   <Download className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Reports and export</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.reports.title")}</h2>
               </div>
               <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-                <p>Series reports show a full session matrix with joined/missed state per attendee.</p>
-                <p>Export formats: CSV and Excel (`.xlsx`) with summary counts and per-session participation columns.</p>
+                <p>{t("docs.reports.p1")}</p>
+                <p>{t("docs.reports.p2")}</p>
               </div>
             </Card>
 
@@ -153,32 +149,24 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-rose-50 p-3 text-rose-700">
                   <ShieldCheck className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Security and data controls</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.security.title")}</h2>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Auth and access</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    JWT-based auth, protected app routes, and organization role checks (`OWNER`, `ADMIN`, `MEMBER`).
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.security.auth.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.security.auth.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Profile images</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Local storage with server-side validation/re-encoding; only JPEG, PNG, and WebP are accepted.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.security.profileImages.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.security.profileImages.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Password reset</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Backend-generated single-use token flow with expiry and email delivery through Resend.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.security.passwordReset.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.security.passwordReset.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Organization lifecycle</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Inactivity tracking with warning state, scheduled deletion metadata, and automatic purge window.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.security.orgLifecycle.title")}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{t("docs.security.orgLifecycle.body")}</p>
                 </div>
               </div>
             </Card>
@@ -188,41 +176,45 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-slate-100 p-3 text-slate-700">
                   <Trash2 className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Deletion and retention</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.deletion.title")}</h2>
               </div>
               <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-                <p>EventQR uses an organization-level cleanup policy to remove inactive workspace data and save storage.</p>
-                <p>Organizations move through <span className="font-mono text-slate-900">ACTIVE</span> to <span className="font-mono text-slate-900">INACTIVE</span> and then to permanent deletion if inactivity continues past the purge window.</p>
-                <p>Activity updates the organization lifecycle automatically. Examples include login, switching workspace, attendee changes, event/session changes, invite activity, attendance scans, and scanner link generation.</p>
+                <p>{t("docs.deletion.p1")}</p>
+                <p>
+                  {t("docs.deletion.p2a")} <span className="font-mono text-slate-900">ACTIVE</span>{" "}
+                  {t("docs.deletion.p2b")} <span className="font-mono text-slate-900">INACTIVE</span>{" "}
+                  {t("docs.deletion.p2c")}
+                </p>
+                <p>{t("docs.deletion.p3")}</p>
               </div>
 
               <div className="mt-5 grid gap-4 md:grid-cols-2">
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">What gets deleted</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.deletion.whatGetsDeleted.title")}</p>
                   <div className="mt-2 space-y-2 text-sm text-slate-600">
-                    <p>Attendees, attendance records, event sessions, event series, invites, workspace memberships for that organization, and attendee profile image files.</p>
+                    <p>{t("docs.deletion.whatGetsDeleted.body")}</p>
                   </div>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">What stays</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.deletion.whatStays.title")}</p>
                   <div className="mt-2 space-y-2 text-sm text-slate-600">
-                    <p>User accounts, passwords, account settings, and access to any other organizations the user belongs to.</p>
+                    <p>{t("docs.deletion.whatStays.body")}</p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-4 md:grid-cols-3">
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Warning</p>
-                  <p className="mt-2 text-sm text-slate-600">By default, workspaces are flagged inactive after 75 days without activity.</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.deletion.warning.title")}</p>
+                  <p className="mt-2 text-sm text-slate-600">{t("docs.deletion.warning.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Purge</p>
-                  <p className="mt-2 text-sm text-slate-600">By default, hard deletion happens after 90 days from the last real activity.</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.deletion.purge.title")}</p>
+                  <p className="mt-2 text-sm text-slate-600">{t("docs.deletion.purge.body")}</p>
                 </div>
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                  <p className="text-sm font-semibold text-slate-900">Visibility</p>
-                  <p className="mt-2 text-sm text-slate-600">Admins can see last activity and scheduled deletion timing in organization settings.</p>
+                  <p className="text-sm font-semibold text-slate-900">{t("docs.deletion.visibility.title")}</p>
+                  <p className="mt-2 text-sm text-slate-600">{t("docs.deletion.visibility.body")}</p>
                 </div>
               </div>
             </Card>
@@ -232,12 +224,18 @@ export function DocsPage() {
                 <div className="rounded-[8px] bg-indigo-50 p-3 text-indigo-700">
                   <BellRing className="size-5" />
                 </div>
-                <h2 className="text-3xl font-semibold text-slate-900">Automation and email notifications</h2>
+                <h2 className="text-3xl font-semibold text-slate-900">{t("docs.automation.title")}</h2>
               </div>
               <div className="mt-4 space-y-3 text-sm leading-7 text-slate-600">
-                <p>Password reset request emails and password changed success emails are sent from backend only.</p>
-                <p>Inactive organization warning emails are sent to owner/admin members when status changes to inactive.</p>
-                <p>Support contact in outbound messaging: <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">support@magitecx.com</a>.</p>
+                <p>{t("docs.automation.p1")}</p>
+                <p>{t("docs.automation.p2")}</p>
+                <p>
+                  {t("docs.automation.p3")}{" "}
+                  <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">
+                    support@magitecx.com
+                  </a>
+                  .
+                </p>
               </div>
             </Card>
           </div>
@@ -246,9 +244,9 @@ export function DocsPage() {
         <footer className="py-6">
           <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Need support?</p>
+              <p className="text-sm font-semibold text-slate-900">{t("docs.needSupport")}</p>
               <p className="text-sm text-slate-500">
-                Email{" "}
+                {t("docs.email")}{" "}
                 <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">
                   support@magitecx.com
                 </a>
@@ -256,19 +254,19 @@ export function DocsPage() {
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
               <Link className="hover:text-slate-900" to="/about">
-                About
+                {t("landing.footer.about")}
               </Link>
               <Link className="hover:text-slate-900" to="/contact">
-                Contact
+                {t("landing.footer.contact")}
               </Link>
               <Link className="hover:text-slate-900" to="/help">
-                Help / FAQ
+                {t("landing.footer.helpFaq")}
               </Link>
               <Link className="hover:text-slate-900" to="/privacy">
-                Privacy Policy
+                {t("landing.footer.privacyPolicy")}
               </Link>
               <Link className="hover:text-slate-900" to="/terms">
-                Terms of Service
+                {t("landing.footer.termsOfService")}
               </Link>
               <BrandBadge compact />
             </div>

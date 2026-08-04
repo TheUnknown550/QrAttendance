@@ -12,13 +12,16 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BrandBadge } from "../components/brand/brand-badge";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { LanguageToggle } from "../components/ui/language-toggle";
 import { Select } from "../components/ui/select";
+import { ThemeToggle } from "../components/ui/theme-toggle";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatDate, resolveMediaUrl } from "../lib/utils";
@@ -45,6 +48,27 @@ const DEFAULT_SETTINGS: EventSeriesSettings = {
   requireCheckInPhoto: false,
 };
 
+function useStatusLabel() {
+  const { t } = useTranslation();
+
+  return (status: ScanResult["status"]) => {
+    switch (status) {
+      case "found":
+        return t("scanner.status.found");
+      case "success":
+        return t("scanner.status.success");
+      case "already_checked_in":
+        return t("scanner.status.alreadyCheckedIn");
+      case "invalid_qr":
+        return t("scanner.status.invalidQr");
+      case "wrong_event_session":
+        return t("scanner.status.wrongEventSession");
+      default:
+        return status;
+    }
+  };
+}
+
 function AttendeeScanMeta({
   attendee,
   settings,
@@ -52,6 +76,7 @@ function AttendeeScanMeta({
   attendee: NonNullable<ScanResult["attendee"]>;
   settings: EventSeriesSettings;
 }) {
+  const { t } = useTranslation();
   const orgAndType = [
     settings.showOrganizationName ? attendee.organizationName : null,
     settings.showAttendeeType ? attendee.attendeeType : null,
@@ -62,14 +87,14 @@ function AttendeeScanMeta({
   return (
     <>
       {settings.showEmail ? (
-        <p className="mt-1 break-words text-sm text-slate-500">{attendee.email ?? "No email"}</p>
+        <p className="mt-1 break-words text-sm text-slate-500">{attendee.email ?? t("scanner.noEmail")}</p>
       ) : null}
       {orgAndType ? <p className="mt-1 break-words text-xs text-slate-500">{orgAndType}</p> : null}
       {settings.showPhone && attendee.phone ? (
         <p className="mt-1 break-words text-xs text-slate-500">{attendee.phone}</p>
       ) : null}
       {settings.showAttendeeNumber && attendee.attendeeNumber != null ? (
-        <p className="mt-1 break-words text-xs text-slate-500">Ticket #{attendee.attendeeNumber}</p>
+        <p className="mt-1 break-words text-xs text-slate-500">{t("scanner.ticketNumber", { number: attendee.attendeeNumber })}</p>
       ) : null}
     </>
   );
@@ -86,6 +111,7 @@ function PhotoCaptureOverlay({
   isSubmitting: boolean;
   submitError: string;
 }) {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [capturedPhoto, setCapturedPhoto] = useState<{ blob: Blob; previewUrl: string } | null>(null);
@@ -116,7 +142,7 @@ function PhotoCaptureOverlay({
           await videoRef.current.play();
         }
       } catch {
-        setCameraError("Could not access the camera. Check your browser's camera permission and try again.");
+        setCameraError(t("scanner.photoCapture.cameraError"));
       }
     }
 
@@ -127,7 +153,7 @@ function PhotoCaptureOverlay({
       streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     };
-  }, [capturedPhoto]);
+  }, [capturedPhoto, t]);
 
   useEffect(() => {
     return () => {
@@ -176,7 +202,7 @@ function PhotoCaptureOverlay({
   return (
     <div className="fixed inset-0 z-[60] flex flex-col bg-black">
       <div className="flex items-center justify-between px-5 pb-4 pt-6">
-        <p className="text-sm font-semibold text-white">Take check-in photo</p>
+        <p className="text-sm font-semibold text-white">{t("scanner.photoCapture.title")}</p>
         <button
           className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white"
           onClick={onCancel}
@@ -188,7 +214,7 @@ function PhotoCaptureOverlay({
 
       <div className="relative flex-1 overflow-hidden">
         {capturedPhoto ? (
-          <img alt="Captured check-in" className="h-full w-full object-cover" src={capturedPhoto.previewUrl} />
+          <img alt={t("scanner.photoCapture.capturedAlt")} className="h-full w-full object-cover" src={capturedPhoto.previewUrl} />
         ) : (
           <video autoPlay className="h-full w-full object-cover" muted playsInline ref={videoRef} />
         )}
@@ -214,7 +240,7 @@ function PhotoCaptureOverlay({
               type="button"
               variant="secondary"
             >
-              Retake
+              {t("scanner.photoCapture.retake")}
             </Button>
             <Button
               disabled={isSubmitting}
@@ -222,12 +248,12 @@ function PhotoCaptureOverlay({
               onClick={() => onConfirm(capturedPhoto.blob)}
               type="button"
             >
-              {isSubmitting ? "Confirming..." : "Confirm check-in"}
+              {isSubmitting ? t("scanner.photoCapture.confirming") : t("scanner.photoCapture.confirmCheckIn")}
             </Button>
           </>
         ) : (
           <button
-            aria-label="Take photo"
+            aria-label={t("scanner.photoCapture.takePhoto")}
             className="flex size-16 items-center justify-center rounded-full border-4 border-white bg-white/20"
             onClick={handleCapture}
             type="button"
@@ -244,6 +270,8 @@ export function ScannerPage() {
   const { token } = useParams();
   const [searchParams] = useSearchParams();
   const preselectedSessionId = searchParams.get("session");
+  const { t } = useTranslation();
+  const getStatusLabel = useStatusLabel();
   const { auth } = useAuth();
   const isPublicScanner = Boolean(token);
   const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -467,7 +495,7 @@ export function ScannerPage() {
     }
 
     await navigator.clipboard.writeText(shareUrl);
-    pushShareFeedback("Link copied");
+    pushShareFeedback(t("scanner.linkCopied"));
   }
 
   async function shareScannerUrl() {
@@ -477,11 +505,11 @@ export function ScannerPage() {
 
     if (navigator.share) {
       await navigator.share({
-        title: `EventQR scanner for ${currentSessionTitle ?? "session"}`,
-        text: `${currentSeriesName ?? "Event session"} scanner`,
+        title: t("scanner.shareTitle", { session: currentSessionTitle ?? t("scanner.session") }),
+        text: t("scanner.shareText", { series: currentSeriesName ?? t("scanner.eventSession") }),
         url: shareUrl,
       });
-      pushShareFeedback("Share ready");
+      pushShareFeedback(t("scanner.shareReady"));
       return;
     }
 
@@ -492,7 +520,7 @@ export function ScannerPage() {
     return (
       <div className="mx-auto max-w-4xl">
         <Card>
-          <p className="text-sm text-slate-500">Loading scanner...</p>
+          <p className="text-sm text-slate-500">{t("scanner.loadingScanner")}</p>
         </Card>
       </div>
     );
@@ -502,7 +530,7 @@ export function ScannerPage() {
     return (
       <div className="mx-auto max-w-4xl">
         <Card>
-          <p className="text-lg font-semibold text-slate-900">Scanner link unavailable</p>
+          <p className="text-lg font-semibold text-slate-900">{t("scanner.linkUnavailable")}</p>
           <p className="mt-2 text-sm text-slate-500">{getErrorMessage(publicSessionQuery.error)}</p>
         </Card>
       </div>
@@ -512,6 +540,10 @@ export function ScannerPage() {
   if (isPublicScanner) {
     return (
       <div className="fixed inset-0 z-50 bg-black">
+        <div className="fixed right-3 top-3 z-50 flex items-center gap-2 lg:right-6 lg:top-6">
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
         {currentSessionId ? (
           <Scanner
             allowMultiple={false}
@@ -532,18 +564,18 @@ export function ScannerPage() {
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-white/60">
               <Camera className="mx-auto size-12" />
-              <p className="mt-3 text-sm">Scanner unavailable.</p>
+              <p className="mt-3 text-sm">{t("scanner.scannerUnavailable")}</p>
             </div>
           </div>
         )}
 
         {/* Top session info bar */}
         <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-5 pb-10 pt-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/60">Active session</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-white/60">{t("scanner.activeSession")}</p>
           <p className="mt-1 text-sm font-semibold text-white">
             {currentSessionTitle && currentSeriesName
               ? `${currentSeriesName} — ${currentSessionTitle}`
-              : "No session selected"}
+              : t("scanner.noSessionSelected")}
           </p>
         </div>
 
@@ -577,7 +609,7 @@ export function ScannerPage() {
                 )}
               </div>
               <p className="text-base font-semibold capitalize text-slate-900">
-                {lastResult.status === "found" ? "Ready to check in" : lastResult.status.replaceAll("_", " ")}
+                {getStatusLabel(lastResult.status)}
               </p>
             </div>
 
@@ -610,7 +642,7 @@ export function ScannerPage() {
             {lastResult.status === "found" ? (
               <div className="mt-5 flex gap-3">
                 <Button className="flex-1" onClick={dismissReview} type="button" variant="secondary">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   className="flex-1"
@@ -619,7 +651,7 @@ export function ScannerPage() {
                   onClick={confirmCheckIn}
                   type="button"
                 >
-                  {checkInMutation.isPending ? "Checking in..." : "Check in"}
+                  {checkInMutation.isPending ? t("scanner.checkingIn") : t("scanner.checkIn")}
                 </Button>
               </div>
             ) : null}
@@ -649,19 +681,19 @@ export function ScannerPage() {
       <Card className="overflow-hidden">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-2xl">
-            <p className="text-sm font-semibold text-slate-900">Scanner</p>
+            <p className="text-sm font-semibold text-slate-900">{t("scanner.eyebrow")}</p>
             <h1 className="mt-2 break-words font-display text-4xl font-semibold text-slate-900">
-              Live check-in
+              {t("scanner.liveCheckIn")}
             </h1>
           </div>
-          <Badge>{sessionOptions.length} available sessions</Badge>
+          <Badge>{t("scanner.availableSessions", { count: sessionOptions.length })}</Badge>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Target session</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("scanner.targetSession")}</span>
             <Select onChange={(event) => setSelectedSessionId(event.target.value)} value={selectedSessionId}>
-              <option value="">Select a session</option>
+              <option value="">{t("scanner.selectSession")}</option>
               {sessionOptions.map((session) => (
                 <option key={session.id} value={session.id}>
                   {session.label}
@@ -671,11 +703,11 @@ export function ScannerPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Manual token</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("scanner.manualToken")}</span>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Input onChange={(event) => setManualToken(event.target.value)} value={manualToken} />
               <Button className="shrink-0 sm:w-auto" onClick={() => submitToken(manualToken)} type="button" variant="secondary">
-                Submit
+                {t("scanner.submit")}
               </Button>
             </div>
           </label>
@@ -683,11 +715,11 @@ export function ScannerPage() {
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Current target</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t("scanner.currentTarget")}</p>
             <p className="mt-1 break-words text-sm font-semibold text-slate-900">
               {currentSessionTitle && currentSeriesName
                 ? `${currentSeriesName} - ${currentSessionTitle}`
-                : "No session selected"}
+                : t("scanner.noSessionSelected")}
             </p>
             {selectedSession?.sessionDate ? (
               <p className="mt-1 text-xs text-slate-500">{formatDate(selectedSession.sessionDate)}</p>
@@ -696,7 +728,7 @@ export function ScannerPage() {
           {currentSeriesId ? (
             <Link to={`/app/reports/event-series/${currentSeriesId}`}>
               <Button icon={<Sheet className="size-4" />} variant="ghost">
-                Open report
+                {t("scanner.openReport")}
               </Button>
             </Link>
           ) : null}
@@ -706,8 +738,8 @@ export function ScannerPage() {
           <div className="mt-4 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-900">Phone scanner</p>
-                <p className="mt-1 break-all text-xs text-slate-500">{shareUrl || "Preparing link..."}</p>
+                <p className="text-sm font-semibold text-slate-900">{t("scanner.phoneScanner")}</p>
+                <p className="mt-1 break-all text-xs text-slate-500">{shareUrl || t("scanner.preparingLink")}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -717,7 +749,7 @@ export function ScannerPage() {
                   type="button"
                   variant="secondary"
                 >
-                  Copy URL
+                  {t("scanner.copyUrl")}
                 </Button>
                 <Button
                   disabled={!shareUrl || shareLinkQuery.isLoading}
@@ -725,7 +757,7 @@ export function ScannerPage() {
                   onClick={() => void shareScannerUrl()}
                   type="button"
                 >
-                  Share
+                  {t("scanner.share")}
                 </Button>
               </div>
             </div>
@@ -755,7 +787,7 @@ export function ScannerPage() {
               <div className="flex h-full items-center justify-center">
                 <div className="text-center text-slate-400">
                   <Camera className="mx-auto size-10" />
-                  <p className="mt-4 text-sm">Choose a session first.</p>
+                  <p className="mt-4 text-sm">{t("scanner.chooseSessionFirst")}</p>
                 </div>
               </div>
             )}
@@ -775,8 +807,8 @@ export function ScannerPage() {
 
       <div className="space-y-6">
         <Card>
-          <p className="text-sm font-semibold text-slate-900">Latest scan</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Result</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("scanner.latestScan")}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("scanner.result")}</h2>
 
           {lastResult ? (
             <div className="mt-6 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
@@ -796,10 +828,10 @@ export function ScannerPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-lg font-semibold capitalize text-slate-900">
-                    {lastResult.status === "found" ? "Ready to check in" : lastResult.status.replaceAll("_", " ")}
+                    {getStatusLabel(lastResult.status)}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    {lastResult.checkedInAt ? formatDate(lastResult.checkedInAt) : "No timestamp available"}
+                    {lastResult.checkedInAt ? formatDate(lastResult.checkedInAt) : t("scanner.noTimestamp")}
                   </p>
                 </div>
               </div>
@@ -827,7 +859,7 @@ export function ScannerPage() {
               {lastResult.status === "found" ? (
                 <div className="mt-5 flex gap-3">
                   <Button className="flex-1" onClick={dismissReview} type="button" variant="secondary">
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                   <Button
                     className="flex-1"
@@ -836,14 +868,14 @@ export function ScannerPage() {
                     onClick={confirmCheckIn}
                     type="button"
                   >
-                    {checkInMutation.isPending ? "Checking in..." : "Check in"}
+                    {checkInMutation.isPending ? t("scanner.checkingIn") : t("scanner.checkIn")}
                   </Button>
                 </div>
               ) : null}
             </div>
           ) : (
             <div className="mt-6 rounded-[8px] bg-[var(--color-surface-soft)] p-5 text-sm text-slate-500">
-              Scan a QR code.
+              {t("scanner.scanAQrCode")}
             </div>
           )}
 
@@ -855,12 +887,12 @@ export function ScannerPage() {
         </Card>
 
         <Card>
-          <p className="text-sm font-semibold text-slate-900">Flow</p>
+          <p className="text-sm font-semibold text-slate-900">{t("scanner.flow")}</p>
           <div className="mt-5 space-y-3">
             {[
-              { title: "Pick session", icon: ScanLine },
-              { title: "Share to phone", icon: Smartphone },
-              { title: "Scan or paste", icon: Camera },
+              { title: t("scanner.flowSteps.pickSession"), icon: ScanLine },
+              { title: t("scanner.flowSteps.shareToPhone"), icon: Smartphone },
+              { title: t("scanner.flowSteps.scanOrPaste"), icon: Camera },
             ].map((item) => (
               <div key={item.title} className="flex gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-4">
                 <div className="rounded-[6px] bg-amber-50 p-2 text-amber-700">

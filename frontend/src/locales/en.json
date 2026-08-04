@@ -1,0 +1,997 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "back": "Back",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "siteHeader": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "docs": "Docs",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "helpFaq": "Help / FAQ",
+    "login": "Login",
+    "createAccount": "Create account"
+  },
+  "appShell": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "eventSeries": "Event Series",
+      "attendees": "Attendees",
+      "scanner": "Scanner",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "workspace": "Workspace",
+    "noActiveOrganization": "No active organization",
+    "switchWorkspacesHint": "Switch workspaces from the menu below.",
+    "account": "Account",
+    "logOut": "Log out",
+    "support": "Support:",
+    "newSeries": "New series",
+    "addAttendee": "Add attendee",
+    "openScanner": "Open scanner",
+    "inactiveBanner": {
+      "title": "Workspace inactivity warning",
+      "body": "{{name}} is inactive. If no new activity happens, it will be permanently deleted on",
+      "scheduledPurgeDateFallback": "the scheduled purge date",
+      "viewDetails": "View details",
+      "dismiss": "Dismiss inactivity warning"
+    }
+  },
+  "auth": {
+    "login": {
+      "seoDescription": "Log in to EventQR to manage attendee QR codes, event sessions, scanner flows, and attendance reports.",
+      "seoTitle": "Login",
+      "register": "Register",
+      "eyebrow": "Login",
+      "eyebrowSub": "Account access",
+      "title": "Welcome back",
+      "email": "Email",
+      "password": "Password",
+      "signingIn": "Signing in...",
+      "logIn": "Log in",
+      "forgotPassword": "Forgot password?",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "tagline": "Scan. Track. Export.",
+      "checkIn": "Check-in",
+      "newHere": "New here?",
+      "newHereHint": "Create account first. Join or create workspace after."
+    },
+    "register": {
+      "seoDescription": "Create your EventQR account, then create or join an organization to manage recurring event attendance with QR check-ins.",
+      "seoTitle": "Create Account",
+      "eyebrow": "Register",
+      "eyebrowSub": "Create account first",
+      "title": "Create account",
+      "name": "Name",
+      "passwordPlaceholder": "At least 6 characters",
+      "agreeToThe": "I agree to the",
+      "and": "and",
+      "creating": "Creating...",
+      "agreement": "Agreement",
+      "closeDocument": "Close document",
+      "afterSignUp": "After sign up",
+      "steps": {
+        "createWorkspace": "Create workspace",
+        "joinByCode": "Join by code",
+        "openInviteLink": "Open invite link",
+        "startScanning": "Start scanning"
+      },
+      "alreadyHaveAccount": "Already have an account?",
+      "goToLogin": "Go straight to login.",
+      "legal": {
+        "terms": {
+          "title": "Terms of Service",
+          "body": "Last updated May 20, 2026\n\nThese Terms of Service govern access to and use of EventQR, a QR attendance platform powered by Magitecx, including the website, dashboard, scanner tools, reports, exports, documentation, and related support services.\n\nBy creating an account, joining a workspace, using a scanner link, or otherwise accessing the service, you agree to these Terms. If you use EventQR on behalf of an organization, you represent that you are authorized to bind that organization to these Terms.\n\nAccounts and roles:\nUsers create individual accounts first and may then create or join one or more organizations. Organizations may assign roles such as owner, admin, or member. You are responsible for actions taken through your account and for keeping your credentials secure. You must provide accurate information and update account details when they change.\n\nAcceptable use:\nYou may use EventQR only for legitimate attendance, event operations, workspace collaboration, and related administrative purposes. You may not misuse the service, interfere with scanner or reporting operations, attempt unauthorized access, upload malicious files, abuse public scan links, scrape data without permission, or use the platform to violate privacy, intellectual property, or other legal rights. We may suspend or restrict access if we reasonably believe an account or workspace is being used unlawfully, abusively, or in a way that threatens the service or other users.\n\nWorkspace data:\nYour organization is responsible for the attendee, event, and attendance data it creates, imports, or uploads into EventQR. You represent that you have the right to upload attendee information and profile images and to use those records for your organization's attendance workflows. We provide the software service and related operational tooling, but you remain responsible for your internal consent, notice, and data handling obligations to your attendees and staff.\n\nDeletion and inactivity:\nEventQR includes an automatic organization-level cleanup lifecycle intended to reduce unused data and storage overhead. By default, a workspace may be marked inactive after 75 days without meaningful activity and may be permanently deleted after 90 days from the last real activity if inactivity continues. Activity can include login, switching organizations, attendee changes, event and session changes, invite actions, attendance scans, scanner share-link generation, and certain organization-setting actions. When a workspace is permanently deleted, organization-scoped data may be removed, including event series, event sessions, attendees, attendance records, invites, organization memberships for that workspace, and stored attendee profile images. User accounts are not automatically deleted when a workspace is purged. Users may continue using other organizations associated with their accounts. Replaced, removed, or orphaned uploaded files may also be deleted earlier as part of routine file management and security cleanup.\n\nIntellectual property:\nEventQR, its software, branding, interface design, documentation, and related service materials remain the property of Magitecx or its licensors, except for customer-provided content. You retain rights to the content and data your organization uploads, subject to the rights needed for us to host, process, display, export, secure, and support that content within the service.\n\nAvailability and changes:\nWe may update, improve, modify, or discontinue features as the product evolves. We may also suspend portions of the service for maintenance, security, or operational reasons. We aim to operate the service professionally, but we do not guarantee uninterrupted availability, error-free performance, or compatibility with every device, browser, or camera environment.\n\nDisclaimers and limitation of liability:\nTo the maximum extent permitted by law, EventQR is provided on an \"as is\" and \"as available\" basis without warranties of merchantability, fitness for a particular purpose, or non-infringement. To the maximum extent permitted by law, Magitecx will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, goodwill, data, or business opportunities arising from or related to use of the service. To the maximum extent permitted by law, any direct liability related to the service will be limited to the amount paid, if any, for the applicable service period directly preceding the event giving rise to the claim.\n\nContact and updates:\nQuestions about these Terms can be sent to support@magitecx.com. We may update these Terms from time to time. Continued use of EventQR after an update becomes effective constitutes acceptance of the revised Terms."
+        },
+        "privacy": {
+          "title": "Privacy Policy",
+          "body": "Last updated May 20, 2026\n\nThis Privacy Policy explains how EventQR, powered by Magitecx, collects, uses, stores, and deletes information when you use the EventQR website, dashboard, scanner flows, support channels, and related services.\n\nEventQR is designed for organizations that manage attendees, recurring event series, attendance check-ins, and reporting. By using the service, you acknowledge that your organization may upload attendee information and attendance data into the platform.\n\nData we collect:\nWe collect account data such as name, email address, password hash, organization memberships, role assignments, and account activity needed to authenticate and manage access. We collect organization data such as workspace names, join codes, invite records, event series, event sessions, settings, inactivity status, and scheduled deletion metadata. We collect attendee data such as attendee names, email addresses, phone numbers, profile images, QR tokens, and attendance history created by the organization using the service. We also collect technical and support data such as browser and device information, IP-derived operational logs, password reset requests, and messages you send to support.\n\nHow we use data:\nWe use personal and workspace data to provide authentication, organization membership, scanner flows, attendee management, reports, exports, and support operations. We also use data to maintain service security, investigate misuse, send service emails such as password resets and inactivity warnings, and improve the reliability of the platform. We do not sell attendee or account personal information.\n\nSharing:\nWe share data only as needed to operate the service, such as with infrastructure, email, hosting, database, and security providers acting on our behalf. Password reset and notification emails are sent through Resend. We may also disclose information if reasonably necessary to comply with law, enforce our Terms, prevent fraud, or protect users, EventQR, Magitecx, or the public.\n\nRetention and deletion:\nEventQR stores organization data for as long as the workspace remains active or until it is removed under the product's inactivity lifecycle or an administrative deletion action. By default, organizations may be marked inactive after 75 days without meaningful workspace activity and may be permanently deleted after 90 days from the last real activity if inactivity continues. When an organization is permanently deleted, organization-scoped data may be removed, including attendees, event series, event sessions, attendance records, invites, workspace memberships for that organization, and stored attendee profile images. User accounts are not automatically deleted when an organization is purged. Replaced or removed attendee profile images may be deleted earlier as part of file cleanup and storage management.\n\nSecurity:\nWe use access controls, password hashing, secure token flows, protected dashboard routes, and server-side validation in support of the service. Attendee profile images are validated and re-encoded server-side, and only supported image formats are accepted by the current upload flow. No system is completely secure, and you are responsible for safeguarding your account credentials.\n\nYour choices:\nUsers can update account details, change passwords, switch organizations, and manage workspace records according to their role permissions. Organization administrators control most attendee and event data inside their workspaces, including updates, exports, and deletions.\n\nContact:\nQuestions about this Privacy Policy or privacy-related requests can be sent to support@magitecx.com. This document is a product-facing policy draft and should be reviewed for your business entity details, local law requirements, and final publication requirements before production launch."
+        }
+      }
+    },
+    "forgotPassword": {
+      "seoTitle": "Forgot password",
+      "backToLogin": "Back to login",
+      "eyebrow": "Reset password",
+      "title": "Email link request",
+      "hint": "Enter your account email. If it exists, we will send a reset link.",
+      "successMessage": "If that email exists, a reset link has been sent.",
+      "sending": "Sending...",
+      "sendResetLink": "Send reset link"
+    },
+    "resetPassword": {
+      "seoTitle": "Reset password",
+      "invalidLink": "This reset link is invalid. Request a new link from forgot password.",
+      "hint": "Set a new password for your account.",
+      "title": "Choose a new password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password",
+      "successMessage": "Password reset successful. You can now log in.",
+      "updating": "Updating...",
+      "resetPassword": "Reset password"
+    }
+  },
+  "invite": {
+    "seoDescription": "Accept an EventQR organization invite and join the workspace for attendee and attendance management.",
+    "seoTitle": "Organization Invite",
+    "eyebrow": "Organization invite",
+    "loading": "Loading invite...",
+    "joiningAutomatically": "Joining the organization automatically with your current account.",
+    "loginOrCreatePrompt": "Log in or create an account and the app will automatically join this organization.",
+    "joiningOrganization": "Joining organization...",
+    "finishingAcceptance": "Finishing invite acceptance..."
+  },
+  "onboarding": {
+    "eyebrow": "Workspace setup",
+    "eyebrowSub": "Choose how to continue",
+    "inviteDetected": "Invite detected. Joining...",
+    "joinCode": "Join code",
+    "invite": "Invite",
+    "yourOrganizations": "Your organizations",
+    "open": "Open",
+    "createOrganization": "Create organization",
+    "organizationName": "Organization name",
+    "creating": "Creating...",
+    "joinWithCode": "Join with code",
+    "joining": "Joining...",
+    "join": "Join"
+  },
+  "scanner": {
+    "status": {
+      "found": "Ready to check in",
+      "success": "Success",
+      "alreadyCheckedIn": "Already checked in",
+      "invalidQr": "Invalid QR",
+      "wrongEventSession": "Wrong event session"
+    },
+    "noEmail": "No email",
+    "ticketNumber": "Ticket #{{number}}",
+    "photoCapture": {
+      "cameraError": "Could not access the camera. Check your browser's camera permission and try again.",
+      "title": "Take check-in photo",
+      "capturedAlt": "Captured check-in",
+      "retake": "Retake",
+      "confirming": "Confirming...",
+      "confirmCheckIn": "Confirm check-in",
+      "takePhoto": "Take photo"
+    },
+    "linkCopied": "Link copied",
+    "shareTitle": "EventQR scanner for {{session}}",
+    "session": "session",
+    "shareText": "{{series}} scanner",
+    "eventSession": "Event session",
+    "shareReady": "Share ready",
+    "loadingScanner": "Loading scanner...",
+    "linkUnavailable": "Scanner link unavailable",
+    "scannerUnavailable": "Scanner unavailable.",
+    "activeSession": "Active session",
+    "noSessionSelected": "No session selected",
+    "checkingIn": "Checking in...",
+    "checkIn": "Check in",
+    "eyebrow": "Scanner",
+    "liveCheckIn": "Live check-in",
+    "availableSessions": "{{count}} available sessions",
+    "targetSession": "Target session",
+    "selectSession": "Select a session",
+    "manualToken": "Manual token",
+    "submit": "Submit",
+    "currentTarget": "Current target",
+    "openReport": "Open report",
+    "phoneScanner": "Phone scanner",
+    "preparingLink": "Preparing link...",
+    "copyUrl": "Copy URL",
+    "share": "Share",
+    "chooseSessionFirst": "Choose a session first.",
+    "latestScan": "Latest scan",
+    "result": "Result",
+    "noTimestamp": "No timestamp available",
+    "scanAQrCode": "Scan a QR code.",
+    "flow": "Flow",
+    "flowSteps": {
+      "pickSession": "Pick session",
+      "shareToPhone": "Share to phone",
+      "scanOrPaste": "Scan or paste"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Dashboard",
+    "title": "Attendance ops",
+    "leadSeries": "Lead series",
+    "noSeries": "No series",
+    "sessionsCount": "{{count}} sessions",
+    "open": "Open",
+    "createFirstSeries": "Create your first series.",
+    "stats": {
+      "attendees": "Attendees",
+      "series": "Series",
+      "sessions": "Sessions",
+      "attendance": "Attendance"
+    },
+    "topAttendance": "Top attendance",
+    "report": "Report",
+    "noReportData": "No report data yet."
+  },
+  "eventSeries": {
+    "eventName": "Event name",
+    "description": "Description",
+    "descriptionOptional": "Description (optional)",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "seriesName": "Series name",
+    "sessionTitle": "Session title",
+    "dateAndTime": "Date and time",
+    "sessionDateAndTime": "Session date and time",
+    "sessionsCount": "{{count}} sessions",
+    "starts": "Starts {{date}}",
+    "list": {
+      "eyebrow": "Event Series",
+      "title": "Event Series",
+      "subtitle": "Create an event series, then open it to manage its sessions and settings.",
+      "orgSettings": "Org settings",
+      "createSeries": "Create series",
+      "newEventSeries": "New event series",
+      "creating": "Creating...",
+      "createEvent": "Create event",
+      "allSeries": "All series",
+      "available": "{{count}} available",
+      "noEventsYet": "No events yet",
+      "createFirstHint": "Create your first event series to get started."
+    },
+    "detail": {
+      "loading": "Loading event series...",
+      "eyebrow": "Series",
+      "noDescription": "No description set for this program.",
+      "noStartDate": "No start date",
+      "noEndDate": "No end date",
+      "editSeries": "Edit series",
+      "details": "Details",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "confirmDeleteSeries": "Delete {{name}} and all its sessions and attendance records?",
+      "deleting": "Deleting...",
+      "deleteSeries": "Delete series",
+      "features": {
+        "scannerReady": {
+          "title": "Scanner-ready",
+          "description": "Use any session in this series with the live browser QR scanner."
+        },
+        "sessionBased": {
+          "title": "Session-based attendance",
+          "description": "Every check-in is stored per attendee and per event session."
+        },
+        "reportExport": {
+          "title": "Report export",
+          "description": "Export attendance percentage and counts as CSV any time."
+        }
+      },
+      "sessions": "Sessions",
+      "schedule": "Schedule",
+      "addingSession": "Adding...",
+      "addSession": "Add session",
+      "noDescriptionSet": "No description set.",
+      "checkInsCount": "{{count}} check-ins",
+      "saveSession": "Save session",
+      "confirmDeleteSession": "Delete {{title}} and all of its attendance records?",
+      "noSessionsYet": "No sessions created yet.",
+      "manageEvent": "Manage event",
+      "eventSettings": "Event settings",
+      "eventSettingsHint": "Controls how check-in works and what attendee details show up on the scanner and session roster for",
+      "settingsSaved": "Event settings saved.",
+      "saveEventSettings": "Save event settings"
+    },
+    "settings": {
+      "requireCheckInApproval": {
+        "label": "Require approval before check-in",
+        "description": "Scanning shows the attendee's info and waits for a tap on \"Check in\" to confirm. Turn off to check attendees in the instant their QR code is scanned."
+      },
+      "showOrganizationName": {
+        "label": "Show organization name",
+        "description": "Display the attendee's organization on the scanner and session roster."
+      },
+      "showAttendeeType": {
+        "label": "Show type of attendee",
+        "description": "Display the attendee's type (e.g. VIP, Guest) on the scanner and session roster."
+      },
+      "showPhone": {
+        "label": "Show phone number",
+        "description": "Display the attendee's phone number on the scanner and session roster."
+      },
+      "showEmail": {
+        "label": "Show email address",
+        "description": "Display the attendee's email on the scanner and session roster."
+      },
+      "showAttendeeNumber": {
+        "label": "Show attendee number",
+        "description": "Display the attendee's ticket number badge on the scanner and session roster."
+      },
+      "requireCheckInPhoto": {
+        "label": "Require photo at check-in",
+        "description": "On the public phone scanner, staff must take a photo of the attendee before the check-in is confirmed. The photo is saved and shown in this event's attendance report."
+      }
+    }
+  },
+  "session": {
+    "noPhone": "No phone",
+    "loading": "Loading session...",
+    "eyebrow": "Session",
+    "noDescription": "No description set for this session.",
+    "attendeesMarkedAttended": "{{count}} attendees marked attended",
+    "created": "Created {{date}}",
+    "backTo": "Back to {{name}}",
+    "cancelEdit": "Cancel edit",
+    "confirmDelete": "Delete {{title}} and all of its attendance records?",
+    "overview": "Event session overview",
+    "scheduledFor": "Scheduled for",
+    "editSession": "Edit session",
+    "updateDetails": "Update details",
+    "attendanceDirectory": "Attendance directory",
+    "searchAttendees": "Search attendees",
+    "attendee": "Attendee",
+    "status": "Status",
+    "lastUpdate": "Last update",
+    "action": "Action",
+    "noAttendeesMatch": "No attendees match the current search.",
+    "attended": "Attended",
+    "notAttended": "Not attended",
+    "markAttended": "Mark attended",
+    "markNotAttended": "Mark not attended",
+    "marked": "Marked {{date}}",
+    "noAttendanceRecorded": "No attendance recorded yet."
+  },
+  "attendees": {
+    "eyebrow": "Attendees",
+    "createProfile": "Create profile",
+    "name": "Name",
+    "surname": "Surname",
+    "organizationNameOptional": "Organization name (optional)",
+    "typeOfAttendeeOptional": "Type of attendee (optional)",
+    "phone": "Phone",
+    "attendeeNumber": "Attendee number",
+    "attendeeNumberPlaceholder": "e.g. 42",
+    "attendeeNumberWholeNumber": "Attendee number must be a whole number",
+    "photo": "Photo",
+    "selected": "Selected: {{name}}",
+    "creating": "Creating...",
+    "createAttendee": "Create attendee",
+    "directory": "Directory",
+    "bulkImport": "Bulk import",
+    "sendQrEmails": "Send QR emails",
+    "searchPlaceholder": "Search name, organization, type, email, phone",
+    "sendingQrCodesToast": "Sending QR codes to {{count}} attendee. This runs in the background and may take a few minutes for large lists.",
+    "sendingQrCodesToast_other": "Sending QR codes to {{count}} attendees. This runs in the background and may take a few minutes for large lists.",
+    "contact": "Contact",
+    "actions": "Actions",
+    "qrTokenReady": "QR token ready",
+    "qrReady": "QR ready",
+    "open": "Open",
+    "noAttendeesMatch": "No attendees match the current search.",
+    "pageOf": "Page {{page}} of {{totalPages}}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "attendeeDetail": {
+    "loading": "Loading attendee profile...",
+    "attendee": "Attendee",
+    "created": "Created {{date}}",
+    "sendQrEmail": "Send QR email",
+    "qrEmailSendingToast": "QR code email is being sent to {{name}}.",
+    "qrCode": "QR code",
+    "checkInToken": "Check-in token",
+    "downloadQr": "Download QR",
+    "rawToken": "Raw token",
+    "editAttendee": "Edit attendee",
+    "profile": "Profile",
+    "attendeeNumberPlaceholder": "Optional, e.g. 1",
+    "currentPhoto": "Current photo",
+    "photoWillBeRemoved": "Photo will be removed on save.",
+    "photoWillStay": "Photo will stay unchanged.",
+    "keepPhoto": "Keep photo",
+    "removePhoto": "Remove photo",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "deleting": "Deleting...",
+    "deleteAttendee": "Delete attendee",
+    "attendanceHistory": "Attendance history",
+    "checkInsCount": "{{count}} check-in",
+    "checkInsCount_other": "{{count}} check-ins",
+    "noAttendanceRecords": "No attendance records yet."
+  },
+  "reports": {
+    "eyebrow": "Reports",
+    "title": "Attendance reports",
+    "subtitle": "Pick an event series to view and export its attendance report.",
+    "eventSeries": "Event series",
+    "available": "{{count}} available",
+    "sessionsCount": "{{count}} session",
+    "sessionsCount_other": "{{count}} sessions",
+    "starts": "Starts {{date}}",
+    "viewReport": "View report",
+    "noEventSeriesYet": "No event series yet",
+    "createSeriesFirst": "Create an event series first, then come back to view its report.",
+    "goToEventSeries": "Go to Event Series"
+  },
+  "attendanceReport": {
+    "loading": "Loading report...",
+    "eyebrow": "Attendance report",
+    "sessionsCount": "{{count}} session",
+    "sessionsCount_other": "{{count}} sessions",
+    "attendeesCount": "{{count}} attendee",
+    "attendeesCount_other": "{{count}} attendees",
+    "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
+    "session": "Session",
+    "joined": "Joined",
+    "missed": "Missed",
+    "checkInProof": "Check-in proof",
+    "attended": "Attended",
+    "total": "Total",
+    "attendancePercent": "Attendance %",
+    "noCheckIn": "No check-in"
+  },
+  "accountSettings": {
+    "eyebrow": "Account settings",
+    "profile": "Profile",
+    "name": "Name",
+    "saving": "Saving...",
+    "saveAccount": "Save account",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "updatingPassword": "Updating password...",
+    "updatePassword": "Update password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "organizations": "Organizations",
+    "active": "Active: {{name}}",
+    "membershipRole": "{{role}} membership",
+    "currentOrg": "Current org",
+    "switch": "Switch"
+  },
+  "organizationSettings": {
+    "eyebrow": "Organization settings",
+    "workspace": "Workspace",
+    "yourRole": "Your role: {{role}}",
+    "inactiveWorkspace": "Inactive workspace",
+    "viewOnlyAccess": "View-only access",
+    "lifecycle": "Lifecycle",
+    "lastActivity": "Last activity: {{date}}",
+    "inactiveWarningAfter": "Inactive warning after: {{days}} days",
+    "hardDeleteAfter": "Hard delete after: {{days}} days",
+    "scheduledDeletion": "Scheduled deletion: {{date}}",
+    "organizationName": "Organization name",
+    "saving": "Saving...",
+    "saveOrganization": "Save organization",
+    "joinCode": "Join code",
+    "shareForManualJoins": "Share for manual joins.",
+    "copied": "Copied",
+    "copy": "Copy",
+    "regenerate": "Regenerate",
+    "inviteLinks": "Invite links",
+    "createShareableLink": "Create a shareable auto-join link.",
+    "days": "{{count}} days",
+    "createInvite": "Create invite",
+    "inviteCreationRestricted": "Invite creation is available to organization admins and owners.",
+    "leaveOrganization": "Leave organization",
+    "leaveOrganizationDescription": "Remove your own access to this workspace. Your account will remain active.",
+    "leaving": "Leaving...",
+    "leaveWorkspace": "Leave workspace",
+    "deleteOrganization": "Delete organization",
+    "deleteOrganizationDescription": "Permanently delete this workspace, all attendees, check-ins, sessions, invites, and organization data.",
+    "typeToConfirm": "Type {{name}} to confirm",
+    "theWorkspaceName": "the workspace name",
+    "deletingWorkspace": "Deleting workspace...",
+    "deleteWorkspace": "Delete workspace",
+    "cannotBeUndone": "This cannot be undone.",
+    "members": "Members",
+    "teamMembersCount": "{{count}} team member",
+    "teamMembersCount_other": "{{count}} team members",
+    "onlyOwnersCanManage": "Only owners can update roles or remove members.",
+    "you": "You",
+    "admin": "Admin",
+    "member": "Member",
+    "remove": "Remove",
+    "inviteHistory": "Invite history",
+    "inviteLinksCount": "{{count}} invite link",
+    "inviteLinksCount_other": "{{count}} invite links",
+    "inviteCreatedBy": "Invite created by {{name}}",
+    "inviteCreatedMeta": "Created {{date}} - Used {{count}} times",
+    "adminControls": "Admin controls",
+    "permissions": "Permissions",
+    "workspaceConfig": "Workspace config",
+    "inviteCreation": "Invite creation",
+    "memberManagement": "Member management",
+    "enabledForYourRole": "Enabled for your role",
+    "requiresHigherAccess": "Requires higher organization access"
+  },
+  "sendQrEmailsModal": {
+    "eventNameRequired": "Event name is required",
+    "title": "Send QR code email",
+    "sendToName": "Send to {{name}}",
+    "sendToCount": "Send to {{count}} attendee",
+    "sendToCount_other": "Send to {{count}} attendees",
+    "descriptionSingle": "{{name}} will receive their personal check-in QR code by email, along with the event details you enter below.",
+    "descriptionAll": "Every attendee in your directory will receive their personal check-in QR code by email, along with the event details you enter below.",
+    "eventName": "Event name",
+    "dateOptional": "Date (optional)",
+    "locationOptional": "Location (optional)",
+    "customMessageOptional": "Custom message (optional)",
+    "sending": "Sending...",
+    "addAttendeesFirst": "Add attendees before sending QR code emails."
+  },
+  "bulkImportModal": {
+    "fields": {
+      "fullName": "Full name (combined)",
+      "firstName": "Name",
+      "surname": "Surname",
+      "organizationName": "Organization name",
+      "attendeeType": "Type of attendee",
+      "email": "Email",
+      "phone": "Phone",
+      "attendeeNumber": "Attendee number"
+    },
+    "title": "Bulk import attendees",
+    "uploadDescription": "Upload a CSV or Excel file. Column headers don't need to match exactly — you'll get a chance to map each column to the right field on the next screen.",
+    "readingFile": "Reading file...",
+    "clickToChoose": "Click to choose a .csv or .xlsx file",
+    "maxSize": "Max {{size}}MB",
+    "foundRows": "Found {{rows}} rows in {{columns}} columns. Match each field below to a column from your file, or leave optional fields unmapped.",
+    "singleFullNameColumn": "Single \"full name\" column",
+    "separateNameSurnameColumns": "Separate name / surname columns",
+    "notImported": "Not imported",
+    "columnN": "Column {{number}}",
+    "mapRequiredFields": "Map a name column and an email column before importing.",
+    "importing": "Importing...",
+    "importRows": "Import {{count}} row",
+    "importRows_other": "Import {{count}} rows",
+    "chooseDifferentFile": "Choose a different file",
+    "imported": "Imported {{count}} attendee",
+    "imported_other": "Imported {{count}} attendees",
+    "skipped": "Skipped {{count}} row (see below).",
+    "skipped_other": "Skipped {{count}} rows (see below).",
+    "row": "Row",
+    "reason": "Reason",
+    "done": "Done"
+  },
+  "organizationSwitcher": {
+    "workspaceName": "Workspace: {{name}}",
+    "currentWorkspace": "Current workspace",
+    "roleAccess": "{{role}} access",
+    "active": "Active",
+    "noOrganizationsAvailable": "No organizations available.",
+    "createOrJoin": "Create or join",
+    "manageWorkspace": "Manage workspace"
+  },
+  "landing": {
+    "eyebrow": "Attendance",
+    "features": {
+      "series": "Series",
+      "qrCards": "QR cards",
+      "scanner": "Scanner",
+      "reports": "Reports"
+    },
+    "featureDetails": {
+      "seriesSessions": {
+        "title": "Series + sessions",
+        "copy": "Group recurring events into one series and track each session separately."
+      },
+      "secureQr": {
+        "title": "Secure QR identity",
+        "copy": "Each attendee gets a unique token-based QR for safer check-in."
+      },
+      "fastScanning": {
+        "title": "Fast live scanning",
+        "copy": "Staff picks a session once and keeps scanning without duplicate check-ins."
+      },
+      "attendanceMatrix": {
+        "title": "Attendance matrix",
+        "copy": "See exactly who joined or missed each session across the full program."
+      }
+    },
+    "workflow": {
+      "attendee": {
+        "title": "Attendee",
+        "subtitle": "Shows QR badge",
+        "detail": "Each person has a secure QR token."
+      },
+      "staff": {
+        "title": "Staff",
+        "subtitle": "Scans session",
+        "detail": "Camera checks the QR against the selected session."
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "subtitle": "Marks attendance",
+        "detail": "Joined, missed, and percentages update in the report."
+      }
+    },
+    "hero": {
+      "title": "Simple QR attendance for recurring events.",
+      "subtitle": "Create attendees. Scan sessions. See who joined.",
+      "getStarted": "Get started",
+      "logIn": "Log in"
+    },
+    "preview": {
+      "series": "Series",
+      "seriesName": "AI Workshop",
+      "live": "Live",
+      "session1": "Session 1",
+      "session2": "Session 2",
+      "session3": "Session 3",
+      "today": "Today",
+      "latestScan": "Latest scan",
+      "checkedIn": "Checked in",
+      "addAttendee": "Add attendee",
+      "createSession": "Create session",
+      "export": "Export",
+      "attendanceMatrix": "Attendance matrix",
+      "exportable": "Exportable",
+      "in": "In",
+      "out": "Out"
+    },
+    "featuresEyebrow": "Features",
+    "featuresTitle": "Built for event teams",
+    "featuresSubtitle": "The product is designed around the real attendance flow, not a generic form system.",
+    "workflowEyebrow": "Workflow",
+    "workflowTitle": "How check-in works",
+    "workflowSubtitle": "Attendee shows QR. Staff scans. Attendance updates instantly.",
+    "workflowBadges": {
+      "secureToken": "Secure token",
+      "duplicateProtected": "Duplicate protected",
+      "liveResult": "Live result"
+    },
+    "startSteps": {
+      "createSeries": "Create series",
+      "addAttendees": "Add attendees",
+      "scanSession": "Scan session"
+    },
+    "footer": {
+      "tagline": "QR attendance for recurring events and workshops.",
+      "support": "Support:",
+      "about": "About",
+      "contact": "Contact",
+      "helpFaq": "Help / FAQ",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
+    }
+  },
+  "about": {
+    "eyebrow": "About",
+    "aboutEventQr": "About EventQR",
+    "heroTitle": "Attendance infrastructure for recurring events.",
+    "paragraph1": "EventQR is built for organizations that need a reliable way to manage attendees, run session check-ins, and track attendance over time across recurring programs and workshops.",
+    "paragraph2": "Instead of piecing together spreadsheets, printed lists, and manual attendance logs, teams can issue secure QR identities, scan attendees into sessions, and keep reporting inside one system.",
+    "paragraph3": "The product is designed for practical event operations: simpler staff workflows, cleaner reporting, and easier workspace management across multiple organizations.",
+    "items": {
+      "workspaceBased": {
+        "title": "Workspace-based",
+        "copy": "Each organization manages its own attendees, sessions, invites, and permissions."
+      },
+      "secureIdentity": {
+        "title": "Secure identity",
+        "copy": "Attendees use secure QR tokens rather than plain numeric IDs."
+      },
+      "fastScanning": {
+        "title": "Fast scanning",
+        "copy": "Teams can run browser-based scanning flows on desktop or phone-friendly shared links."
+      },
+      "clearReporting": {
+        "title": "Clear reporting",
+        "copy": "Attendance percentages and session-level participation stay visible in one place."
+      }
+    }
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "support": "Support",
+    "heroTitle": "Get in touch.",
+    "heroDescription": "For account issues, workspace problems, scanner questions, or product support, contact the EventQR support team.",
+    "supportEmail": "Support email",
+    "supportEmailHint": "Please include your organization name and a short description of the issue so support can respond faster.",
+    "items": {
+      "generalHelp": {
+        "title": "General help",
+        "copy": "Questions about navigation, account setup, invites, reports, or exports."
+      },
+      "securityQuestions": {
+        "title": "Security questions",
+        "copy": "Password reset issues, access problems, and organization lifecycle concerns."
+      },
+      "responseContext": {
+        "title": "Response context",
+        "copy": "Best results come from including screenshots, exact page names, and reproduction steps."
+      },
+      "singleContactPoint": {
+        "title": "Single contact point",
+        "copy": "All support requests currently route through support@magitecx.com."
+      }
+    }
+  },
+  "docs": {
+    "eyebrow": "Documentation",
+    "contents": "Contents",
+    "toc": {
+      "overview": "Overview",
+      "accounts": "Accounts + Workspaces",
+      "attendance": "Attendance Flow",
+      "scanner": "Scanner + Share Links",
+      "reports": "Reports + Export",
+      "security": "Security + Data Rules",
+      "deletion": "Deletion + Retention",
+      "automation": "Automation + Emails"
+    },
+    "overview": {
+      "title": "EventQR product docs",
+      "body": "EventQR is a multi-organization QR attendance platform for recurring workshops and event series. Organizations manage attendees, run session check-ins, and export attendance outcomes."
+    },
+    "accounts": {
+      "title": "Accounts and workspaces",
+      "p1": "Users create accounts first, then create or join one or more organizations (workspaces).",
+      "p2": "A user can switch active workspace from the sidebar selector at any time.",
+      "p3": "All event series, sessions, attendees, and attendance actions are scoped to the active organization."
+    },
+    "attendance": {
+      "title": "Attendance model",
+      "p1": "Attendees belong to an organization, not to a single event.",
+      "p2": "Event series contain sessions. Check-ins create attendance records at attendee+session level.",
+      "p3": "Series report percentages are calculated as:"
+    },
+    "scanner": {
+      "title": "Scanner and share links",
+      "internal": {
+        "title": "Internal scanner",
+        "body": "Staff choose a session, scan QR codes, and get immediate success/duplicate/invalid feedback."
+      },
+      "public": {
+        "title": "Public scan page",
+        "body": "Session-specific share links open a scan-only page (`/scan/:token`) for phone-based operations."
+      }
+    },
+    "reports": {
+      "title": "Reports and export",
+      "p1": "Series reports show a full session matrix with joined/missed state per attendee.",
+      "p2": "Export formats: CSV and Excel (`.xlsx`) with summary counts and per-session participation columns."
+    },
+    "security": {
+      "title": "Security and data controls",
+      "auth": {
+        "title": "Auth and access",
+        "body": "JWT-based auth, protected app routes, and organization role checks (`OWNER`, `ADMIN`, `MEMBER`)."
+      },
+      "profileImages": {
+        "title": "Profile images",
+        "body": "Local storage with server-side validation/re-encoding; only JPEG, PNG, and WebP are accepted."
+      },
+      "passwordReset": {
+        "title": "Password reset",
+        "body": "Backend-generated single-use token flow with expiry and email delivery through Resend."
+      },
+      "orgLifecycle": {
+        "title": "Organization lifecycle",
+        "body": "Inactivity tracking with warning state, scheduled deletion metadata, and automatic purge window."
+      }
+    },
+    "deletion": {
+      "title": "Deletion and retention",
+      "p1": "EventQR uses an organization-level cleanup policy to remove inactive workspace data and save storage.",
+      "p2a": "Organizations move through",
+      "p2b": "to",
+      "p2c": "and then to permanent deletion if inactivity continues past the purge window.",
+      "p3": "Activity updates the organization lifecycle automatically. Examples include login, switching workspace, attendee changes, event/session changes, invite activity, attendance scans, and scanner link generation.",
+      "whatGetsDeleted": {
+        "title": "What gets deleted",
+        "body": "Attendees, attendance records, event sessions, event series, invites, workspace memberships for that organization, and attendee profile image files."
+      },
+      "whatStays": {
+        "title": "What stays",
+        "body": "User accounts, passwords, account settings, and access to any other organizations the user belongs to."
+      },
+      "warning": {
+        "title": "Warning",
+        "body": "By default, workspaces are flagged inactive after 75 days without activity."
+      },
+      "purge": {
+        "title": "Purge",
+        "body": "By default, hard deletion happens after 90 days from the last real activity."
+      },
+      "visibility": {
+        "title": "Visibility",
+        "body": "Admins can see last activity and scheduled deletion timing in organization settings."
+      }
+    },
+    "automation": {
+      "title": "Automation and email notifications",
+      "p1": "Password reset request emails and password changed success emails are sent from backend only.",
+      "p2": "Inactive organization warning emails are sent to owner/admin members when status changes to inactive.",
+      "p3": "Support contact in outbound messaging:"
+    },
+    "needSupport": "Need support?",
+    "email": "Email"
+  },
+  "help": {
+    "eyebrow": "Help / FAQ",
+    "help": "Help",
+    "commonQuestions": "Common questions.",
+    "description": "This page covers the most common setup and workflow questions. If you still need help, email support@magitecx.com.",
+    "faqs": {
+      "gettingStarted": {
+        "question": "How do I start using EventQR?",
+        "answer": "Create an account first, then create a workspace or join one using a code or invite link. After that, add attendees, create an event series, add sessions, and begin scanning."
+      },
+      "qrCodes": {
+        "question": "How do attendee QR codes work?",
+        "answer": "Each attendee receives a unique secure QR token. The scanner sends that token to the backend together with the selected session, and the backend validates and records the check-in."
+      },
+      "scanFromPhone": {
+        "question": "Can I scan from a phone?",
+        "answer": "Yes. From the scanner page, staff can generate a session-specific share link and open the phone-friendly scan page on a mobile device."
+      },
+      "multipleOrgs": {
+        "question": "Can users belong to more than one organization?",
+        "answer": "Yes. Accounts are global. A single user can join multiple organizations and switch between workspaces from the sidebar selector."
+      },
+      "inactiveOrg": {
+        "question": "What happens if an organization becomes inactive?",
+        "answer": "The workspace can be marked inactive after the configured inactivity threshold and may later be permanently deleted if no new activity occurs before the purge deadline."
+      }
+    }
+  },
+  "legalPageLayout": {
+    "updated": "Updated {{date}}",
+    "questions": "Questions?",
+    "contact": "Contact"
+  },
+  "privacy": {
+    "eyebrow": "Privacy Policy",
+    "lastUpdated": "Last updated May 20, 2026",
+    "toc": {
+      "overview": "Overview",
+      "dataWeCollect": "Data We Collect",
+      "howWeUseData": "How We Use Data",
+      "sharing": "Sharing",
+      "retention": "Retention + Deletion",
+      "security": "Security",
+      "choices": "Your Choices",
+      "contact": "Contact"
+    },
+    "overview": {
+      "p1": "This Privacy Policy explains how EventQR, powered by Magitecx, collects, uses, stores, and deletes information when you use the EventQR website, dashboard, scanner flows, support channels, and related services.",
+      "p2": "EventQR is designed for organizations that manage attendees, recurring event series, attendance check-ins, and reporting. By using the service, you acknowledge that your organization may upload attendee information and attendance data into the platform."
+    },
+    "dataWeCollect": {
+      "title": "Data we collect",
+      "accountData": {
+        "title": "Account data",
+        "body": "Name, email address, password hash, organization memberships, role assignments, and account activity needed to authenticate and manage access."
+      },
+      "organizationData": {
+        "title": "Organization data",
+        "body": "Workspace names, join codes, invite records, event series, event sessions, settings, inactivity status, and scheduled deletion metadata."
+      },
+      "attendeeData": {
+        "title": "Attendee data",
+        "body": "Attendee names, email addresses, phone numbers, profile images, QR tokens, and attendance history created by the organization using the service."
+      },
+      "technicalData": {
+        "title": "Technical and support data",
+        "body": "Browser and device information, IP-derived operational logs, password reset requests, and messages you send to support."
+      }
+    },
+    "howWeUseData": {
+      "title": "How we use data",
+      "p1": "We use personal and workspace data to provide authentication, organization membership, scanner flows, attendee management, reports, exports, and support operations.",
+      "p2": "We also use data to maintain service security, investigate misuse, send service emails such as password resets and inactivity warnings, and improve the reliability of the platform.",
+      "p3": "We do not sell attendee or account personal information."
+    },
+    "sharing": {
+      "title": "Sharing and service providers",
+      "p1": "We share data only as needed to operate the service, such as with infrastructure, email, hosting, database, and security providers acting on our behalf.",
+      "p2": "At the time of this draft, password reset and notification emails are sent through Resend. Additional sub-processors may be used for hosting, database operations, and file storage as the service evolves.",
+      "p3": "We may also disclose information if reasonably necessary to comply with law, enforce our Terms, prevent fraud, or protect users, EventQR, Magitecx, or the public."
+    },
+    "retention": {
+      "title": "Retention and deletion",
+      "p1": "EventQR stores organization data for as long as the workspace remains active or until it is removed under the product's inactivity lifecycle or an administrative deletion action.",
+      "p2": "By default, organizations may be marked inactive after 75 days without meaningful workspace activity and may be permanently deleted after 90 days from the last real activity if inactivity continues.",
+      "p3": "When an organization is permanently deleted, organization-scoped data may be removed, including attendees, event series, event sessions, attendance records, invites, workspace memberships for that organization, and stored attendee profile images.",
+      "p4": "User accounts are not automatically deleted when an organization is purged. A user may continue using other organizations linked to the same account.",
+      "p5": "Replaced or removed attendee profile images may be deleted earlier as part of file cleanup and storage management."
+    },
+    "security": {
+      "title": "Security",
+      "p1": "We use access controls, password hashing, secure token flows, protected dashboard routes, and server-side validation in support of the service.",
+      "p2": "Attendee profile images are validated and re-encoded server-side, and only supported image formats are accepted by the current upload flow.",
+      "p3": "No system is completely secure. You are responsible for safeguarding your account credentials and limiting access within your organization appropriately."
+    },
+    "choices": {
+      "title": "Your choices",
+      "p1": "Users can update account details, change passwords, switch organizations, and manage workspace records according to their role permissions.",
+      "p2": "Organization administrators control most attendee and event data inside their workspaces, including updates, exports, and deletions.",
+      "p3": "If you need support regarding your data, contact support using the email listed below."
+    },
+    "contact": {
+      "title": "Contact",
+      "p1": "Questions about this Privacy Policy or privacy-related requests can be sent to",
+      "p2": "This document is a product-facing policy draft and should be reviewed for your business entity details, local law requirements, and final publication requirements before production launch."
+    }
+  },
+  "terms": {
+    "eyebrow": "Terms of Service",
+    "lastUpdated": "Last updated May 20, 2026",
+    "toc": {
+      "acceptance": "Acceptance",
+      "accounts": "Accounts + Roles",
+      "acceptableUse": "Acceptable Use",
+      "organizationData": "Workspace Data",
+      "deletion": "Deletion + Inactivity",
+      "intellectualProperty": "Intellectual Property",
+      "availability": "Availability + Changes",
+      "liability": "Disclaimers + Liability",
+      "contact": "Contact"
+    },
+    "acceptance": {
+      "p1": "These Terms of Service govern access to and use of EventQR, a QR attendance platform powered by Magitecx, including the website, dashboard, scanner tools, reports, exports, documentation, and related support services.",
+      "p2": "By creating an account, joining a workspace, using a scanner link, or otherwise accessing the service, you agree to these Terms. If you use EventQR on behalf of an organization, you represent that you are authorized to bind that organization to these Terms."
+    },
+    "accounts": {
+      "title": "Accounts and roles",
+      "p1": "Users create individual accounts first and may then create or join one or more organizations.",
+      "p2": "Organizations may assign roles such as owner, admin, or member. You are responsible for actions taken through your account and for keeping your credentials secure.",
+      "p3": "You must provide accurate information, use the service lawfully, and promptly update account details that become inaccurate or outdated."
+    },
+    "acceptableUse": {
+      "title": "Acceptable use",
+      "p1": "You may use EventQR only for legitimate attendance, event operations, workspace collaboration, and related administrative purposes.",
+      "p2": "You may not misuse the service, interfere with scanner or reporting operations, attempt unauthorized access, upload malicious files, abuse public scan links, scrape data without permission, or use the platform to violate privacy, intellectual property, or other legal rights.",
+      "p3": "We may suspend or restrict access if we reasonably believe an account or workspace is being used unlawfully, abusively, or in a way that threatens the service or other users."
+    },
+    "organizationData": {
+      "title": "Workspace data and responsibilities",
+      "p1": "Your organization is responsible for the attendee, event, and attendance data it creates, imports, or uploads into EventQR.",
+      "p2": "You represent that you have the right to upload attendee information and profile images and to use those records for your organization's attendance workflows.",
+      "p3": "We provide the software service and related operational tooling, but you remain responsible for your internal consent, notice, and data handling obligations to your attendees and staff."
+    },
+    "deletion": {
+      "title": "Deletion and inactivity policy",
+      "p1": "EventQR includes an automatic organization-level cleanup lifecycle intended to reduce unused data and storage overhead.",
+      "p2": "By default, a workspace may be marked inactive after 75 days without meaningful activity and may be permanently deleted after 90 days from the last real activity if inactivity continues.",
+      "p3": "Activity can include login, switching organizations, attendee changes, event and session changes, invite actions, attendance scans, scanner share-link generation, and certain organization-setting actions.",
+      "p4": "When a workspace is permanently deleted, organization-scoped data may be removed, including event series, event sessions, attendees, attendance records, invites, organization memberships for that workspace, and stored attendee profile images.",
+      "p5": "User accounts are not automatically deleted when a workspace is purged. Users may continue using other organizations associated with their accounts.",
+      "p6": "Replaced, removed, or orphaned uploaded files may also be deleted earlier as part of routine file management and security cleanup."
+    },
+    "intellectualProperty": {
+      "title": "Intellectual property",
+      "p1": "EventQR, its software, branding, interface design, documentation, and related service materials remain the property of Magitecx or its licensors, except for customer-provided content.",
+      "p2": "You retain rights to the content and data your organization uploads, subject to the rights needed for us to host, process, display, export, secure, and support that content within the service."
+    },
+    "availability": {
+      "title": "Availability, changes, and support",
+      "p1": "We may update, improve, modify, or discontinue features as the product evolves. We may also suspend portions of the service for maintenance, security, or operational reasons.",
+      "p2": "We aim to operate the service professionally, but we do not guarantee uninterrupted availability, error-free performance, or compatibility with every device, browser, or camera environment."
+    },
+    "liability": {
+      "title": "Disclaimers and limitation of liability",
+      "p1": "To the maximum extent permitted by law, EventQR is provided on an \"as is\" and \"as available\" basis without warranties of merchantability, fitness for a particular purpose, or non-infringement.",
+      "p2": "To the maximum extent permitted by law, Magitecx will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, goodwill, data, or business opportunities arising from or related to use of the service.",
+      "p3": "To the maximum extent permitted by law, any direct liability related to the service will be limited to the amount paid, if any, for the applicable service period directly preceding the event giving rise to the claim."
+    },
+    "contact": {
+      "title": "Contact and updates",
+      "p1": "Questions about these Terms can be sent to",
+      "p2": "We may update these Terms from time to time. Continued use of EventQR after an update becomes effective constitutes acceptance of the revised Terms.",
+      "p3": "This Terms page is a professional product draft and should be reviewed for final business entity details, jurisdiction-specific rules, and production legal approval before final publication."
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowRightLeft, Building2, Link2, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "../components/ui/button";
@@ -31,6 +32,7 @@ type JoinOrganizationValues = z.infer<typeof joinOrganizationSchema>;
 
 export function OnboardingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { auth, setAuthState } = useAuth();
   const queryClient = useQueryClient();
   const pendingInviteToken = getPendingInviteToken();
@@ -108,22 +110,22 @@ export function OnboardingPage() {
             <Building2 className="size-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-900">Workspace setup</p>
-            <p className="text-sm text-slate-500">Choose how to continue</p>
+            <p className="text-sm font-semibold text-slate-900">{t("onboarding.eyebrow")}</p>
+            <p className="text-sm text-slate-500">{t("onboarding.eyebrowSub")}</p>
           </div>
         </div>
 
         {pendingInviteToken ? (
           <div className="mt-6 rounded-[8px] bg-emerald-50 p-4 text-sm text-emerald-700">
-            Invite detected. Joining...
+            {t("onboarding.inviteDetected")}
           </div>
         ) : null}
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {[
-            { title: "Create", icon: Building2 },
-            { title: "Join code", icon: Users },
-            { title: "Invite", icon: Link2 },
+            { title: t("common.create"), icon: Building2 },
+            { title: t("onboarding.joinCode"), icon: Users },
+            { title: t("onboarding.invite"), icon: Link2 },
           ].map((item) => (
             <div
               key={item.title}
@@ -141,7 +143,7 @@ export function OnboardingPage() {
           <div className="mt-8">
             <div className="flex items-center gap-3">
               <ArrowRightLeft className="size-4 text-slate-500" />
-              <p className="text-sm font-semibold text-slate-600">Your organizations</p>
+              <p className="text-sm font-semibold text-slate-600">{t("onboarding.yourOrganizations")}</p>
             </div>
             <div className="mt-4 grid gap-3">
               {auth.memberships.map((membership) => (
@@ -157,7 +159,7 @@ export function OnboardingPage() {
                       <p className="mt-1 text-sm text-slate-500">{membership.role.toLowerCase()}</p>
                     </div>
                     <Button disabled={switchMutation.isPending} type="button" variant="ghost">
-                      Open
+                      {t("onboarding.open")}
                     </Button>
                   </div>
                 </button>
@@ -173,12 +175,12 @@ export function OnboardingPage() {
             <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
               <Building2 className="size-5" />
             </div>
-            <h2 className="text-2xl font-semibold text-slate-900">Create organization</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{t("onboarding.createOrganization")}</h2>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={createForm.handleSubmit((values) => createMutation.mutate(values))}>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("onboarding.organizationName")}</span>
               <Input placeholder="Acme Learning Lab" {...createForm.register("name")} />
               {createForm.formState.errors.name ? (
                 <p className="mt-2 text-xs text-rose-500">{createForm.formState.errors.name.message}</p>
@@ -192,7 +194,7 @@ export function OnboardingPage() {
             ) : null}
 
             <Button className="w-full" disabled={createMutation.isPending} type="submit">
-              {createMutation.isPending ? "Creating..." : "Create"}
+              {createMutation.isPending ? t("onboarding.creating") : t("common.create")}
             </Button>
           </form>
         </Card>
@@ -202,12 +204,12 @@ export function OnboardingPage() {
             <div className="rounded-[8px] bg-emerald-50 p-3 text-emerald-700">
               <Users className="size-5" />
             </div>
-            <h2 className="text-2xl font-semibold text-slate-900">Join with code</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{t("onboarding.joinWithCode")}</h2>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={joinForm.handleSubmit((values) => joinMutation.mutate(values))}>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Join code</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("onboarding.joinCode")}</span>
               <Input placeholder="AB12CD34" {...joinForm.register("joinCode")} />
               {joinForm.formState.errors.joinCode ? (
                 <p className="mt-2 text-xs text-rose-500">{joinForm.formState.errors.joinCode.message}</p>
@@ -221,7 +223,7 @@ export function OnboardingPage() {
             ) : null}
 
             <Button className="w-full" disabled={joinMutation.isPending} type="submit" variant="secondary">
-              {joinMutation.isPending ? "Joining..." : "Join"}
+              {joinMutation.isPending ? t("onboarding.joining") : t("onboarding.join")}
             </Button>
           </form>
         </Card>

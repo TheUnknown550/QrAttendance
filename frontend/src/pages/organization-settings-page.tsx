@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, DoorOpen, RotateCw, Shield, Trash2, UserCog } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -12,6 +13,7 @@ import { formatDate } from "../lib/utils";
 import type { AuthResponse, OrganizationDetail } from "../types/api";
 
 export function OrganizationSettingsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeMembership, auth, setAuthState } = useAuth();
   const queryClient = useQueryClient();
@@ -125,37 +127,65 @@ export function OrganizationSettingsPage() {
 
   const deleteNameMatches = organization ? deleteConfirmationName.trim() === organization.name : false;
 
+  const permissionItems = [
+    {
+      title: t("organizationSettings.workspaceConfig"),
+      enabled: canManageOrganization,
+      icon: Shield,
+    },
+    {
+      title: t("organizationSettings.inviteCreation"),
+      enabled: canCreateInvites,
+      icon: UserCog,
+    },
+    {
+      title: t("organizationSettings.memberManagement"),
+      enabled: canManageMembers,
+      icon: UserCog,
+    },
+  ];
+
   return (
     <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
       <Card className="p-8">
-        <p className="text-sm font-semibold text-slate-900">Organization settings</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold text-slate-900">Workspace</h1>
+        <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.eyebrow")}</p>
+        <h1 className="mt-2 font-display text-3xl font-semibold text-slate-900">{t("organizationSettings.workspace")}</h1>
         <div className="mt-5 flex flex-wrap gap-3">
           <span className="max-w-full break-words rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-2 text-sm text-slate-700">
-            Your role: {organization?.currentUserRole ?? activeMembership?.role ?? "MEMBER"}
+            {t("organizationSettings.yourRole", { role: organization?.currentUserRole ?? activeMembership?.role ?? "MEMBER" })}
           </span>
           {isInactive ? (
             <span className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700">
-              Inactive workspace
+              {t("organizationSettings.inactiveWorkspace")}
             </span>
           ) : null}
           {!canManageOrganization ? (
             <span className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
-              View-only access
+              {t("organizationSettings.viewOnlyAccess")}
             </span>
           ) : null}
         </div>
 
         {organization ? (
           <div className={isInactive ? "mt-6 rounded-[8px] bg-rose-50 p-5" : "mt-6 rounded-[8px] bg-[var(--color-surface-soft)] p-5"}>
-            <p className="text-sm font-semibold text-slate-900">Lifecycle</p>
+            <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.lifecycle")}</p>
             <div className="mt-3 space-y-2 text-sm text-slate-600">
-              <p>Last activity: {formatDate(organization.lifecycle.lastActivityAt)}</p>
-              <p>Inactive warning after: {organization.lifecycle.warningThresholdDays} days</p>
-              <p>Hard delete after: {organization.lifecycle.hardDeleteThresholdDays} days</p>
+              <p>{t("organizationSettings.lastActivity", { date: formatDate(organization.lifecycle.lastActivityAt) })}</p>
+              <p>
+                {t("organizationSettings.inactiveWarningAfter", {
+                  days: organization.lifecycle.warningThresholdDays,
+                })}
+              </p>
+              <p>
+                {t("organizationSettings.hardDeleteAfter", {
+                  days: organization.lifecycle.hardDeleteThresholdDays,
+                })}
+              </p>
               {organization.lifecycle.scheduledDeletionAt ? (
                 <p className={isInactive ? "font-semibold text-rose-700" : ""}>
-                  Scheduled deletion: {formatDate(organization.lifecycle.scheduledDeletionAt)}
+                  {t("organizationSettings.scheduledDeletion", {
+                    date: formatDate(organization.lifecycle.scheduledDeletionAt),
+                  })}
                 </p>
               ) : null}
             </div>
@@ -164,7 +194,7 @@ export function OrganizationSettingsPage() {
 
         <div className="mt-8 space-y-4">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Organization name</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">{t("organizationSettings.organizationName")}</span>
             <Input
               disabled={!canManageOrganization}
               onChange={(event) => setOrganizationName(event.target.value)}
@@ -183,19 +213,19 @@ export function OrganizationSettingsPage() {
             onClick={() => updateMutation.mutate(organizationName)}
             type="button"
           >
-            {updateMutation.isPending ? "Saving..." : "Save organization"}
+            {updateMutation.isPending ? t("organizationSettings.saving") : t("organizationSettings.saveOrganization")}
           </Button>
         </div>
 
         <div className="mt-10 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Join code</p>
-              <p className="mt-1 text-sm text-slate-500">Share for manual joins.</p>
+              <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.joinCode")}</p>
+              <p className="mt-1 text-sm text-slate-500">{t("organizationSettings.shareForManualJoins")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button icon={<Copy className="size-4" />} onClick={copyJoinCode} type="button" variant="ghost">
-                {joinCodeCopied ? "Copied" : "Copy"}
+                {joinCodeCopied ? t("organizationSettings.copied") : t("organizationSettings.copy")}
               </Button>
               <Button
                 disabled={!canManageOrganization || regenerateMutation.isPending}
@@ -204,20 +234,20 @@ export function OrganizationSettingsPage() {
                 type="button"
                 variant="secondary"
               >
-                Regenerate
+                {t("organizationSettings.regenerate")}
               </Button>
             </div>
           </div>
           <div className="mt-4 break-all rounded-[8px] bg-white px-4 py-3 font-mono text-lg text-amber-700">
-            {organization?.joinCode ?? "Loading..."}
+            {organization?.joinCode ?? t("common.loading")}
           </div>
         </div>
 
         <div className="mt-6 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Invite links</p>
-              <p className="mt-1 text-sm text-slate-500">Create a shareable auto-join link.</p>
+              <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.inviteLinks")}</p>
+              <p className="mt-1 text-sm text-slate-500">{t("organizationSettings.createShareableLink")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Select
@@ -226,9 +256,9 @@ export function OrganizationSettingsPage() {
                 onChange={(event) => setInviteExpiryDays(event.target.value)}
                 value={inviteExpiryDays}
               >
-                <option value="7">7 days</option>
-                <option value="30">30 days</option>
-                <option value="90">90 days</option>
+                <option value="7">{t("organizationSettings.days", { count: 7 })}</option>
+                <option value="30">{t("organizationSettings.days", { count: 30 })}</option>
+                <option value="90">{t("organizationSettings.days", { count: 90 })}</option>
               </Select>
               <Button
                 disabled={!canCreateInvites || inviteMutation.isPending}
@@ -236,13 +266,13 @@ export function OrganizationSettingsPage() {
                 type="button"
                 variant="secondary"
               >
-                Create invite
+                {t("organizationSettings.createInvite")}
               </Button>
             </div>
           </div>
           {!canCreateInvites ? (
             <p className="mt-4 rounded-[8px] bg-white px-4 py-3 text-sm text-slate-500">
-              Invite creation is available to organization admins and owners.
+              {t("organizationSettings.inviteCreationRestricted")}
             </p>
           ) : null}
         </div>
@@ -250,10 +280,8 @@ export function OrganizationSettingsPage() {
         <div className="mt-6 rounded-[8px] bg-rose-50 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Leave organization</p>
-              <p className="mt-1 text-sm text-slate-500">
-                Remove your own access to this workspace. Your account will remain active.
-              </p>
+              <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.leaveOrganization")}</p>
+              <p className="mt-1 text-sm text-slate-500">{t("organizationSettings.leaveOrganizationDescription")}</p>
             </div>
             <Button
               disabled={leaveOrganizationMutation.isPending}
@@ -262,7 +290,9 @@ export function OrganizationSettingsPage() {
               type="button"
               variant="danger"
             >
-              {leaveOrganizationMutation.isPending ? "Leaving..." : "Leave workspace"}
+              {leaveOrganizationMutation.isPending
+                ? t("organizationSettings.leaving")
+                : t("organizationSettings.leaveWorkspace")}
             </Button>
           </div>
           {leaveOrganizationMutation.isError ? (
@@ -274,13 +304,13 @@ export function OrganizationSettingsPage() {
 
         {canManageOrganization ? (
           <div className="mt-6 rounded-[8px] border border-rose-200 bg-rose-50 p-5">
-            <p className="text-sm font-semibold text-slate-900">Delete organization</p>
-            <p className="mt-1 text-sm text-slate-600">
-              Permanently delete this workspace, all attendees, check-ins, sessions, invites, and organization data.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.deleteOrganization")}</p>
+            <p className="mt-1 text-sm text-slate-600">{t("organizationSettings.deleteOrganizationDescription")}</p>
             <label className="mt-4 block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Type <span className="font-semibold">{organization?.name ?? "the workspace name"}</span> to confirm
+                {t("organizationSettings.typeToConfirm", {
+                  name: organization?.name ?? t("organizationSettings.theWorkspaceName"),
+                })}
               </span>
               <Input
                 disabled={deleteOrganizationMutation.isPending || !organization}
@@ -296,9 +326,11 @@ export function OrganizationSettingsPage() {
                 type="button"
                 variant="danger"
               >
-                {deleteOrganizationMutation.isPending ? "Deleting workspace..." : "Delete workspace"}
+                {deleteOrganizationMutation.isPending
+                  ? t("organizationSettings.deletingWorkspace")
+                  : t("organizationSettings.deleteWorkspace")}
               </Button>
-              <p className="text-xs text-slate-500">This cannot be undone.</p>
+              <p className="text-xs text-slate-500">{t("organizationSettings.cannotBeUndone")}</p>
             </div>
             {deleteOrganizationMutation.isError ? (
               <p className="mt-4 rounded-[8px] bg-white px-4 py-3 text-sm text-rose-700">
@@ -311,11 +343,13 @@ export function OrganizationSettingsPage() {
 
       <div className="grid gap-6">
         <Card className="p-8">
-          <p className="text-sm font-semibold text-slate-900">Members</p>
-          <h2 className="mt-2 text-3xl font-semibold text-slate-900">{organization?.members.length ?? 0} team members</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.members")}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-slate-900">
+            {t("organizationSettings.teamMembersCount", { count: organization?.members.length ?? 0 })}
+          </h2>
           {!canManageMembers ? (
             <p className="mt-4 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3 text-sm text-slate-500">
-              Only owners can update roles or remove members.
+              {t("organizationSettings.onlyOwnersCanManage")}
             </p>
           ) : null}
 
@@ -333,7 +367,7 @@ export function OrganizationSettingsPage() {
                     </span>
                     {member.userId === auth?.user.id ? (
                       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs uppercase tracking-[0.18em] text-emerald-700">
-                        You
+                        {t("organizationSettings.you")}
                       </span>
                     ) : null}
                     {canManageMembers && member.userId !== auth?.user.id && member.role !== "OWNER" ? (
@@ -349,8 +383,8 @@ export function OrganizationSettingsPage() {
                           }
                           value={member.role}
                         >
-                          <option value="ADMIN">Admin</option>
-                          <option value="MEMBER">Member</option>
+                          <option value="ADMIN">{t("organizationSettings.admin")}</option>
+                          <option value="MEMBER">{t("organizationSettings.member")}</option>
                         </Select>
                         <Button
                           disabled={removeMemberMutation.isPending}
@@ -359,7 +393,7 @@ export function OrganizationSettingsPage() {
                           type="button"
                           variant="danger"
                         >
-                          Remove
+                          {t("organizationSettings.remove")}
                         </Button>
                       </>
                     ) : null}
@@ -371,8 +405,10 @@ export function OrganizationSettingsPage() {
         </Card>
 
         <Card className="p-8">
-          <p className="text-sm font-semibold text-slate-900">Invite history</p>
-          <h2 className="mt-2 text-3xl font-semibold text-slate-900">{organization?.invites.length ?? 0} invite links</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.inviteHistory")}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-slate-900">
+            {t("organizationSettings.inviteLinksCount", { count: organization?.invites.length ?? 0 })}
+          </h2>
 
           <div className="mt-6 space-y-3">
             {organization?.invites.map((invite) => {
@@ -382,10 +418,15 @@ export function OrganizationSettingsPage() {
                 <div key={invite.id} className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="break-words text-sm font-semibold text-slate-900">Invite created by {invite.createdByName}</p>
+                      <p className="break-words text-sm font-semibold text-slate-900">
+                        {t("organizationSettings.inviteCreatedBy", { name: invite.createdByName })}
+                      </p>
                       <p className="mt-2 break-all text-sm text-slate-500">{inviteUrl}</p>
                       <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-                        Created {formatDate(invite.createdAt)} - Used {invite.usedCount} times
+                        {t("organizationSettings.inviteCreatedMeta", {
+                          date: formatDate(invite.createdAt),
+                          count: invite.usedCount,
+                        })}
                       </p>
                     </div>
                     <Button
@@ -394,7 +435,7 @@ export function OrganizationSettingsPage() {
                       type="button"
                       variant="ghost"
                     >
-                      {copiedInviteId === invite.id ? "Copied" : "Copy"}
+                      {copiedInviteId === invite.id ? t("organizationSettings.copied") : t("organizationSettings.copy")}
                     </Button>
                   </div>
                 </div>
@@ -404,32 +445,18 @@ export function OrganizationSettingsPage() {
         </Card>
 
         <Card className="p-8">
-          <p className="text-sm font-semibold text-slate-900">Admin controls</p>
-          <h2 className="mt-2 text-3xl font-semibold text-slate-900">Permissions</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.adminControls")}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-slate-900">{t("organizationSettings.permissions")}</h2>
 
           <div className="mt-6 grid gap-3 md:grid-cols-3">
-            {[
-              {
-                title: "Workspace config",
-                enabled: canManageOrganization,
-                icon: Shield,
-              },
-              {
-                title: "Invite creation",
-                enabled: canCreateInvites,
-                icon: UserCog,
-              },
-              {
-                title: "Member management",
-                enabled: canManageMembers,
-                icon: UserCog,
-              },
-            ].map((item) => (
+            {permissionItems.map((item) => (
               <div key={item.title} className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
                 <item.icon className="size-5 text-amber-700" />
                 <p className="mt-4 font-semibold text-slate-900">{item.title}</p>
                 <p className="mt-2 text-sm text-slate-500">
-                  {item.enabled ? "Enabled for your role" : "Requires higher organization access"}
+                  {item.enabled
+                    ? t("organizationSettings.enabledForYourRole")
+                    : t("organizationSettings.requiresHigherAccess")}
                 </p>
               </div>
             ))}

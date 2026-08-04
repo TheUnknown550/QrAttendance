@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, Sheet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -9,6 +10,7 @@ import { formatDate } from "../lib/utils";
 import type { EventSeries } from "../types/api";
 
 export function ReportsPage() {
+  const { t } = useTranslation();
   const { auth } = useAuth();
 
   const seriesQuery = useQuery({
@@ -23,18 +25,18 @@ export function ReportsPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Reports</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold text-slate-900">Attendance reports</h1>
-            <p className="mt-2 text-sm text-slate-500">
-              Pick an event series to view and export its attendance report.
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{t("reports.eyebrow")}</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold text-slate-900">{t("reports.title")}</h1>
+            <p className="mt-2 text-sm text-slate-500">{t("reports.subtitle")}</p>
           </div>
         </div>
       </Card>
 
       <Card>
-        <p className="text-sm font-semibold text-slate-900">Event series</p>
-        <h2 className="mt-2 text-2xl font-semibold text-slate-900">{series.length} available</h2>
+        <p className="text-sm font-semibold text-slate-900">{t("reports.eventSeries")}</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          {t("reports.available", { count: series.length })}
+        </h2>
 
         {seriesQuery.isError ? (
           <p className="mt-6 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -51,13 +53,13 @@ export function ReportsPage() {
               <div className="min-w-0">
                 <h3 className="truncate font-semibold text-slate-900">{item.name}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {(item._count?.sessions ?? item.sessions?.length ?? 0)} sessions
-                  {item.startDate ? ` · Starts ${formatDate(item.startDate)}` : ""}
+                  {t("reports.sessionsCount", { count: item._count?.sessions ?? item.sessions?.length ?? 0 })}
+                  {item.startDate ? ` · ${t("reports.starts", { date: formatDate(item.startDate) })}` : ""}
                 </p>
               </div>
               <Link to={`/app/reports/event-series/${item.id}`}>
                 <Button icon={<Sheet className="size-4" />} variant="secondary">
-                  View report
+                  {t("reports.viewReport")}
                 </Button>
               </Link>
             </div>
@@ -66,12 +68,10 @@ export function ReportsPage() {
           {!seriesQuery.isLoading && series.length === 0 ? (
             <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-8 text-center">
               <CalendarDays className="mx-auto size-8 text-slate-300" />
-              <p className="mt-3 text-sm font-medium text-slate-600">No event series yet</p>
-              <p className="mt-1 text-sm text-slate-400">
-                Create an event series first, then come back to view its report.
-              </p>
+              <p className="mt-3 text-sm font-medium text-slate-600">{t("reports.noEventSeriesYet")}</p>
+              <p className="mt-1 text-sm text-slate-400">{t("reports.createSeriesFirst")}</p>
               <Link className="mt-6 inline-block" to="/app/event-series">
-                <Button>Go to Event Series</Button>
+                <Button>{t("reports.goToEventSeries")}</Button>
               </Link>
             </div>
           ) : null}

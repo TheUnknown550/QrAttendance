@@ -8,6 +8,7 @@ import {
   Sheet,
   UserRound,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { buildOrganizationStructuredData, buildWebsiteStructuredData } from "../lib/seo";
 import { BrandBadge } from "../components/brand/brand-badge";
@@ -16,37 +17,63 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Seo } from "../components/seo/seo";
 
-const features = [
-  { title: "Series", icon: CalendarDays },
-  { title: "QR cards", icon: QrCode },
-  { title: "Scanner", icon: ScanLine },
-  { title: "Reports", icon: Sheet },
-];
-
-const featureDetails = [
-  {
-    title: "Series + sessions",
-    copy: "Group recurring events into one series and track each session separately.",
-    icon: CalendarDays,
-  },
-  {
-    title: "Secure QR identity",
-    copy: "Each attendee gets a unique token-based QR for safer check-in.",
-    icon: QrCode,
-  },
-  {
-    title: "Fast live scanning",
-    copy: "Staff picks a session once and keeps scanning without duplicate check-ins.",
-    icon: ScanLine,
-  },
-  {
-    title: "Attendance matrix",
-    copy: "See exactly who joined or missed each session across the full program.",
-    icon: Sheet,
-  },
-];
-
 export function LandingPage() {
+  const { t } = useTranslation();
+
+  const features = [
+    { title: t("landing.features.series"), icon: CalendarDays },
+    { title: t("landing.features.qrCards"), icon: QrCode },
+    { title: t("landing.features.scanner"), icon: ScanLine },
+    { title: t("landing.features.reports"), icon: Sheet },
+  ];
+
+  const featureDetails = [
+    {
+      title: t("landing.featureDetails.seriesSessions.title"),
+      copy: t("landing.featureDetails.seriesSessions.copy"),
+      icon: CalendarDays,
+    },
+    {
+      title: t("landing.featureDetails.secureQr.title"),
+      copy: t("landing.featureDetails.secureQr.copy"),
+      icon: QrCode,
+    },
+    {
+      title: t("landing.featureDetails.fastScanning.title"),
+      copy: t("landing.featureDetails.fastScanning.copy"),
+      icon: ScanLine,
+    },
+    {
+      title: t("landing.featureDetails.attendanceMatrix.title"),
+      copy: t("landing.featureDetails.attendanceMatrix.copy"),
+      icon: Sheet,
+    },
+  ];
+
+  const workflowSteps = [
+    {
+      title: t("landing.workflow.attendee.title"),
+      subtitle: t("landing.workflow.attendee.subtitle"),
+      icon: UserRound,
+      tone: "bg-amber-50 text-amber-700",
+      detail: t("landing.workflow.attendee.detail"),
+    },
+    {
+      title: t("landing.workflow.staff.title"),
+      subtitle: t("landing.workflow.staff.subtitle"),
+      icon: ScanLine,
+      tone: "bg-emerald-50 text-emerald-700",
+      detail: t("landing.workflow.staff.detail"),
+    },
+    {
+      title: t("landing.workflow.dashboard.title"),
+      subtitle: t("landing.workflow.dashboard.subtitle"),
+      icon: Sheet,
+      tone: "bg-sky-50 text-sky-700",
+      detail: t("landing.workflow.dashboard.detail"),
+    },
+  ];
+
   return (
     <div className="min-h-screen px-4 py-20 text-[var(--color-text)] lg:px-6 lg:py-5">
       <Seo
@@ -82,26 +109,24 @@ export function LandingPage() {
         ]}
       />
       <div className="mx-auto max-w-[1320px]">
-        <SiteHeader eyebrow="Attendance" />
+        <SiteHeader eyebrow={t("landing.eyebrow")} />
 
         <section className="grid gap-8 py-10 lg:grid-cols-[1fr_560px] lg:py-14">
           <div className="max-w-2xl pt-4">
             <h1 className="break-words font-display text-4xl font-semibold leading-[1.02] text-slate-900 sm:text-5xl md:text-7xl">
-              Simple QR attendance for recurring events.
+              {t("landing.hero.title")}
             </h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">
-              Create attendees. Scan sessions. See who joined.
-            </p>
+            <p className="mt-5 max-w-lg text-lg leading-8 text-slate-600">{t("landing.hero.subtitle")}</p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/register">
                 <Button className="px-6 py-3 text-base" icon={<ArrowRight className="size-4" />}>
-                  Get started
+                  {t("landing.hero.getStarted")}
                 </Button>
               </Link>
               <Link to="/login">
                 <Button className="px-6 py-3 text-base" variant="secondary">
-                  Log in
+                  {t("landing.hero.logIn")}
                 </Button>
               </Link>
             </div>
@@ -124,19 +149,21 @@ export function LandingPage() {
                 <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Series</p>
-                      <h2 className="mt-2 break-words text-2xl font-semibold text-slate-900">AI Workshop</h2>
+                      <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("landing.preview.series")}</p>
+                      <h2 className="mt-2 break-words text-2xl font-semibold text-slate-900">
+                        {t("landing.preview.seriesName")}
+                      </h2>
                     </div>
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                      Live
+                      {t("landing.preview.live")}
                     </span>
                   </div>
 
                   <div className="mt-5 space-y-3">
                     {[
-                      ["Session 1", "96%"],
-                      ["Session 2", "88%"],
-                      ["Session 3", "Today"],
+                      [t("landing.preview.session1"), "96%"],
+                      [t("landing.preview.session2"), "88%"],
+                      [t("landing.preview.session3"), t("landing.preview.today")],
                     ].map(([title, value]) => (
                       <div key={title} className="flex items-center justify-between rounded-[8px] bg-white px-4 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03)]">
                         <p className="break-words font-medium text-slate-800">{title}</p>
@@ -147,21 +174,25 @@ export function LandingPage() {
                 </div>
 
                 <div className="rounded-[8px] bg-emerald-50 p-5">
-                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">Latest scan</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-700">{t("landing.preview.latestScan")}</p>
                   <div className="mt-5 rounded-[8px] bg-white p-4">
                     <div className="flex items-center gap-3">
                       <div className="rounded-[8px] bg-emerald-50 p-3 text-emerald-700">
                         <CheckCircle2 className="size-5" />
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">Checked in</p>
+                        <p className="font-semibold text-slate-900">{t("landing.preview.checkedIn")}</p>
                         <p className="text-sm text-slate-500">Sophia Rivera</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-4 grid gap-3">
-                    {["Add attendee", "Create session", "Export"].map((item) => (
+                    {[
+                      t("landing.preview.addAttendee"),
+                      t("landing.preview.createSession"),
+                      t("landing.preview.export"),
+                    ].map((item) => (
                       <div
                         key={item}
                         className="rounded-[8px] bg-white px-4 py-3 text-sm font-semibold text-slate-700"
@@ -175,14 +206,14 @@ export function LandingPage() {
 
               <div className="overflow-x-auto rounded-[8px] bg-[var(--color-surface-soft)] p-5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-slate-900">Attendance matrix</h3>
+                  <h3 className="text-xl font-semibold text-slate-900">{t("landing.preview.attendanceMatrix")}</h3>
                   <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                    Exportable
+                    {t("landing.preview.exportable")}
                   </span>
                 </div>
 
                 <div className="mt-4 grid min-w-[520px] grid-cols-[1.2fr_repeat(3,0.8fr)] gap-3 text-sm">
-                  <div className="text-slate-500">Attendee</div>
+                  <div className="text-slate-500">{t("session.attendee")}</div>
                   <div className="text-slate-500">S1</div>
                   <div className="text-slate-500">S2</div>
                   <div className="text-slate-500">S3</div>
@@ -204,7 +235,7 @@ export function LandingPage() {
                               : "rounded-[8px] bg-white px-4 py-3 text-center font-semibold text-slate-400"
                           }
                         >
-                          {joined ? "In" : "Out"}
+                          {joined ? t("landing.preview.in") : t("landing.preview.out")}
                         </div>
                       ))}
                     </div>
@@ -218,14 +249,12 @@ export function LandingPage() {
         <section className="py-4" id="features">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Features</p>
+              <p className="text-sm font-semibold text-slate-900">{t("landing.featuresEyebrow")}</p>
               <h2 className="mt-2 font-display text-3xl font-semibold text-slate-900 md:text-4xl">
-                Built for event teams
+                {t("landing.featuresTitle")}
               </h2>
             </div>
-            <p className="max-w-md text-sm text-slate-500">
-              The product is designed around the real attendance flow, not a generic form system.
-            </p>
+            <p className="max-w-md text-sm text-slate-500">{t("landing.featuresSubtitle")}</p>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -245,40 +274,16 @@ export function LandingPage() {
           <Card className="p-6 md:p-8">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Workflow</p>
+                <p className="text-sm font-semibold text-slate-900">{t("landing.workflowEyebrow")}</p>
                 <h2 className="mt-2 font-display text-3xl font-semibold text-slate-900 md:text-4xl">
-                  How check-in works
+                  {t("landing.workflowTitle")}
                 </h2>
               </div>
-              <p className="max-w-md text-sm text-slate-500">
-                Attendee shows QR. Staff scans. Attendance updates instantly.
-              </p>
+              <p className="max-w-md text-sm text-slate-500">{t("landing.workflowSubtitle")}</p>
             </div>
 
             <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-center">
-              {[
-                {
-                  title: "Attendee",
-                  subtitle: "Shows QR badge",
-                  icon: UserRound,
-                  tone: "bg-amber-50 text-amber-700",
-                  detail: "Each person has a secure QR token.",
-                },
-                {
-                  title: "Staff",
-                  subtitle: "Scans session",
-                  icon: ScanLine,
-                  tone: "bg-emerald-50 text-emerald-700",
-                  detail: "Camera checks the QR against the selected session.",
-                },
-                {
-                  title: "Dashboard",
-                  subtitle: "Marks attendance",
-                  icon: Sheet,
-                  tone: "bg-sky-50 text-sky-700",
-                  detail: "Joined, missed, and percentages update in the report.",
-                },
-              ].map((item, index) => (
+              {workflowSteps.map((item, index) => (
                 <div key={item.title} className="contents">
                   <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-5">
                     <div className={`w-fit rounded-[8px] p-3 ${item.tone}`}>
@@ -305,9 +310,9 @@ export function LandingPage() {
 
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               {[
-                { icon: QrCode, title: "Secure token" },
-                { icon: ScanLine, title: "Duplicate protected" },
-                { icon: CheckCircle2, title: "Live result" },
+                { icon: QrCode, title: t("landing.workflowBadges.secureToken") },
+                { icon: ScanLine, title: t("landing.workflowBadges.duplicateProtected") },
+                { icon: CheckCircle2, title: t("landing.workflowBadges.liveResult") },
               ].map((item) => (
                 <div
                   key={item.title}
@@ -325,9 +330,9 @@ export function LandingPage() {
 
         <section className="grid gap-4 py-4 md:grid-cols-3" id="start">
           {[
-            { icon: CalendarDays, title: "Create series" },
-            { icon: QrCode, title: "Add attendees" },
-            { icon: ScanLine, title: "Scan session" },
+            { icon: CalendarDays, title: t("landing.startSteps.createSeries") },
+            { icon: QrCode, title: t("landing.startSteps.addAttendees") },
+            { icon: ScanLine, title: t("landing.startSteps.scanSession") },
           ].map((item) => (
             <Card key={item.title} className="flex items-center gap-4 p-5">
               <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
@@ -342,9 +347,9 @@ export function LandingPage() {
           <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-900">EventQR</p>
-              <p className="text-sm text-slate-500">QR attendance for recurring events and workshops.</p>
+              <p className="text-sm text-slate-500">{t("landing.footer.tagline")}</p>
               <p className="mt-1 text-sm text-slate-500">
-                Support:{" "}
+                {t("landing.footer.support")}{" "}
                 <a className="font-medium text-amber-700 hover:text-amber-800" href="mailto:support@magitecx.com">
                   support@magitecx.com
                 </a>
@@ -352,19 +357,19 @@ export function LandingPage() {
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
               <Link className="hover:text-slate-900" to="/about">
-                About
+                {t("landing.footer.about")}
               </Link>
               <Link className="hover:text-slate-900" to="/contact">
-                Contact
+                {t("landing.footer.contact")}
               </Link>
               <Link className="hover:text-slate-900" to="/help">
-                Help / FAQ
+                {t("landing.footer.helpFaq")}
               </Link>
               <Link className="hover:text-slate-900" to="/privacy">
-                Privacy Policy
+                {t("landing.footer.privacyPolicy")}
               </Link>
               <Link className="hover:text-slate-900" to="/terms">
-                Terms of Service
+                {t("landing.footer.termsOfService")}
               </Link>
               <BrandBadge compact />
             </div>

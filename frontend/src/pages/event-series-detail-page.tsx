@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarClock, Pencil, Plus, QrCode, TableProperties, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { Badge } from "../components/ui/badge";
@@ -30,54 +31,59 @@ const sessionSchema = z.object({
 type SeriesValues = z.infer<typeof seriesSchema>;
 type SessionFormValues = z.infer<typeof sessionSchema>;
 
-const SETTINGS_TOGGLES: Array<{
+function useSettingsToggles(): Array<{
   key: keyof EventSeriesSettings;
   label: string;
   description: string;
-}> = [
-  {
-    key: "requireCheckInApproval",
-    label: "Require approval before check-in",
-    description: "Scanning shows the attendee's info and waits for a tap on \"Check in\" to confirm. Turn off to check attendees in the instant their QR code is scanned.",
-  },
-  {
-    key: "showOrganizationName",
-    label: "Show organization name",
-    description: "Display the attendee's organization on the scanner and session roster.",
-  },
-  {
-    key: "showAttendeeType",
-    label: "Show type of attendee",
-    description: "Display the attendee's type (e.g. VIP, Guest) on the scanner and session roster.",
-  },
-  {
-    key: "showPhone",
-    label: "Show phone number",
-    description: "Display the attendee's phone number on the scanner and session roster.",
-  },
-  {
-    key: "showEmail",
-    label: "Show email address",
-    description: "Display the attendee's email on the scanner and session roster.",
-  },
-  {
-    key: "showAttendeeNumber",
-    label: "Show attendee number",
-    description: "Display the attendee's ticket number badge on the scanner and session roster.",
-  },
-  {
-    key: "requireCheckInPhoto",
-    label: "Require photo at check-in",
-    description:
-      "On the public phone scanner, staff must take a photo of the attendee before the check-in is confirmed. The photo is saved and shown in this event's attendance report.",
-  },
-];
+}> {
+  const { t } = useTranslation();
+
+  return [
+    {
+      key: "requireCheckInApproval",
+      label: t("eventSeries.settings.requireCheckInApproval.label"),
+      description: t("eventSeries.settings.requireCheckInApproval.description"),
+    },
+    {
+      key: "showOrganizationName",
+      label: t("eventSeries.settings.showOrganizationName.label"),
+      description: t("eventSeries.settings.showOrganizationName.description"),
+    },
+    {
+      key: "showAttendeeType",
+      label: t("eventSeries.settings.showAttendeeType.label"),
+      description: t("eventSeries.settings.showAttendeeType.description"),
+    },
+    {
+      key: "showPhone",
+      label: t("eventSeries.settings.showPhone.label"),
+      description: t("eventSeries.settings.showPhone.description"),
+    },
+    {
+      key: "showEmail",
+      label: t("eventSeries.settings.showEmail.label"),
+      description: t("eventSeries.settings.showEmail.description"),
+    },
+    {
+      key: "showAttendeeNumber",
+      label: t("eventSeries.settings.showAttendeeNumber.label"),
+      description: t("eventSeries.settings.showAttendeeNumber.description"),
+    },
+    {
+      key: "requireCheckInPhoto",
+      label: t("eventSeries.settings.requireCheckInPhoto.label"),
+      description: t("eventSeries.settings.requireCheckInPhoto.description"),
+    },
+  ];
+}
 
 export function EventSeriesDetailPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { auth } = useAuth();
+  const settingsToggles = useSettingsToggles();
 
   const seriesQuery = useQuery({
     queryKey: ["event-series", auth?.activeOrganizationId, id],
@@ -216,7 +222,7 @@ export function EventSeriesDetailPage() {
   });
 
   if (!series) {
-    return <Card>Loading event series...</Card>;
+    return <Card>{t("eventSeries.detail.loading")}</Card>;
   }
 
   return (
@@ -224,15 +230,15 @@ export function EventSeriesDetailPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold text-slate-900">Series</p>
+            <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.eyebrow")}</p>
             <h1 className="mt-2 break-words font-display text-4xl font-semibold text-slate-900">{series.name}</h1>
             <p className="mt-4 text-base leading-7 text-slate-500">
-              {series.description ?? "No description set for this program."}
+              {series.description ?? t("eventSeries.detail.noDescription")}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Badge>{series.sessions.length} sessions</Badge>
-              <Badge>{series.startDate ? formatDate(series.startDate) : "No start date"}</Badge>
-              <Badge>{series.endDate ? formatDate(series.endDate) : "No end date"}</Badge>
+              <Badge>{t("eventSeries.sessionsCount", { count: series.sessions.length })}</Badge>
+              <Badge>{series.startDate ? formatDate(series.startDate) : t("eventSeries.detail.noStartDate")}</Badge>
+              <Badge>{series.endDate ? formatDate(series.endDate) : t("eventSeries.detail.noEndDate")}</Badge>
             </div>
           </div>
 
@@ -241,7 +247,7 @@ export function EventSeriesDetailPage() {
               className="rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-white"
               to={`/app/reports/event-series/${series.id}`}
             >
-              Report
+              {t("dashboard.report")}
             </Link>
           </div>
         </div>
@@ -251,25 +257,25 @@ export function EventSeriesDetailPage() {
         <Card>
           <form className="space-y-4" onSubmit={handleSubmit((values) => updateMutation.mutate(values))}>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Edit series</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Details</h2>
+              <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.editSeries")}</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("eventSeries.detail.details")}</h2>
             </div>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Series name</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.seriesName")}</span>
               <Input {...register("name")} />
               {errors.name ? <p className="mt-2 text-xs text-rose-500">{errors.name.message}</p> : null}
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Description</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
               <Input {...register("description")} />
             </label>
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Start date</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.startDate")}</span>
                 <Input type="datetime-local" {...register("startDate")} />
               </label>
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">End date</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.endDate")}</span>
                 <Input type="datetime-local" {...register("endDate")} />
               </label>
             </div>
@@ -284,35 +290,35 @@ export function EventSeriesDetailPage() {
               </p>
             ) : null}
             <div className="flex flex-wrap gap-3">
-              <Button type="submit">{updateMutation.isPending ? "Saving..." : "Save changes"}</Button>
+              <Button type="submit">{updateMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveChanges")}</Button>
               <Button
                 onClick={() => {
-                  if (window.confirm(`Delete ${series.name} and all its sessions and attendance records?`)) {
+                  if (window.confirm(t("eventSeries.detail.confirmDeleteSeries", { name: series.name }))) {
                     deleteMutation.mutate();
                   }
                 }}
                 type="button"
                 variant="danger"
               >
-                {deleteMutation.isPending ? "Deleting..." : "Delete series"}
+                {deleteMutation.isPending ? t("eventSeries.detail.deleting") : t("eventSeries.detail.deleteSeries")}
               </Button>
             </div>
           </form>
           <div className="mt-6 space-y-4">
             {[
               {
-                title: "Scanner-ready",
-                description: "Use any session in this series with the live browser QR scanner.",
+                title: t("eventSeries.detail.features.scannerReady.title"),
+                description: t("eventSeries.detail.features.scannerReady.description"),
                 icon: QrCode,
               },
               {
-                title: "Session-based attendance",
-                description: "Every check-in is stored per attendee and per event session.",
+                title: t("eventSeries.detail.features.sessionBased.title"),
+                description: t("eventSeries.detail.features.sessionBased.description"),
                 icon: CalendarClock,
               },
               {
-                title: "Report export",
-                description: "Export attendance percentage and counts as CSV any time.",
+                title: t("eventSeries.detail.features.reportExport.title"),
+                description: t("eventSeries.detail.features.reportExport.description"),
                 icon: TableProperties,
               },
             ].map((item) => (
@@ -334,11 +340,11 @@ export function EventSeriesDetailPage() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Sessions</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Schedule</h2>
+              <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.sessions")}</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("eventSeries.detail.schedule")}</h2>
             </div>
             <Link className="text-sm font-medium text-amber-700 hover:text-amber-800" to="/app/scanner">
-              Open scanner
+              {t("appShell.openScanner")}
             </Link>
           </div>
 
@@ -347,14 +353,14 @@ export function EventSeriesDetailPage() {
             onSubmit={sessionForm.handleSubmit((values) => createSessionMutation.mutate(values))}
           >
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Session title</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
               <Input placeholder="Session 1" {...sessionForm.register("title")} />
               {sessionForm.formState.errors.title ? (
                 <p className="mt-2 text-xs text-rose-500">{sessionForm.formState.errors.title.message}</p>
               ) : null}
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Date and time</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.dateAndTime")}</span>
               <Input type="datetime-local" {...sessionForm.register("sessionDate")} />
               {sessionForm.formState.errors.sessionDate ? (
                 <p className="mt-2 text-xs text-rose-500">{sessionForm.formState.errors.sessionDate.message}</p>
@@ -362,11 +368,11 @@ export function EventSeriesDetailPage() {
             </label>
             <div className="flex items-end">
               <Button className="w-full md:w-auto" icon={<Plus className="size-4" />} type="submit">
-                {createSessionMutation.isPending ? "Adding..." : "Add session"}
+                {createSessionMutation.isPending ? t("eventSeries.detail.addingSession") : t("eventSeries.detail.addSession")}
               </Button>
             </div>
             <label className="block md:col-span-3">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Description (optional)</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.descriptionOptional")}</span>
               <Input placeholder="Intro to AI workflows" {...sessionForm.register("description")} />
             </label>
             {createSessionMutation.isError ? (
@@ -387,15 +393,15 @@ export function EventSeriesDetailPage() {
                     )}
                   >
                     <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-slate-600">Session title</span>
+                      <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
                       <Input {...editSessionForm.register("title")} />
                     </label>
                     <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-slate-600">Description</span>
+                      <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
                       <Input {...editSessionForm.register("description")} />
                     </label>
                     <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-slate-600">Session date and time</span>
+                      <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionDateAndTime")}</span>
                       <Input type="datetime-local" {...editSessionForm.register("sessionDate")} />
                     </label>
                     {updateSessionMutation.isError ? (
@@ -405,7 +411,7 @@ export function EventSeriesDetailPage() {
                     ) : null}
                     <div className="flex flex-wrap gap-3">
                       <Button type="submit">
-                        {updateSessionMutation.isPending ? "Saving..." : "Save session"}
+                        {updateSessionMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveSession")}
                       </Button>
                       <Button
                         icon={<X className="size-4" />}
@@ -413,7 +419,7 @@ export function EventSeriesDetailPage() {
                         type="button"
                         variant="ghost"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </Button>
                     </div>
                   </form>
@@ -422,13 +428,13 @@ export function EventSeriesDetailPage() {
                     <Link className="min-w-0 flex-1" to={`/app/event-series/${series.id}/sessions/${session.id}`}>
                       <h3 className="break-words font-semibold text-slate-900">{session.title}</h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        {session.description ?? "No description set."}
+                        {session.description ?? t("eventSeries.detail.noDescriptionSet")}
                       </p>
                     </Link>
                     <div className="text-right text-sm text-slate-600">
                       <p>{formatDate(session.sessionDate)}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">
-                        {session._count?.attendance ?? 0} check-ins
+                        {t("eventSeries.detail.checkInsCount", { count: session._count?.attendance ?? 0 })}
                       </p>
                     </div>
                   </div>
@@ -449,19 +455,19 @@ export function EventSeriesDetailPage() {
                       type="button"
                       variant="secondary"
                     >
-                      Edit
+                      {t("common.edit")}
                     </Button>
                     <Button
                       icon={<Trash2 className="size-4" />}
                       onClick={() => {
-                        if (window.confirm(`Delete ${session.title} and all of its attendance records?`)) {
+                        if (window.confirm(t("eventSeries.detail.confirmDeleteSession", { title: session.title }))) {
                           deleteSessionMutation.mutate(session.id);
                         }
                       }}
                       type="button"
                       variant="danger"
                     >
-                      {deleteSessionMutation.isPending ? "Deleting..." : "Delete"}
+                      {deleteSessionMutation.isPending ? t("eventSeries.detail.deleting") : t("common.delete")}
                     </Button>
                   </div>
                 ) : null}
@@ -470,7 +476,7 @@ export function EventSeriesDetailPage() {
 
             {series.sessions.length === 0 ? (
               <p className="rounded-[8px] bg-[var(--color-surface-soft)] p-4 text-sm text-slate-500">
-                No sessions created yet.
+                {t("eventSeries.detail.noSessionsYet")}
               </p>
             ) : null}
           </div>
@@ -479,17 +485,17 @@ export function EventSeriesDetailPage() {
 
       <Card>
         <div>
-          <p className="text-sm font-semibold text-slate-900">Manage event</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Event settings</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.manageEvent")}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("eventSeries.detail.eventSettings")}</h2>
           <p className="mt-2 text-sm text-slate-500">
-            Controls how check-in works and what attendee details show up on the scanner and session roster for{" "}
+            {t("eventSeries.detail.eventSettingsHint")}{" "}
             <strong>{series.name}</strong>.
           </p>
         </div>
 
         {settings ? (
           <div className="mt-6 space-y-3">
-            {SETTINGS_TOGGLES.map((toggle) => (
+            {settingsToggles.map((toggle) => (
               <label
                 className="flex cursor-pointer items-start gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-4 transition hover:bg-white"
                 key={toggle.key}
@@ -518,12 +524,12 @@ export function EventSeriesDetailPage() {
 
             {settingsMutation.isSuccess ? (
               <p className="rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                Event settings saved.
+                {t("eventSeries.detail.settingsSaved")}
               </p>
             ) : null}
 
             <Button onClick={() => settingsMutation.mutate()} type="button">
-              {settingsMutation.isPending ? "Saving..." : "Save event settings"}
+              {settingsMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveEventSettings")}
             </Button>
           </div>
         ) : null}

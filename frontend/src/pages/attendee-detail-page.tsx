@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { Mail } from "lucide-react";
@@ -16,27 +17,36 @@ import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { formatDate, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, AttendeeDetail } from "../types/api";
 
-const updateAttendeeSchema = z.object({
-  firstName: z.string().min(1),
-  surname: z.string().min(1),
-  organizationName: z.string().optional(),
-  attendeeType: z.string().optional(),
-  email: z.email(),
-  phone: z.string().optional(),
-  attendeeNumber: z
-    .string()
-    .optional()
-    .refine((value) => !value || /^\d+$/.test(value.trim()), {
-      message: "Attendee number must be a whole number",
-    }),
-});
-
-type UpdateAttendeeValues = z.infer<typeof updateAttendeeSchema>;
+type UpdateAttendeeValues = {
+  firstName: string;
+  surname: string;
+  organizationName?: string;
+  attendeeType?: string;
+  email: string;
+  phone?: string;
+  attendeeNumber?: string;
+};
 
 export function AttendeeDetailPage() {
+  const { t } = useTranslation();
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const updateAttendeeSchema = z.object({
+    firstName: z.string().min(1),
+    surname: z.string().min(1),
+    organizationName: z.string().optional(),
+    attendeeType: z.string().optional(),
+    email: z.email(),
+    phone: z.string().optional(),
+    attendeeNumber: z
+      .string()
+      .optional()
+      .refine((value) => !value || /^\d+$/.test(value.trim()), {
+        message: t("attendees.attendeeNumberWholeNumber"),
+      }),
+  });
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
@@ -170,7 +180,7 @@ export function AttendeeDetailPage() {
   });
 
   if (!attendee) {
-    return <Card>Loading attendee profile...</Card>;
+    return <Card>{t("attendeeDetail.loading")}</Card>;
   }
 
   const currentImageSrc =
@@ -189,7 +199,7 @@ export function AttendeeDetailPage() {
               src={currentImageSrc}
             />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-900">Attendee</p>
+              <p className="text-sm font-semibold text-slate-900">{t("attendeeDetail.attendee")}</p>
               <h1 className="mt-2 break-words font-display text-3xl font-semibold text-slate-900">
                 {attendee.firstName} {attendee.surname}
               </h1>
@@ -198,8 +208,8 @@ export function AttendeeDetailPage() {
                 {attendee.attendeeNumber != null ? <Badge>#{attendee.attendeeNumber}</Badge> : null}
                 {attendee.organizationName ? <Badge>{attendee.organizationName}</Badge> : null}
                 {attendee.attendeeType ? <Badge>{attendee.attendeeType}</Badge> : null}
-                <Badge>{attendee.phone ?? "No phone"}</Badge>
-                <Badge>Created {formatDate(attendee.createdAt)}</Badge>
+                <Badge>{attendee.phone ?? t("session.noPhone")}</Badge>
+                <Badge>{t("attendeeDetail.created", { date: formatDate(attendee.createdAt) })}</Badge>
               </div>
 
               <Button
@@ -208,7 +218,7 @@ export function AttendeeDetailPage() {
                 onClick={() => setSendQrEmailOpen(true)}
                 type="button"
               >
-                Send QR email
+                {t("attendeeDetail.sendQrEmail")}
               </Button>
 
               {qrEmailToast ? (
@@ -223,7 +233,13 @@ export function AttendeeDetailPage() {
         <SendQrEmailsModal
           attendeeIds={[attendee.id]}
           onClose={() => setSendQrEmailOpen(false)}
-          onSent={() => setQrEmailToast(`QR code email is being sent to ${attendee.firstName} ${attendee.surname}.`)}
+          onSent={() =>
+            setQrEmailToast(
+              t("attendeeDetail.qrEmailSendingToast", {
+                name: `${attendee.firstName} ${attendee.surname}`,
+              }),
+            )
+          }
           open={sendQrEmailOpen}
           recipientLabel={`${attendee.firstName} ${attendee.surname}`}
           totalAttendees={1}
@@ -232,8 +248,8 @@ export function AttendeeDetailPage() {
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
-              <p className="text-sm font-semibold text-slate-900">QR code</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">Check-in token</h2>
+              <p className="text-sm font-semibold text-slate-900">{t("attendeeDetail.qrCode")}</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("attendeeDetail.checkInToken")}</h2>
             </div>
 
             {qrCodeDataUrl ? (
@@ -242,7 +258,7 @@ export function AttendeeDetailPage() {
                 download={`${`${attendee.firstName}-${attendee.surname}`.replace(/\s+/g, "-").toLowerCase()}-qr.png`}
                 href={qrCodeDataUrl}
               >
-                Download QR
+                {t("attendeeDetail.downloadQr")}
               </a>
             ) : null}
           </div>
@@ -254,7 +270,7 @@ export function AttendeeDetailPage() {
               ) : null}
             </div>
             <div className="flex-1 rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Raw token</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">{t("attendeeDetail.rawToken")}</p>
               <p className="mt-3 break-all font-mono text-sm leading-7 text-slate-700">{attendee.qrToken}</p>
               <div className="mt-6 border-t border-[var(--color-border)] pt-4">
                 <BrandBadge compact />
@@ -266,27 +282,27 @@ export function AttendeeDetailPage() {
 
       <div className="space-y-6">
         <Card>
-          <p className="text-sm font-semibold text-slate-900">Edit attendee</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Profile</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("attendeeDetail.editAttendee")}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("attendeeDetail.profile")}</h2>
 
           <form
             className="mt-6 space-y-4"
             onSubmit={handleSubmit((values) => updateMutation.mutate(values))}
           >
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Name</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.name")}</span>
               <Input {...register("firstName")} />
               {errors.firstName ? <p className="mt-2 text-xs text-rose-500">{errors.firstName.message}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Surname</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.surname")}</span>
               <Input {...register("surname")} />
               {errors.surname ? <p className="mt-2 text-xs text-rose-500">{errors.surname.message}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Organization name (optional)</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.organizationNameOptional")}</span>
               <Input {...register("organizationName")} />
               {errors.organizationName ? (
                 <p className="mt-2 text-xs text-rose-500">{errors.organizationName.message}</p>
@@ -294,7 +310,7 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Type of attendee (optional)</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.typeOfAttendeeOptional")}</span>
               <Input {...register("attendeeType")} />
               {errors.attendeeType ? (
                 <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
@@ -302,21 +318,21 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Email</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
               <Input {...register("email")} />
               {errors.email ? <p className="mt-2 text-xs text-rose-500">{errors.email.message}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Phone</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.phone")}</span>
               <Input {...register("phone")} />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Attendee number</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.attendeeNumber")}</span>
               <Input
                 inputMode="numeric"
-                placeholder="Optional, e.g. 1"
+                placeholder={t("attendeeDetail.attendeeNumberPlaceholder")}
                 type="number"
                 min={0}
                 {...register("attendeeNumber")}
@@ -327,7 +343,7 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Photo</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.photo")}</span>
               <Input
                 key={imageInputKey}
                 accept="image/*"
@@ -338,16 +354,18 @@ export function AttendeeDetailPage() {
                 type="file"
               />
               {profileImageFile ? (
-                <p className="mt-2 text-xs text-slate-500">Selected: {profileImageFile.name}</p>
+                <p className="mt-2 text-xs text-slate-500">{t("attendees.selected", { name: profileImageFile.name })}</p>
               ) : null}
             </label>
 
             {attendee.profileImageUrl && !profileImageFile ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">Current photo</p>
+                  <p className="text-sm font-medium text-slate-900">{t("attendeeDetail.currentPhoto")}</p>
                   <p className="text-xs text-slate-500">
-                    {removeProfileImage ? "Photo will be removed on save." : "Photo will stay unchanged."}
+                    {removeProfileImage
+                      ? t("attendeeDetail.photoWillBeRemoved")
+                      : t("attendeeDetail.photoWillStay")}
                   </p>
                 </div>
                 <Button
@@ -355,7 +373,7 @@ export function AttendeeDetailPage() {
                   type="button"
                   variant={removeProfileImage ? "secondary" : "ghost"}
                 >
-                  {removeProfileImage ? "Keep photo" : "Remove photo"}
+                  {removeProfileImage ? t("attendeeDetail.keepPhoto") : t("attendeeDetail.removePhoto")}
                 </Button>
               </div>
             ) : null}
@@ -367,17 +385,21 @@ export function AttendeeDetailPage() {
             ) : null}
 
             <div className="flex flex-wrap gap-3">
-              <Button type="submit">{updateMutation.isPending ? "Saving..." : "Save changes"}</Button>
+              <Button type="submit">
+                {updateMutation.isPending ? t("attendeeDetail.saving") : t("attendeeDetail.saveChanges")}
+              </Button>
               <Button onClick={() => deleteMutation.mutate()} type="button" variant="danger">
-                {deleteMutation.isPending ? "Deleting..." : "Delete attendee"}
+                {deleteMutation.isPending ? t("attendeeDetail.deleting") : t("attendeeDetail.deleteAttendee")}
               </Button>
             </div>
           </form>
         </Card>
 
         <Card>
-          <p className="text-sm font-semibold text-slate-900">Attendance history</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{attendee.attendance.length} check-ins</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("attendeeDetail.attendanceHistory")}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+            {t("attendeeDetail.checkInsCount", { count: attendee.attendance.length })}
+          </h2>
 
           <div className="mt-6 space-y-3">
             {attendee.attendance.map((record) => (
@@ -394,7 +416,7 @@ export function AttendeeDetailPage() {
 
             {attendee.attendance.length === 0 ? (
               <p className="rounded-[8px] bg-[var(--color-surface-soft)] p-4 text-sm text-slate-500">
-                No attendance records yet.
+                {t("attendeeDetail.noAttendanceRecords")}
               </p>
             ) : null}
           </div>

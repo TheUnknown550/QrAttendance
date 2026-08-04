@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, FileSpreadsheet, Upload } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, getErrorMessage, unwrapResponse } from "../../lib/api";
 import type {
   ConfirmAttendeeImportResult,
@@ -18,17 +19,6 @@ interface Props {
 }
 
 type Step = "upload" | "map" | "summary";
-
-const FIELD_LABELS: Record<ImportTargetField, string> = {
-  fullName: "Full name (combined)",
-  firstName: "Name",
-  surname: "Surname",
-  organizationName: "Organization name",
-  attendeeType: "Type of attendee",
-  email: "Email",
-  phone: "Phone",
-  attendeeNumber: "Attendee number",
-};
 
 const REQUIRED_FIELDS: ImportTargetField[] = ["email"];
 const FIELD_ORDER: ImportTargetField[] = [
@@ -52,9 +42,21 @@ function resetState() {
 }
 
 export function BulkImportModal({ open, onClose }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [state, setState] = useState(resetState);
   const { step, parseResult, mapping, nameMode } = state;
+
+  const FIELD_LABELS: Record<ImportTargetField, string> = {
+    fullName: t("bulkImportModal.fields.fullName"),
+    firstName: t("bulkImportModal.fields.firstName"),
+    surname: t("bulkImportModal.fields.surname"),
+    organizationName: t("bulkImportModal.fields.organizationName"),
+    attendeeType: t("bulkImportModal.fields.attendeeType"),
+    email: t("bulkImportModal.fields.email"),
+    phone: t("bulkImportModal.fields.phone"),
+    attendeeNumber: t("bulkImportModal.fields.attendeeNumber"),
+  };
 
   function close() {
     onClose();
@@ -125,20 +127,19 @@ export function BulkImportModal({ open, onClose }: Props) {
   const missingRequired = REQUIRED_FIELDS.filter((field) => mapping[field] === undefined);
 
   return (
-    <Dialog className="max-w-3xl" onClose={close} open={open} title="Bulk import attendees">
+    <Dialog className="max-w-3xl" onClose={close} open={open} title={t("bulkImportModal.title")}>
       {step === "upload" ? (
         <div className="space-y-5">
-          <p className="text-sm text-slate-500">
-            Upload a CSV or Excel file. Column headers don&apos;t need to match exactly &mdash; you&apos;ll get a
-            chance to map each column to the right field on the next screen.
-          </p>
+          <p className="text-sm text-slate-500">{t("bulkImportModal.uploadDescription")}</p>
 
           <label className="flex cursor-pointer flex-col items-center gap-3 rounded-[10px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] px-6 py-12 text-center transition hover:border-amber-400 hover:bg-white">
             <FileSpreadsheet className="size-8 text-amber-600" />
             <span className="text-sm font-medium text-slate-700">
-              {parseMutation.isPending ? "Reading file..." : "Click to choose a .csv or .xlsx file"}
+              {parseMutation.isPending ? t("bulkImportModal.readingFile") : t("bulkImportModal.clickToChoose")}
             </span>
-            <span className="text-xs text-slate-400">Max {(5 * 1024 * 1024) / (1024 * 1024)}MB</span>
+            <span className="text-xs text-slate-400">
+              {t("bulkImportModal.maxSize", { size: (5 * 1024 * 1024) / (1024 * 1024) })}
+            </span>
             <input
               accept=".csv,.xlsx,.xls"
               className="hidden"
@@ -159,9 +160,10 @@ export function BulkImportModal({ open, onClose }: Props) {
       {step === "map" && parseResult ? (
         <div className="space-y-5">
           <p className="text-sm text-slate-500">
-            Found <strong>{parseResult.totalRows}</strong> row{parseResult.totalRows === 1 ? "" : "s"} in{" "}
-            <strong>{parseResult.headers.length}</strong> columns. Match each field below to a column from your
-            file, or leave optional fields unmapped.
+            {t("bulkImportModal.foundRows", {
+              rows: parseResult.totalRows,
+              columns: parseResult.headers.length,
+            })}
           </p>
 
           <div className="flex gap-2 rounded-[8px] bg-[var(--color-surface-soft)] p-1 text-sm">
@@ -170,14 +172,14 @@ export function BulkImportModal({ open, onClose }: Props) {
               onClick={() => setState((current) => ({ ...current, nameMode: "combined" }))}
               type="button"
             >
-              Single "full name" column
+              {t("bulkImportModal.singleFullNameColumn")}
             </button>
             <button
               className={`flex-1 rounded-[6px] px-3 py-2 font-medium transition ${nameMode === "split" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}
               onClick={() => setState((current) => ({ ...current, nameMode: "split" }))}
               type="button"
             >
-              Separate name / surname columns
+              {t("bulkImportModal.separateNameSurnameColumns")}
             </button>
           </div>
 
@@ -193,10 +195,10 @@ export function BulkImportModal({ open, onClose }: Props) {
                   onChange={(event) => setFieldMapping(field, event.target.value)}
                   value={mapping[field] ?? ""}
                 >
-                  <option value="">Not imported</option>
+                  <option value="">{t("bulkImportModal.notImported")}</option>
                   {parseResult.headers.map((header, index) => (
                     <option key={index} value={index}>
-                      {header || `Column ${index + 1}`}
+                      {header || t("bulkImportModal.columnN", { number: index + 1 })}
                     </option>
                   ))}
                 </Select>
@@ -211,7 +213,7 @@ export function BulkImportModal({ open, onClose }: Props) {
                   <tr>
                     {parseResult.headers.map((header, index) => (
                       <th className="whitespace-nowrap px-3 py-2" key={index}>
-                        {header || `Column ${index + 1}`}
+                        {header || t("bulkImportModal.columnN", { number: index + 1 })}
                       </th>
                     ))}
                   </tr>
@@ -233,7 +235,7 @@ export function BulkImportModal({ open, onClose }: Props) {
 
           {!canImport || missingRequired.length > 0 ? (
             <p className="rounded-[8px] bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Map a name column and an email column before importing.
+              {t("bulkImportModal.mapRequiredFields")}
             </p>
           ) : null}
 
@@ -250,10 +252,12 @@ export function BulkImportModal({ open, onClose }: Props) {
               onClick={() => confirmMutation.mutate()}
               type="button"
             >
-              {confirmMutation.isPending ? "Importing..." : `Import ${parseResult.totalRows} row${parseResult.totalRows === 1 ? "" : "s"}`}
+              {confirmMutation.isPending
+                ? t("bulkImportModal.importing")
+                : t("bulkImportModal.importRows", { count: parseResult.totalRows })}
             </Button>
             <Button onClick={() => setState(resetState())} type="button" variant="ghost">
-              Choose a different file
+              {t("bulkImportModal.chooseDifferentFile")}
             </Button>
           </div>
         </div>
@@ -265,12 +269,11 @@ export function BulkImportModal({ open, onClose }: Props) {
             <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
             <div>
               <p className="font-semibold">
-                Imported {confirmMutation.data.created} attendee{confirmMutation.data.created === 1 ? "" : "s"}
+                {t("bulkImportModal.imported", { count: confirmMutation.data.created })}
               </p>
               {confirmMutation.data.skippedCount > 0 ? (
                 <p className="mt-1 text-emerald-700">
-                  Skipped {confirmMutation.data.skippedCount} row{confirmMutation.data.skippedCount === 1 ? "" : "s"}{" "}
-                  (see below).
+                  {t("bulkImportModal.skipped", { count: confirmMutation.data.skippedCount })}
                 </p>
               ) : null}
             </div>
@@ -281,8 +284,8 @@ export function BulkImportModal({ open, onClose }: Props) {
               <table className="min-w-full text-left text-xs">
                 <thead className="bg-[var(--color-surface-soft)] uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-3 py-2">Row</th>
-                    <th className="px-3 py-2">Reason</th>
+                    <th className="px-3 py-2">{t("bulkImportModal.row")}</th>
+                    <th className="px-3 py-2">{t("bulkImportModal.reason")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border)]">
@@ -298,7 +301,7 @@ export function BulkImportModal({ open, onClose }: Props) {
           ) : null}
 
           <Button className="w-full" onClick={close} type="button">
-            Done
+            {t("bulkImportModal.done")}
           </Button>
         </div>
       ) : null}
