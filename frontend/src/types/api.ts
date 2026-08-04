@@ -102,11 +102,20 @@ export type SessionAttendanceRecord = {
   attendee: Attendee;
 };
 
+export type EventSeriesSettings = {
+  requireCheckInApproval: boolean;
+  showOrganizationName: boolean;
+  showAttendeeType: boolean;
+  showPhone: boolean;
+  showEmail: boolean;
+  showAttendeeNumber: boolean;
+};
+
 export type EventSessionDetail = EventSession & {
   eventSeries: {
     id: string;
     name: string;
-  };
+  } & EventSeriesSettings;
   attendance: SessionAttendanceRecord[];
   allAttendees: Attendee[];
 };
@@ -123,7 +132,7 @@ export type EventSeries = {
   _count?: {
     sessions: number;
   };
-};
+} & EventSeriesSettings;
 
 export type AttendanceHistory = {
   id: string;
@@ -174,6 +183,8 @@ export type ScanResult = {
     organizationName?: string | null;
     attendeeType?: string | null;
     email?: string;
+    phone?: string | null;
+    attendeeNumber?: number | null;
     profileImageUrl?: string | null;
   };
   checkedInAt?: string;
@@ -189,7 +200,7 @@ export type ScannerShareLink = {
     eventSeries: {
       id: string;
       name: string;
-    };
+    } & EventSeriesSettings;
   };
 };
 
@@ -203,7 +214,7 @@ export type PublicScannerSession = {
     eventSeries: {
       id: string;
       name: string;
-    };
+    } & EventSeriesSettings;
   };
 };
 

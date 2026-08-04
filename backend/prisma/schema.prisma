@@ -115,16 +115,22 @@ model OrganizationInvite {
 }
 
 model EventSeries {
-  id             String         @id @default(uuid()) @db.Uuid
-  organizationId String         @db.Uuid
-  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  name           String
-  description    String?
-  startDate      DateTime?
-  endDate        DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  sessions       EventSession[]
+  id                     String         @id @default(uuid()) @db.Uuid
+  organizationId         String         @db.Uuid
+  organization           Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  name                   String
+  description            String?
+  startDate              DateTime?
+  endDate                DateTime?
+  requireCheckInApproval Boolean        @default(true) @map("require_check_in_approval")
+  showOrganizationName   Boolean        @default(true) @map("show_organization_name")
+  showAttendeeType       Boolean        @default(true) @map("show_attendee_type")
+  showPhone              Boolean        @default(true) @map("show_phone")
+  showEmail              Boolean        @default(true) @map("show_email")
+  showAttendeeNumber     Boolean        @default(true) @map("show_attendee_number")
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  sessions               EventSession[]
 
   @@index([organizationId])
   @@unique([organizationId, name])

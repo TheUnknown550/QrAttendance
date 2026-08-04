@@ -12,7 +12,29 @@ import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { cn, formatAttendeeOrgType, formatDate, resolveMediaUrl } from "../lib/utils";
-import type { Attendee, EventSession, EventSessionDetail } from "../types/api";
+import type { Attendee, EventSeriesSettings, EventSession, EventSessionDetail } from "../types/api";
+
+function AttendeeRosterMeta({ attendee, settings }: { attendee: Attendee; settings: EventSeriesSettings }) {
+  const orgAndType = formatAttendeeOrgType(
+    settings.showOrganizationName ? attendee.organizationName : undefined,
+    settings.showAttendeeType ? attendee.attendeeType : undefined,
+  );
+
+  return (
+    <>
+      {settings.showOrganizationName || settings.showAttendeeType ? (
+        <p className="truncate text-xs text-slate-500">{orgAndType}</p>
+      ) : null}
+      {settings.showEmail ? <p className="truncate text-sm text-slate-500">{attendee.email}</p> : null}
+      {settings.showPhone ? (
+        <p className="truncate text-xs text-slate-500">{attendee.phone ?? "No phone"}</p>
+      ) : null}
+      {settings.showAttendeeNumber && attendee.attendeeNumber != null ? (
+        <p className="truncate text-xs text-slate-500">Ticket #{attendee.attendeeNumber}</p>
+      ) : null}
+    </>
+  );
+}
 
 const sessionSchema = z.object({
   title: z.string().min(1),
@@ -307,6 +329,7 @@ export function SessionDetailPage() {
                   attendanceRecord={attendanceRecord}
                   isBusy={markAttendedMutation.isPending || markNotAttendedMutation.isPending}
                   key={attendee.id}
+                  settings={session.eventSeries}
                   onToggle={() => {
                     if (attendanceRecord) {
                       markNotAttendedMutation.mutate(attendee.id);
@@ -335,9 +358,7 @@ export function SessionDetailPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
-                    <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}</p>
-                    <p className="truncate text-sm text-slate-500">{attendee.email}</p>
-                    <p className="mt-2 text-xs text-slate-500">{attendee.phone ?? "No phone"}</p>
+                    <AttendeeRosterMeta attendee={attendee} settings={session.eventSeries} />
                   </div>
                 </div>
 
@@ -390,11 +411,13 @@ function AttendeeAttendanceRow({
   attendanceRecord,
   isBusy,
   onToggle,
+  settings,
 }: {
   attendee: Attendee;
   attendanceRecord: EventSessionDetail["attendance"][number] | null;
   isBusy: boolean;
   onToggle: () => void;
+  settings: EventSeriesSettings;
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] items-center gap-4 bg-white px-5 py-4">
@@ -406,9 +429,7 @@ function AttendeeAttendanceRow({
         />
         <div className="min-w-0">
           <p className="truncate font-medium text-slate-900">{attendee.firstName} {attendee.surname}</p>
-          <p className="truncate text-xs text-slate-500">{formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}</p>
-          <p className="truncate text-sm text-slate-500">{attendee.email}</p>
-          <p className="truncate text-xs text-slate-400">{attendee.phone ?? "No phone"}</p>
+          <AttendeeRosterMeta attendee={attendee} settings={settings} />
         </div>
       </div>
 

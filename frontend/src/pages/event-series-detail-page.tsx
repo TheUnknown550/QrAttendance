@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarClock, QrCode, TableProperties } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatDate } from "../lib/utils";
-import type { EventSeries } from "../types/api";
+import type { EventSeries, EventSeriesSettings } from "../types/api";
 
 const seriesSchema = z.object({
   name: z.string().min(1),
@@ -22,6 +22,43 @@ const seriesSchema = z.object({
 });
 
 type SeriesValues = z.infer<typeof seriesSchema>;
+
+const SETTINGS_TOGGLES: Array<{
+  key: keyof EventSeriesSettings;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "requireCheckInApproval",
+    label: "Require approval before check-in",
+    description: "Scanning shows the attendee's info and waits for a tap on \"Check in\" to confirm. Turn off to check attendees in the instant their QR code is scanned.",
+  },
+  {
+    key: "showOrganizationName",
+    label: "Show organization name",
+    description: "Display the attendee's organization on the scanner and session roster.",
+  },
+  {
+    key: "showAttendeeType",
+    label: "Show type of attendee",
+    description: "Display the attendee's type (e.g. VIP, Guest) on the scanner and session roster.",
+  },
+  {
+    key: "showPhone",
+    label: "Show phone number",
+    description: "Display the attendee's phone number on the scanner and session roster.",
+  },
+  {
+    key: "showEmail",
+    label: "Show email address",
+    description: "Display the attendee's email on the scanner and session roster.",
+  },
+  {
+    key: "showAttendeeNumber",
+    label: "Show attendee number",
+    description: "Display the attendee's ticket number badge on the scanner and session roster.",
+  },
+];
 
 export function EventSeriesDetailPage() {
   const { id = "" } = useParams();
@@ -45,6 +82,8 @@ export function EventSeriesDetailPage() {
     resolver: zodResolver(seriesSchema),
   });
 
+  const [settings, setSettings] = useState<EventSeriesSettings | null>(null);
+
   useEffect(() => {
     if (!series) {
       return;
@@ -55,6 +94,15 @@ export function EventSeriesDetailPage() {
       description: series.description ?? "",
       startDate: series.startDate ? toDateTimeLocal(series.startDate) : "",
       endDate: series.endDate ? toDateTimeLocal(series.endDate) : "",
+    });
+
+    setSettings({
+      requireCheckInApproval: series.requireCheckInApproval,
+      showOrganizationName: series.showOrganizationName,
+      showAttendeeType: series.showAttendeeType,
+      showPhone: series.showPhone,
+      showEmail: series.showEmail,
+      showAttendeeNumber: series.showAttendeeNumber,
     });
   }, [reset, series]);
 
@@ -67,6 +115,28 @@ export function EventSeriesDetailPage() {
           endDate: values.endDate ? new Date(values.endDate).toISOString() : "",
         }),
       ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-series", auth?.activeOrganizationId] });
+      queryClient.invalidateQueries({ queryKey: ["event-series", auth?.activeOrganizationId, id] });
+    },
+  });
+
+  const settingsMutation = useMutation({
+    mutationFn: async () => {
+      if (!series || !settings) {
+        throw new Error("Event series not loaded");
+      }
+
+      return unwrapResponse<EventSeries>(
+        await api.patch(`/event-series/${id}`, {
+          name: series.name,
+          description: series.description ?? "",
+          startDate: series.startDate ?? "",
+          endDate: series.endDate ?? "",
+          ...settings,
+        }),
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-series", auth?.activeOrganizationId] });
       queryClient.invalidateQueries({ queryKey: ["event-series", auth?.activeOrganizationId, id] });
@@ -246,6 +316,58 @@ export function EventSeriesDetailPage() {
           </div>
         </Card>
       </div>
+
+      <Card>
+        <div>
+          <p className="text-sm font-semibold text-slate-900">Manage event</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Event settings</h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Controls how check-in works and what attendee details show up on the scanner and session roster for{" "}
+            <strong>{series.name}</strong>.
+          </p>
+        </div>
+
+        {settings ? (
+          <div className="mt-6 space-y-3">
+            {SETTINGS_TOGGLES.map((toggle) => (
+              <label
+                className="flex cursor-pointer items-start gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-4 transition hover:bg-white"
+                key={toggle.key}
+              >
+                <input
+                  checked={settings[toggle.key]}
+                  className="mt-0.5 size-4 shrink-0 rounded border-[var(--color-border)] text-amber-600 focus:ring-amber-500/40"
+                  onChange={(event) => {
+                    settingsMutation.reset();
+                    setSettings((current) => (current ? { ...current, [toggle.key]: event.target.checked } : current));
+                  }}
+                  type="checkbox"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-slate-900">{toggle.label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">{toggle.description}</span>
+                </span>
+              </label>
+            ))}
+
+            {settingsMutation.isError ? (
+              <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {getErrorMessage(settingsMutation.error)}
+              </p>
+            ) : null}
+
+            {settingsMutation.isSuccess ? (
+              <p className="rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                Event settings saved.
+              </p>
+            ) : null}
+
+            <Button onClick={() => settingsMutation.mutate()} type="button">
+              {settingsMutation.isPending ? "Saving..." : "Save event settings"}
+            </Button>
+          </div>
+        ) : null}
+      </Card>
     </div>
   );
 }

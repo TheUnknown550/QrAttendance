@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, ChevronDown, Plus, Radio, Sheet, X } from "lucide-react";
+import { CalendarDays, ChevronDown, Plus, Radio, Settings2, Sheet, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
@@ -125,6 +125,12 @@ export function EventSeriesListPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link to="/app/settings/organization">
+              <Button icon={<Settings2 className="size-4" />} variant="secondary">
+                Settings
+              </Button>
+            </Link>
+
             {selectedSeries ? (
               <Link to={`/app/reports/event-series/${selectedSeries.id}`}>
                 <Button icon={<Sheet className="size-4" />} variant="secondary">

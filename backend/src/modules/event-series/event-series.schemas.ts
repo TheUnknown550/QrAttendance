@@ -17,6 +17,12 @@ export const createEventSeriesSchema = z.object({
   description: optionalString,
   startDate: optionalDate,
   endDate: optionalDate,
+  requireCheckInApproval: z.boolean().optional(),
+  showOrganizationName: z.boolean().optional(),
+  showAttendeeType: z.boolean().optional(),
+  showPhone: z.boolean().optional(),
+  showEmail: z.boolean().optional(),
+  showAttendeeNumber: z.boolean().optional(),
 });
 
 export const updateEventSeriesSchema = createEventSeriesSchema;

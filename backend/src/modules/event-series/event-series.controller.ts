@@ -96,6 +96,12 @@ export const createEventSeries = asyncHandler(async (request, response) => {
       description: body.description,
       startDate: body.startDate ? new Date(body.startDate) : undefined,
       endDate: body.endDate ? new Date(body.endDate) : undefined,
+      requireCheckInApproval: body.requireCheckInApproval,
+      showOrganizationName: body.showOrganizationName,
+      showAttendeeType: body.showAttendeeType,
+      showPhone: body.showPhone,
+      showEmail: body.showEmail,
+      showAttendeeNumber: body.showAttendeeNumber,
       organizationId,
     },
   });
@@ -177,6 +183,12 @@ export const getEventSession = asyncHandler(async (request, response) => {
           select: {
             id: true,
             name: true,
+            requireCheckInApproval: true,
+            showOrganizationName: true,
+            showAttendeeType: true,
+            showPhone: true,
+            showEmail: true,
+            showAttendeeNumber: true,
           },
         },
         attendance: {
@@ -258,6 +270,12 @@ export const updateEventSeries = asyncHandler(async (request, response) => {
       description: body.description,
       startDate: body.startDate ? new Date(body.startDate) : null,
       endDate: body.endDate ? new Date(body.endDate) : null,
+      requireCheckInApproval: body.requireCheckInApproval,
+      showOrganizationName: body.showOrganizationName,
+      showAttendeeType: body.showAttendeeType,
+      showPhone: body.showPhone,
+      showEmail: body.showEmail,
+      showAttendeeNumber: body.showAttendeeNumber,
     },
   });
 

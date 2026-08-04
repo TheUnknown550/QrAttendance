@@ -21,12 +21,57 @@ import { Select } from "../components/ui/select";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { formatDate, resolveMediaUrl } from "../lib/utils";
-import type { EventSeries, PublicScannerSession, ScanResult, ScannerShareLink } from "../types/api";
+import type {
+  EventSeries,
+  EventSeriesSettings,
+  PublicScannerSession,
+  ScanResult,
+  ScannerShareLink,
+} from "../types/api";
 
 type CheckInPayload = {
   qrToken: string;
   eventSessionId: string;
 };
+
+const DEFAULT_SETTINGS: EventSeriesSettings = {
+  requireCheckInApproval: true,
+  showOrganizationName: true,
+  showAttendeeType: true,
+  showPhone: true,
+  showEmail: true,
+  showAttendeeNumber: true,
+};
+
+function AttendeeScanMeta({
+  attendee,
+  settings,
+}: {
+  attendee: NonNullable<ScanResult["attendee"]>;
+  settings: EventSeriesSettings;
+}) {
+  const orgAndType = [
+    settings.showOrganizationName ? attendee.organizationName : null,
+    settings.showAttendeeType ? attendee.attendeeType : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <>
+      {settings.showEmail ? (
+        <p className="mt-1 break-words text-sm text-slate-500">{attendee.email ?? "No email"}</p>
+      ) : null}
+      {orgAndType ? <p className="mt-1 break-words text-xs text-slate-500">{orgAndType}</p> : null}
+      {settings.showPhone && attendee.phone ? (
+        <p className="mt-1 break-words text-xs text-slate-500">{attendee.phone}</p>
+      ) : null}
+      {settings.showAttendeeNumber && attendee.attendeeNumber != null ? (
+        <p className="mt-1 break-words text-xs text-slate-500">Ticket #{attendee.attendeeNumber}</p>
+      ) : null}
+    </>
+  );
+}
 
 export function ScannerPage() {
   const { token } = useParams();
@@ -78,6 +123,9 @@ export function ScannerPage() {
   const currentSeriesId = isPublicScanner ? publicSession?.eventSeries.id : selectedSession?.seriesId;
   const currentSeriesName = isPublicScanner ? publicSession?.eventSeries.name : selectedSession?.seriesName;
   const currentSessionTitle = isPublicScanner ? publicSession?.title : selectedSession?.title;
+  const currentSeriesSettings: EventSeriesSettings =
+    (isPublicScanner ? publicSession?.eventSeries : seriesQuery.data?.find((series) => series.id === currentSeriesId)) ??
+    DEFAULT_SETTINGS;
 
   useEffect(() => {
     if (!isPublicScanner && !selectedSessionId && sessionOptions[0]) {
@@ -141,6 +189,7 @@ export function ScannerPage() {
         : unwrapResponse<ScanResult>(await api.post("/scan/check-in", payload)),
     onSuccess: (result) => {
       setLastResult(result);
+      setPaused(true);
       if (resumeTimeoutRef.current) {
         window.clearTimeout(resumeTimeoutRef.current);
       }
@@ -160,7 +209,12 @@ export function ScannerPage() {
     recentTokenRef.current = qrToken;
     setScannerError("");
     setPendingQrToken(qrToken);
-    lookupMutation.mutate(isPublicScanner ? { qrToken } : { qrToken, eventSessionId: currentSessionId }, {
+
+    const payload = isPublicScanner ? { qrToken } : { qrToken, eventSessionId: currentSessionId };
+    // Approval-required events review the attendee first; otherwise check in immediately on scan.
+    const mutation = currentSeriesSettings.requireCheckInApproval ? lookupMutation : checkInMutation;
+
+    mutation.mutate(payload, {
       onSettled: () => {
         if (recentTokenTimeoutRef.current) window.clearTimeout(recentTokenTimeoutRef.current);
         recentTokenTimeoutRef.current = window.setTimeout(() => {
@@ -328,7 +382,7 @@ export function ScannerPage() {
                   />
                   <div className="min-w-0">
                     <p className="break-words text-xl font-semibold text-slate-900">{lastResult.attendee.firstName} {lastResult.attendee.surname}</p>
-                    <p className="mt-1 break-words text-sm text-slate-500">{lastResult.attendee.email ?? "No email"}</p>
+                    <AttendeeScanMeta attendee={lastResult.attendee} settings={currentSeriesSettings} />
                   </div>
                 </div>
               ) : (
@@ -338,7 +392,7 @@ export function ScannerPage() {
                   </div>
                   <div className="min-w-0">
                     <p className="break-words text-xl font-semibold text-slate-900">{lastResult.attendee.firstName} {lastResult.attendee.surname}</p>
-                    <p className="mt-1 break-words text-sm text-slate-500">{lastResult.attendee.email ?? "No email"}</p>
+                    <AttendeeScanMeta attendee={lastResult.attendee} settings={currentSeriesSettings} />
                   </div>
                 </div>
               )
@@ -547,7 +601,7 @@ export function ScannerPage() {
                   )}
                   <div className="min-w-0">
                     <p className="break-words font-semibold text-slate-900">{lastResult.attendee.firstName} {lastResult.attendee.surname}</p>
-                    <p className="break-words text-sm text-slate-500">{lastResult.attendee.email ?? "No email"}</p>
+                    <AttendeeScanMeta attendee={lastResult.attendee} settings={currentSeriesSettings} />
                   </div>
                 </div>
               ) : null}
