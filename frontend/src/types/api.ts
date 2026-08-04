@@ -236,3 +236,29 @@ export type SeriesReport = {
   sessions: EventSession[];
   items: ReportItem[];
 };
+
+export type ImportTargetField =
+  | "fullName"
+  | "firstName"
+  | "surname"
+  | "organizationName"
+  | "attendeeType"
+  | "email"
+  | "phone"
+  | "attendeeNumber";
+
+export type ImportColumnMapping = Partial<Record<ImportTargetField, number>>;
+
+export type ParseAttendeeImportResult = {
+  headers: string[];
+  rows: string[][];
+  previewRows: string[][];
+  totalRows: number;
+  suggestedMapping: ImportColumnMapping;
+};
+
+export type ConfirmAttendeeImportResult = {
+  created: number;
+  skippedCount: number;
+  skipped: Array<{ row: number; reason: string }>;
+};

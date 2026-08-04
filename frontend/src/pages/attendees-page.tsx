@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Mail, Plus, Search, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Mail, Plus, Search, Upload, Users } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { BulkImportModal } from "../components/attendees/bulk-import-modal";
 import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -55,6 +56,7 @@ export function AttendeesPage() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [imageInputKey, setImageInputKey] = useState(0);
   const [sendQrEmailsOpen, setSendQrEmailsOpen] = useState(false);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [qrEmailsToast, setQrEmailsToast] = useState("");
   const deferredSearch = useDeferredValue(search);
   const {
@@ -241,6 +243,16 @@ export function AttendeesPage() {
           <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
             <Button
               className="w-full sm:w-auto"
+              icon={<Upload className="size-4" />}
+              onClick={() => setBulkImportOpen(true)}
+              type="button"
+              variant="secondary"
+            >
+              Bulk import
+            </Button>
+
+            <Button
+              className="w-full sm:w-auto"
               icon={<Mail className="size-4" />}
               onClick={() => setSendQrEmailsOpen(true)}
               type="button"
@@ -279,6 +291,8 @@ export function AttendeesPage() {
           open={sendQrEmailsOpen}
           totalAttendees={pagination?.total ?? 0}
         />
+
+        <BulkImportModal onClose={() => setBulkImportOpen(false)} open={bulkImportOpen} />
 
         <div className="mt-6 hidden overflow-hidden rounded-[10px] bg-[var(--color-surface-soft)] md:block">
           <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_140px] border-b border-[var(--color-border)] px-5 py-3 text-xs uppercase tracking-[0.22em] text-slate-500">

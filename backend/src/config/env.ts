@@ -36,6 +36,7 @@ const envSchema = z.object({
   AUTH_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(20),
   REPORT_EXPORT_MAX_ROWS: z.coerce.number().int().positive().default(5000),
+  ATTENDEE_IMPORT_MAX_ROWS: z.coerce.number().int().positive().default(5000),
   DEFAULT_PAGE_SIZE: z.coerce.number().int().positive().default(25),
   MAX_PAGE_SIZE: z.coerce.number().int().positive().default(100),
   RESEND_API_KEY: z.string().startsWith("re_"),

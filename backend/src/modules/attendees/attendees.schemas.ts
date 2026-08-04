@@ -45,3 +45,21 @@ export const sendQrEmailsSchema = z.object({
   message: optionalString,
   attendeeIds: z.array(z.string().uuid()).optional(),
 });
+
+const columnIndexSchema = z.number().int().min(0);
+
+export const importColumnMappingSchema = z.object({
+  fullName: columnIndexSchema.optional(),
+  firstName: columnIndexSchema.optional(),
+  surname: columnIndexSchema.optional(),
+  organizationName: columnIndexSchema.optional(),
+  attendeeType: columnIndexSchema.optional(),
+  email: columnIndexSchema,
+  phone: columnIndexSchema.optional(),
+  attendeeNumber: columnIndexSchema.optional(),
+});
+
+export const confirmAttendeeImportSchema = z.object({
+  rows: z.array(z.array(z.string())).min(1),
+  mapping: importColumnMappingSchema,
+});
