@@ -4,6 +4,7 @@ import { ApiError } from "../../utils/api-error";
 import { successResponse } from "../../utils/api-response";
 import { asyncHandler } from "../../utils/async-handler";
 import { touchOrganizationActivity } from "../organizations/organizations.activity";
+import { saveCheckInPhoto } from "./scan.upload";
 import { checkInSchema, publicCheckInSchema } from "./scan.schemas";
 
 async function generateUniquePublicScanToken() {
@@ -142,7 +143,12 @@ async function performLookup(eventSessionId: string, organizationId: string, qrT
   };
 }
 
-async function performCheckIn(eventSessionId: string, organizationId: string, qrToken: string) {
+async function performCheckIn(
+  eventSessionId: string,
+  organizationId: string,
+  qrToken: string,
+  checkInPhotoUrl?: string,
+) {
   const [session, attendee] = await Promise.all([
     prisma.eventSession.findFirst({
       where: {
@@ -234,6 +240,7 @@ async function performCheckIn(eventSessionId: string, organizationId: string, qr
     data: {
       attendeeId: attendee.id,
       eventSessionId: session.id,
+      checkInPhotoUrl,
     },
   });
 
@@ -256,6 +263,7 @@ async function performCheckIn(eventSessionId: string, organizationId: string, qr
           profileImageUrl: attendee.profileImageUrl,
         },
         checkedInAt: record.checkedInAt,
+        checkInPhotoUrl: record.checkInPhotoUrl,
       },
       "Check-in successful",
     ),
@@ -284,6 +292,7 @@ export const getSessionShareLink = asyncHandler(async (request, response) => {
           showPhone: true,
           showEmail: true,
           showAttendeeNumber: true,
+          requireCheckInPhoto: true,
         },
       },
     },
@@ -328,6 +337,7 @@ export const getPublicScannerSession = asyncHandler(async (request, response) =>
           showPhone: true,
           showEmail: true,
           showAttendeeNumber: true,
+          requireCheckInPhoto: true,
         },
       },
     },
@@ -403,5 +413,42 @@ export const publicCheckIn = asyncHandler(async (request, response) => {
   const session = await resolvePublicSession(token);
 
   const result = await performCheckIn(session.id, session.eventSeries.organizationId, body.qrToken);
+  response.status(result.statusCode).json(result.body);
+});
+
+export const publicCheckInWithPhoto = asyncHandler(async (request, response) => {
+  const token = request.params.token as string;
+  const body = publicCheckInSchema.parse(request.body);
+  const session = await resolvePublicSession(token);
+
+  if (!request.file) {
+    throw new ApiError(400, "A check-in photo is required for this event");
+  }
+
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: session.eventSeries.organizationId,
+    },
+    select: {
+      name: true,
+    },
+  });
+
+  if (!organization) {
+    throw new ApiError(404, "Organization not found");
+  }
+
+  const photo = await saveCheckInPhoto({
+    tenantName: organization.name,
+    sessionId: session.id,
+    file: request.file,
+  });
+
+  const result = await performCheckIn(
+    session.id,
+    session.eventSeries.organizationId,
+    body.qrToken,
+    photo.publicUrl,
+  );
   response.status(result.statusCode).json(result.body);
 });

@@ -9,6 +9,7 @@ import {
   Share2,
   Sheet,
   Smartphone,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -41,6 +42,7 @@ const DEFAULT_SETTINGS: EventSeriesSettings = {
   showPhone: true,
   showEmail: true,
   showAttendeeNumber: true,
+  requireCheckInPhoto: false,
 };
 
 function AttendeeScanMeta({
@@ -73,6 +75,171 @@ function AttendeeScanMeta({
   );
 }
 
+function PhotoCaptureOverlay({
+  onConfirm,
+  onCancel,
+  isSubmitting,
+  submitError,
+}: {
+  onConfirm: (photo: Blob) => void;
+  onCancel: () => void;
+  isSubmitting: boolean;
+  submitError: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [capturedPhoto, setCapturedPhoto] = useState<{ blob: Blob; previewUrl: string } | null>(null);
+  const [cameraError, setCameraError] = useState("");
+
+  useEffect(() => {
+    if (capturedPhoto) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+          audio: false,
+        });
+
+        if (cancelled) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+      } catch {
+        setCameraError("Could not access the camera. Check your browser's camera permission and try again.");
+      }
+    }
+
+    void startCamera();
+
+    return () => {
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    };
+  }, [capturedPhoto]);
+
+  useEffect(() => {
+    return () => {
+      if (capturedPhoto) {
+        URL.revokeObjectURL(capturedPhoto.previewUrl);
+      }
+    };
+  }, [capturedPhoto]);
+
+  function handleCapture() {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0) {
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return;
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          setCapturedPhoto({ blob, previewUrl: URL.createObjectURL(blob) });
+        }
+      },
+      "image/jpeg",
+      0.9,
+    );
+
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  }
+
+  function handleRetake() {
+    if (capturedPhoto) {
+      URL.revokeObjectURL(capturedPhoto.previewUrl);
+    }
+    setCapturedPhoto(null);
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex flex-col bg-black">
+      <div className="flex items-center justify-between px-5 pb-4 pt-6">
+        <p className="text-sm font-semibold text-white">Take check-in photo</p>
+        <button
+          className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white"
+          onClick={onCancel}
+          type="button"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+
+      <div className="relative flex-1 overflow-hidden">
+        {capturedPhoto ? (
+          <img alt="Captured check-in" className="h-full w-full object-cover" src={capturedPhoto.previewUrl} />
+        ) : (
+          <video autoPlay className="h-full w-full object-cover" muted playsInline ref={videoRef} />
+        )}
+
+        {cameraError ? (
+          <div className="absolute inset-x-4 top-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {cameraError}
+          </div>
+        ) : null}
+      </div>
+
+      {submitError ? (
+        <p className="mx-5 mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{submitError}</p>
+      ) : null}
+
+      <div className="flex items-center justify-center gap-4 px-6 py-8">
+        {capturedPhoto ? (
+          <>
+            <Button
+              disabled={isSubmitting}
+              icon={<X className="size-4" />}
+              onClick={handleRetake}
+              type="button"
+              variant="secondary"
+            >
+              Retake
+            </Button>
+            <Button
+              disabled={isSubmitting}
+              icon={<CircleCheckBig className="size-4" />}
+              onClick={() => onConfirm(capturedPhoto.blob)}
+              type="button"
+            >
+              {isSubmitting ? "Confirming..." : "Confirm check-in"}
+            </Button>
+          </>
+        ) : (
+          <button
+            aria-label="Take photo"
+            className="flex size-16 items-center justify-center rounded-full border-4 border-white bg-white/20"
+            onClick={handleCapture}
+            type="button"
+          >
+            <span className="size-12 rounded-full bg-white" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ScannerPage() {
   const { token } = useParams();
   const [searchParams] = useSearchParams();
@@ -90,6 +257,7 @@ export function ScannerPage() {
   const shareFeedbackTimeoutRef = useRef<number | null>(null);
   const recentTokenTimeoutRef = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
+  const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
 
   const seriesQuery = useQuery({
     queryKey: ["event-series", auth?.activeOrganizationId],
@@ -205,6 +373,24 @@ export function ScannerPage() {
     },
   });
 
+  const checkInWithPhotoMutation = useMutation({
+    mutationFn: async ({ qrToken, photo }: { qrToken: string; photo: Blob }) => {
+      const formData = new FormData();
+      formData.append("qrToken", qrToken);
+      formData.append("photo", photo, "check-in.jpg");
+      return unwrapResponse<ScanResult>(await api.post(`/public/scan/${token}/check-in-with-photo`, formData));
+    },
+    onSuccess: (result) => {
+      setIsCapturingPhoto(false);
+      setLastResult(result);
+      setPaused(true);
+      if (resumeTimeoutRef.current) {
+        window.clearTimeout(resumeTimeoutRef.current);
+      }
+      resumeTimeoutRef.current = window.setTimeout(() => setPaused(false), 2200);
+    },
+  });
+
   function submitToken(qrToken: string) {
     if (!currentSessionId || lookupMutation.isPending || checkInMutation.isPending || !qrToken) {
       return;
@@ -237,9 +423,23 @@ export function ScannerPage() {
       return;
     }
 
+    if (isPublicScanner && currentSeriesSettings.requireCheckInPhoto) {
+      checkInWithPhotoMutation.reset();
+      setIsCapturingPhoto(true);
+      return;
+    }
+
     checkInMutation.mutate(
       isPublicScanner ? { qrToken: pendingQrToken } : { qrToken: pendingQrToken, eventSessionId: currentSessionId },
     );
+  }
+
+  function submitCheckInWithPhoto(photo: Blob) {
+    if (!pendingQrToken || checkInWithPhotoMutation.isPending) {
+      return;
+    }
+
+    checkInWithPhotoMutation.mutate({ qrToken: pendingQrToken, photo });
   }
 
   function dismissReview() {
@@ -249,6 +449,7 @@ export function ScannerPage() {
     setLastResult(null);
     setPendingQrToken("");
     setPaused(false);
+    setIsCapturingPhoto(false);
     recentTokenRef.current = "";
   }
 
@@ -429,6 +630,15 @@ export function ScannerPage() {
           <div className="absolute inset-x-4 bottom-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {scannerError}
           </div>
+        ) : null}
+
+        {isCapturingPhoto ? (
+          <PhotoCaptureOverlay
+            isSubmitting={checkInWithPhotoMutation.isPending}
+            onCancel={() => setIsCapturingPhoto(false)}
+            onConfirm={submitCheckInWithPhoto}
+            submitError={checkInWithPhotoMutation.isError ? getErrorMessage(checkInWithPhotoMutation.error) : ""}
+          />
         ) : null}
       </div>
     );

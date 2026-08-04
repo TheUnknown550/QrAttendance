@@ -102,6 +102,7 @@ export const createEventSeries = asyncHandler(async (request, response) => {
       showPhone: body.showPhone,
       showEmail: body.showEmail,
       showAttendeeNumber: body.showAttendeeNumber,
+      requireCheckInPhoto: body.requireCheckInPhoto,
       organizationId,
     },
   });
@@ -189,6 +190,7 @@ export const getEventSession = asyncHandler(async (request, response) => {
             showPhone: true,
             showEmail: true,
             showAttendeeNumber: true,
+            requireCheckInPhoto: true,
           },
         },
         attendance: {
@@ -276,6 +278,7 @@ export const updateEventSeries = asyncHandler(async (request, response) => {
       showPhone: body.showPhone,
       showEmail: body.showEmail,
       showAttendeeNumber: body.showAttendeeNumber,
+      requireCheckInPhoto: body.requireCheckInPhoto,
     },
   });
 

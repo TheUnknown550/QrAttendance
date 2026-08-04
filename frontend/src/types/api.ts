@@ -109,6 +109,7 @@ export type EventSeriesSettings = {
   showPhone: boolean;
   showEmail: boolean;
   showAttendeeNumber: boolean;
+  requireCheckInPhoto: boolean;
 };
 
 export type EventSessionDetail = EventSession & {
@@ -188,6 +189,7 @@ export type ScanResult = {
     profileImageUrl?: string | null;
   };
   checkedInAt?: string;
+  checkInPhotoUrl?: string | null;
 };
 
 export type ScannerShareLink = {
@@ -235,6 +237,7 @@ export type ReportItem = {
     sessionDate: string;
     attended: boolean;
     checkedInAt?: string | null;
+    checkInPhotoUrl?: string | null;
   }>;
 };
 

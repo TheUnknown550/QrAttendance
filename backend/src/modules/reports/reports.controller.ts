@@ -82,6 +82,7 @@ async function buildAttendanceReport(seriesId: string, organizationId: string) {
           sessionDate: session.sessionDate,
           attended: Boolean(record),
           checkedInAt: record?.checkedInAt ?? null,
+          checkInPhotoUrl: record?.checkInPhotoUrl ?? null,
         };
       }),
     };
@@ -103,7 +104,11 @@ function buildReportRowsForExport(report: Awaited<ReturnType<typeof buildAttenda
     const sessionColumns = Object.fromEntries(
       item.sessionAttendance.map((session) => [
         `${session.title} (${new Date(session.sessionDate).toLocaleDateString("en-US")})`,
-        session.attended ? "Joined" : "Did not join",
+        session.attended
+          ? session.checkInPhotoUrl
+            ? `Joined (photo: ${env.APP_URL}${session.checkInPhotoUrl})`
+            : "Joined"
+          : "Did not join",
       ]),
     );
 

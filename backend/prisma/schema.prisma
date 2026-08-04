@@ -128,6 +128,7 @@ model EventSeries {
   showPhone              Boolean        @default(true) @map("show_phone")
   showEmail              Boolean        @default(true) @map("show_email")
   showAttendeeNumber     Boolean        @default(true) @map("show_attendee_number")
+  requireCheckInPhoto    Boolean        @default(false) @map("require_check_in_photo")
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   sessions               EventSession[]
@@ -182,6 +183,7 @@ model AttendanceRecord {
   attendee       Attendee     @relation(fields: [attendeeId], references: [id], onDelete: Restrict)
   eventSession   EventSession @relation(fields: [eventSessionId], references: [id], onDelete: Restrict)
   checkedInAt    DateTime     @default(now())
+  checkInPhotoUrl String?     @map("check_in_photo_url")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

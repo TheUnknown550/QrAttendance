@@ -65,6 +65,12 @@ const SETTINGS_TOGGLES: Array<{
     label: "Show attendee number",
     description: "Display the attendee's ticket number badge on the scanner and session roster.",
   },
+  {
+    key: "requireCheckInPhoto",
+    label: "Require photo at check-in",
+    description:
+      "On the public phone scanner, staff must take a photo of the attendee before the check-in is confirmed. The photo is saved and shown in this event's attendance report.",
+  },
 ];
 
 export function EventSeriesDetailPage() {
@@ -110,6 +116,7 @@ export function EventSeriesDetailPage() {
       showPhone: series.showPhone,
       showEmail: series.showEmail,
       showAttendeeNumber: series.showAttendeeNumber,
+      requireCheckInPhoto: series.requireCheckInPhoto,
     });
   }, [reset, series]);
 

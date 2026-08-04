@@ -23,6 +23,7 @@ export const createEventSeriesSchema = z.object({
   showPhone: z.boolean().optional(),
   showEmail: z.boolean().optional(),
   showAttendeeNumber: z.boolean().optional(),
+  requireCheckInPhoto: z.boolean().optional(),
 });
 
 export const updateEventSeriesSchema = createEventSeriesSchema;

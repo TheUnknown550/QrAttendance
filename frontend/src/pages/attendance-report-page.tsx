@@ -123,15 +123,26 @@ export function AttendanceReportPage() {
                           {sessionInfo?.sessionDate ? formatDate(sessionInfo.sessionDate) : ""}
                         </p>
                       </div>
-                      <span
-                        className={
-                          session.attended
-                            ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
-                            : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"
-                        }
-                      >
-                        {session.attended ? "Joined" : "Missed"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {session.checkInPhotoUrl ? (
+                          <a href={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined} rel="noreferrer" target="_blank">
+                            <img
+                              alt="Check-in proof"
+                              className="size-9 rounded-[6px] object-cover ring-1 ring-[var(--color-border)]"
+                              src={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined}
+                            />
+                          </a>
+                        ) : null}
+                        <span
+                          className={
+                            session.attended
+                              ? "rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                              : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"
+                          }
+                        >
+                          {session.attended ? "Joined" : "Missed"}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
@@ -195,15 +206,30 @@ export function AttendanceReportPage() {
                             : "rounded-[8px] bg-[var(--color-surface-soft)] px-3 py-2"
                         }
                       >
-                        <p
-                          className={
-                            session.attended
-                              ? "text-sm font-semibold text-emerald-700"
-                              : "text-sm font-semibold text-slate-600"
-                          }
-                        >
-                          {session.attended ? "Joined" : "Missed"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          {session.checkInPhotoUrl ? (
+                            <a
+                              href={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              <img
+                                alt="Check-in proof"
+                                className="size-9 rounded-[6px] object-cover ring-1 ring-[var(--color-border)]"
+                                src={resolveMediaUrl(session.checkInPhotoUrl) ?? undefined}
+                              />
+                            </a>
+                          ) : null}
+                          <p
+                            className={
+                              session.attended
+                                ? "text-sm font-semibold text-emerald-700"
+                                : "text-sm font-semibold text-slate-600"
+                            }
+                          >
+                            {session.attended ? "Joined" : "Missed"}
+                          </p>
+                        </div>
                         <p className="mt-1 text-xs text-slate-400">
                           {session.checkedInAt ? formatDate(session.checkedInAt) : "No check-in"}
                         </p>
