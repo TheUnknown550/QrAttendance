@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(grep -E \"^resend$|^sharp$\")",
+      "Bash(npm install *)",
+      "Bash(systemctl reload *)",
+      "Bash(pm2 restart *)"
+    ]
+  }
+}

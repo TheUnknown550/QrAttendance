@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id             String                   @id @default(uuid()) @db.Uuid
+  name           String
+  email          String                   @unique
+  passwordHash   String
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  memberships    OrganizationMembership[]
+  invitesCreated OrganizationInvite[]
+  passwordResetTokens PasswordResetToken[]
+  refreshSessions RefreshSession[]
+
+  @@map("users")
+}
+
+model RefreshSession {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  revokedAt  DateTime?
+  userAgent  String?
+  ipAddress  String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@map("refresh_sessions")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model Organization {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  name                String
+  joinCode            String                   @unique
+  status              OrganizationStatus       @default(ACTIVE)
+  lastActivityAt      DateTime                 @default(now())
+  inactiveSinceAt     DateTime?
+  scheduledDeletionAt DateTime?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  memberships         OrganizationMembership[]
+  invites             OrganizationInvite[]
+  attendees           Attendee[]
+  eventSeries         EventSeries[]
+
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @db.Uuid
+  organizationId String           @db.Uuid
+  role           OrganizationRole @default(MEMBER)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@map("organization_memberships")
+}
+
+model OrganizationInvite {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  createdByUserId String      @db.Uuid
+  token          String       @unique
+  expiresAt      DateTime?
+  usedCount      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User         @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("organization_invites")
+}
+
+model EventSeries {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  name           String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sessions       EventSession[]
+
+  @@index([organizationId])
+  @@unique([organizationId, name])
+  @@map("event_series")
+}
+
+model EventSession {
+  id            String             @id @default(uuid()) @db.Uuid
+  eventSeriesId String             @db.Uuid
+  eventSeries   EventSeries        @relation(fields: [eventSeriesId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  sessionDate   DateTime
+  publicScanToken String?          @unique
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  attendance    AttendanceRecord[]
+
+  @@index([eventSeriesId])
+  @@map("event_sessions")
+}
+
+model Attendee {
+  id              String             @id @default(uuid()) @db.Uuid
+  organizationId  String             @db.Uuid
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  name            String
+  email           String
+  phone           String?
+  attendeeNumber  Int?               @map("attendee_number")
+  profileImageUrl String?
+  qrToken         String             @unique
+  deletedAt       DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  attendance      AttendanceRecord[]
+
+  @@index([organizationId])
+  @@map("attendees")
+}
+
+model AttendanceRecord {
+  id             String       @id @default(uuid()) @db.Uuid
+  attendeeId     String       @db.Uuid
+  eventSessionId String       @db.Uuid
+  attendee       Attendee     @relation(fields: [attendeeId], references: [id], onDelete: Restrict)
+  eventSession   EventSession @relation(fields: [eventSessionId], references: [id], onDelete: Restrict)
+  checkedInAt    DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([attendeeId, eventSessionId])
+  @@index([eventSessionId])
+  @@map("attendance_records")
+}

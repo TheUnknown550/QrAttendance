@@ -1,0 +1,21 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="64" fill="#0F172A"/>
+  <rect x="30" y="30" width="196" height="196" rx="50" fill="#111827" stroke="#334155" stroke-width="8"/>
+  <rect x="52" y="52" width="54" height="54" rx="16" stroke="#F8FAFC" stroke-width="12"/>
+  <rect x="68" y="68" width="22" height="22" rx="6" fill="#F8FAFC"/>
+  <rect x="150" y="52" width="54" height="54" rx="16" stroke="#F8FAFC" stroke-width="12"/>
+  <rect x="166" y="68" width="22" height="22" rx="6" fill="#F8FAFC"/>
+  <rect x="52" y="150" width="54" height="54" rx="16" stroke="#F8FAFC" stroke-width="12"/>
+  <rect x="68" y="166" width="22" height="22" rx="6" fill="#F8FAFC"/>
+  <path d="M130 64H140" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M130 86H158" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M128 128H152V152H128V128Z" fill="#F8FAFC"/>
+  <path d="M170 128H190" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M190 128V148" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M170 170H192" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M148 170H148V192H170" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M128 108V124" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M106 128H122" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M170 108V118" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round"/>
+  <path d="M108 128V148H128" stroke="#F8FAFC" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

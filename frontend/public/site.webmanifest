@@ -1,0 +1,16 @@
+{
+  "name": "EventQR",
+  "short_name": "EventQR",
+  "description": "QR attendance platform for recurring event series and workshops.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f2ea",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/eventqr-mark-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
