@@ -37,3 +37,10 @@ export const createAttendeeSchema = z.object({
 export const updateAttendeeSchema = createAttendeeSchema.partial().extend({
   removeProfileImage: z.boolean().optional(),
 });
+
+export const sendQrEmailsSchema = z.object({
+  eventName: z.string().trim().min(1),
+  eventDate: optionalString,
+  eventLocation: optionalString,
+  message: optionalString,
+});

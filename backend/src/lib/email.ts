@@ -21,6 +21,18 @@ type PasswordChangedSuccessPayload = {
   changedAt: Date;
 };
 
+type AttendeeQrCodeMailPayload = {
+  to: string;
+  firstName: string;
+  surname: string;
+  organizationName: string;
+  eventName: string;
+  eventDate?: string | null;
+  eventLocation?: string | null;
+  message?: string | null;
+  qrPngBuffer: Buffer;
+};
+
 export async function sendPasswordResetEmail(payload: PasswordResetMailPayload) {
   const previewText = `Reset your EventQR password. This link expires in ${payload.expiresInMinutes} minutes.`;
 
@@ -284,5 +296,167 @@ export async function sendPasswordChangedSuccessEmail(payload: PasswordChangedSu
     subject: "EventQR password changed",
     html,
     text,
+  });
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload) {
+  const fullName = `${payload.firstName} ${payload.surname}`.trim();
+  const previewText = `Your check-in QR code for ${payload.eventName}`;
+  const safeFullName = escapeHtml(fullName);
+  const safeEventName = escapeHtml(payload.eventName);
+  const safeOrganizationName = escapeHtml(payload.organizationName);
+  const safeEventDate = payload.eventDate ? escapeHtml(payload.eventDate) : null;
+  const safeEventLocation = payload.eventLocation ? escapeHtml(payload.eventLocation) : null;
+  const safeMessage = payload.message ? escapeHtml(payload.message) : null;
+
+  const detailRows = [
+    safeEventDate ? { label: "Date", value: safeEventDate } : null,
+    safeEventLocation ? { label: "Location", value: safeEventLocation } : null,
+  ].filter((row): row is { label: string; value: string } => row !== null);
+
+  const detailRowsHtml = detailRows
+    .map(
+      (row) => `
+        <tr>
+          <td style="padding:6px 0;font-size:13px;color:#64748b;width:90px;">${row.label}</td>
+          <td style="padding:6px 0;font-size:13px;color:#0f172a;font-weight:600;">${row.value}</td>
+        </tr>
+      `,
+    )
+    .join("");
+
+  const html = `
+    <div style="display:none;opacity:0;overflow:hidden;max-height:0;max-width:0;">
+      ${previewText}
+    </div>
+    <div style="margin:0;padding:24px 0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;color:#0f172a;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;">
+              <tr>
+                <td style="padding:0 20px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
+                    <tr>
+                      <td style="padding:26px 28px;background:linear-gradient(145deg,#fff7ed 0%,#fffbeb 100%);border-bottom:1px solid #f1f5f9;">
+                        <p style="margin:0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#b45309;font-weight:700;">
+                          EventQR
+                        </p>
+                        <h1 style="margin:10px 0 0;font-size:26px;line-height:1.3;color:#0f172a;">
+                          ${safeEventName}
+                        </h1>
+                        <p style="margin:6px 0 0;font-size:13px;color:#92400e;">
+                          Hosted by ${safeOrganizationName}
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:26px 28px;">
+                        <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:#334155;">
+                          Hi ${safeFullName},
+                        </p>
+                        <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#334155;">
+                          Here is your personal check-in QR code. Show it at the entrance and it will be scanned for attendance &mdash; no need to print anything, just have this email open on your phone.
+                        </p>
+
+                        ${
+                          detailRowsHtml
+                            ? `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:20px;">
+                                <tr>
+                                  <td style="padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+                                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                      ${detailRowsHtml}
+                                    </table>
+                                  </td>
+                                </tr>
+                              </table>`
+                            : ""
+                        }
+
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:20px;">
+                          <tr>
+                            <td align="center" style="padding:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;">
+                              <img
+                                alt="Your check-in QR code"
+                                src="cid:attendee-qr-code"
+                                style="display:block;width:220px;height:220px;border-radius:8px;"
+                              />
+                              <p style="margin:14px 0 0;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">
+                                Scan at check-in
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                        ${
+                          safeMessage
+                            ? `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:separate;margin-bottom:8px;">
+                                <tr>
+                                  <td style="padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;">
+                                    <p style="margin:0;font-size:13px;line-height:1.6;color:#92400e;">
+                                      ${safeMessage}
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>`
+                            : ""
+                        }
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:14px 0 0;font-size:12px;line-height:1.6;color:#64748b;text-align:center;">
+                    Sent by ${safeOrganizationName} via EventQR &middot;
+                    <a href="mailto:support@magitecx.com" style="color:#b45309;text-decoration:none;">support@magitecx.com</a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+
+  const text = [
+    `Your check-in QR code for ${payload.eventName}`,
+    "",
+    `Hi ${fullName},`,
+    "",
+    "Your personal check-in QR code is attached to this email as an image.",
+    "Open it on your phone and show it at the entrance to check in.",
+    "",
+    payload.eventDate ? `Date: ${payload.eventDate}` : "",
+    payload.eventLocation ? `Location: ${payload.eventLocation}` : "",
+    payload.message ? `\n${payload.message}` : "",
+    "",
+    `Hosted by ${payload.organizationName} via EventQR`,
+    "Support: support@magitecx.com",
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+
+  await resend.emails.send({
+    from: env.RESEND_FROM_EMAIL,
+    to: payload.to,
+    subject: `Your check-in QR code for ${payload.eventName}`,
+    html,
+    text,
+    attachments: [
+      {
+        content: payload.qrPngBuffer,
+        filename: "qr-code.png",
+        contentType: "image/png",
+        contentId: "attendee-qr-code",
+      },
+    ],
   });
 }

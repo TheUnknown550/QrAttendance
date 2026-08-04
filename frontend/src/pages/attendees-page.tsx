@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Plus, Search, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Mail, Plus, Search, Users } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -53,6 +54,7 @@ export function AttendeesPage() {
   const [page, setPage] = useState(1);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [imageInputKey, setImageInputKey] = useState(0);
+  const [sendQrEmailsOpen, setSendQrEmailsOpen] = useState(false);
   const deferredSearch = useDeferredValue(search);
   const {
     register,
@@ -226,19 +228,36 @@ export function AttendeesPage() {
             <h2 className="mt-2 text-3xl font-semibold text-slate-900">{pagination?.total ?? 0}</h2>
           </div>
 
-          <div className="relative w-full max-w-sm">
-            <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
-            <Input
-              className="pl-11"
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-              }}
-              placeholder="Search name, organization, type, email, phone"
-              value={search}
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              icon={<Mail className="size-4" />}
+              onClick={() => setSendQrEmailsOpen(true)}
+              type="button"
+              variant="secondary"
+            >
+              Send QR emails
+            </Button>
+
+            <div className="relative w-full max-w-sm">
+              <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
+              <Input
+                className="pl-11"
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search name, organization, type, email, phone"
+                value={search}
+              />
+            </div>
           </div>
         </div>
+
+        <SendQrEmailsModal
+          onClose={() => setSendQrEmailsOpen(false)}
+          open={sendQrEmailsOpen}
+          totalAttendees={pagination?.total ?? 0}
+        />
 
         <div className="mt-6 hidden overflow-hidden rounded-[10px] bg-[var(--color-surface-soft)] md:block">
           <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_140px] border-b border-[var(--color-border)] px-5 py-3 text-xs uppercase tracking-[0.22em] text-slate-500">
