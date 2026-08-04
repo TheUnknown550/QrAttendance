@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, CheckCircle2, Search, Trash2, XCircle } from "lucide-react";
+import { CalendarClock, CheckCircle2, Radio, Search, Trash2, XCircle } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -204,6 +204,11 @@ export function SessionDetailPage() {
               to={`/app/event-series/${session.eventSeries.id}`}
             >
               Back to {session.eventSeries.name}
+            </Link>
+            <Link to={`/app/scanner?session=${sessionId}`}>
+              <Button className="w-full" icon={<Radio className="size-4" />}>
+                Open scanner
+              </Button>
             </Link>
             <Button onClick={() => setIsEditing((value) => !value)} type="button" variant="secondary">
               {isEditing ? "Cancel edit" : "Edit"}

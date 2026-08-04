@@ -27,7 +27,6 @@ const ReportsPage = lazy(() => import("./pages/reports-page").then((module) => (
 const ResetPasswordPage = lazy(() => import("./pages/reset-password-page").then((module) => ({ default: module.ResetPasswordPage })));
 const ScannerPage = lazy(() => import("./pages/scanner-page").then((module) => ({ default: module.ScannerPage })));
 const SessionDetailPage = lazy(() => import("./pages/session-detail-page").then((module) => ({ default: module.SessionDetailPage })));
-const SessionsManagementPage = lazy(() => import("./pages/sessions-management-page").then((module) => ({ default: module.SessionsManagementPage })));
 const TermsOfServicePage = lazy(() => import("./pages/terms-of-service-page").then((module) => ({ default: module.TermsOfServicePage })));
 
 function App() {
@@ -56,7 +55,6 @@ function App() {
               <Route path="settings/organization" element={<OrganizationSettingsPage />} />
               <Route path="event-series" element={<EventSeriesListPage />} />
               <Route path="event-series/:id" element={<EventSeriesDetailPage />} />
-              <Route path="event-series/:id/sessions" element={<SessionsManagementPage />} />
               <Route path="event-series/:id/sessions/:sessionId" element={<SessionDetailPage />} />
               <Route path="attendees" element={<AttendeesPage />} />
               <Route path="attendees/:id" element={<AttendeeDetailPage />} />

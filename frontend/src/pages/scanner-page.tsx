@@ -11,7 +11,7 @@ import {
   Smartphone,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BrandBadge } from "../components/brand/brand-badge";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -75,6 +75,8 @@ function AttendeeScanMeta({
 
 export function ScannerPage() {
   const { token } = useParams();
+  const [searchParams] = useSearchParams();
+  const preselectedSessionId = searchParams.get("session");
   const { auth } = useAuth();
   const isPublicScanner = Boolean(token);
   const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -128,10 +130,16 @@ export function ScannerPage() {
     DEFAULT_SETTINGS;
 
   useEffect(() => {
-    if (!isPublicScanner && !selectedSessionId && sessionOptions[0]) {
-      setSelectedSessionId(sessionOptions[0].id);
+    if (isPublicScanner || selectedSessionId || sessionOptions.length === 0) {
+      return;
     }
-  }, [isPublicScanner, selectedSessionId, sessionOptions]);
+
+    const preselected = preselectedSessionId
+      ? sessionOptions.find((session) => session.id === preselectedSessionId)
+      : undefined;
+
+    setSelectedSessionId(preselected?.id ?? sessionOptions[0].id);
+  }, [isPublicScanner, preselectedSessionId, selectedSessionId, sessionOptions]);
 
   useEffect(() => {
     return () => {

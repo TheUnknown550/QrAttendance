@@ -8,6 +8,7 @@ import {
   PlusCircle,
   Radio,
   Sheet,
+  UserCog,
   Users,
   X,
 } from "lucide-react";
@@ -116,30 +117,6 @@ export function AppShell() {
             ))}
           </div>
 
-          <div className="mt-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Quick start</p>
-            <div className="mt-3 grid gap-2 md:grid-cols-3 lg:grid-cols-1">
-              <Link
-                className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-[var(--color-surface-soft)] hover:text-slate-900"
-                to="/app/event-series"
-              >
-                Create series
-              </Link>
-              <Link
-                className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-[var(--color-surface-soft)] hover:text-slate-900"
-                to="/app/attendees"
-              >
-                Add attendees
-              </Link>
-              <Link
-                className="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-[var(--color-surface-soft)] hover:text-slate-900"
-                to="/app/scanner"
-              >
-                Start scanner
-              </Link>
-            </div>
-          </div>
-
           <div className="mt-8 border-t border-[var(--color-border)] pt-4">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Workspace</p>
             <p className="mt-2 break-words text-lg font-semibold text-slate-900">
@@ -150,18 +127,6 @@ export function AppShell() {
             </p>
             <div className="mt-3">
               <OrganizationSwitcher compact />
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <Link to="/app/onboarding">
-                <Button className="w-full" variant="ghost">
-                  Create or join
-                </Button>
-              </Link>
-              <Link to="/app/settings/organization">
-                <Button className="w-full" variant="ghost">
-                  Org settings
-                </Button>
-              </Link>
             </div>
           </div>
 
@@ -274,7 +239,7 @@ export function AppShell() {
                 <Button className="w-full" icon={<Radio className="size-4" />}>Open scanner</Button>
               </Link>
               <Link to="/app/settings/account">
-                <Button className="w-full" icon={<Sheet className="size-4" />} variant="ghost">
+                <Button className="w-full" icon={<UserCog className="size-4" />} variant="ghost">
                   Account
                 </Button>
               </Link>

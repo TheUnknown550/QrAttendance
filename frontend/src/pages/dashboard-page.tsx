@@ -1,12 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  CalendarRange,
-  ChevronRight,
-  Percent,
-  QrCode,
-  ScanLine,
-  Users,
-} from "lucide-react";
+import { CalendarRange, ChevronRight, Percent, QrCode, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -59,29 +52,8 @@ export function DashboardPage() {
     <div className="space-y-6">
       <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Card className="p-6">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div>
-              <p className="text-sm font-semibold text-slate-500">Dashboard</p>
-              <h1 className="mt-3 font-display text-4xl font-semibold text-slate-900">Attendance ops</h1>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                { to: "/app/scanner", label: "Scan", icon: ScanLine },
-                { to: "/app/attendees", label: "Attendees", icon: Users },
-                { to: "/app/event-series", label: "Series", icon: CalendarRange },
-              ].map((item) => (
-                <Link key={item.label} to={item.to}>
-                  <div className="rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-4 transition hover:bg-white">
-                    <div className="w-fit rounded-[8px] bg-white p-3 text-amber-700">
-                      <item.icon className="size-5" />
-                    </div>
-                    <p className="mt-3 font-semibold text-slate-900">{item.label}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <p className="text-sm font-semibold text-slate-500">Dashboard</p>
+          <h1 className="mt-3 font-display text-4xl font-semibold text-slate-900">Attendance ops</h1>
         </Card>
 
         <Card className="p-6">
@@ -148,36 +120,7 @@ export function DashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[0.74fr_1.26fr]">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-slate-900">Next</h2>
-            <Badge>{seriesList.length > 0 ? "Live" : "Setup"}</Badge>
-          </div>
-
-          <div className="mt-5 grid gap-3">
-            {[
-              { title: "Create series", to: "/app/event-series", icon: CalendarRange },
-              { title: "Add attendees", to: "/app/attendees", icon: Users },
-              { title: "Open scanner", to: "/app/scanner", icon: ScanLine },
-            ].map((item) => (
-              <Link
-                key={item.title}
-                className="flex items-center justify-between rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-4 transition hover:bg-white"
-                to={item.to}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="rounded-[8px] bg-white p-3 text-amber-700">
-                    <item.icon className="size-5" />
-                  </div>
-                  <p className="font-semibold text-slate-900">{item.title}</p>
-                </div>
-                <ChevronRight className="size-4 text-slate-400" />
-              </Link>
-            ))}
-          </div>
-        </Card>
-
+      <section>
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-slate-900">Top attendance</h2>

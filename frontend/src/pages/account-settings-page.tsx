@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowRightLeft, Building2, ShieldCheck } from "lucide-react";
+import { ArrowRightLeft } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -117,21 +116,6 @@ export function AccountSettingsPage() {
           </Button>
         </form>
 
-        <div className="mt-10 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
-          <p className="text-sm font-semibold text-slate-900">Workspace</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link to="/app/onboarding">
-              <Button icon={<Building2 className="size-4" />} variant="secondary">
-                Create or join organization
-              </Button>
-            </Link>
-            <Link to="/app/settings/organization">
-              <Button icon={<ShieldCheck className="size-4" />} variant="ghost">
-                Open organization settings
-              </Button>
-            </Link>
-          </div>
-        </div>
       </Card>
 
       <Card className="p-8">
