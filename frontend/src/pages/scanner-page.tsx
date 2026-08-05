@@ -4,6 +4,7 @@ import {
   Camera,
   CircleCheckBig,
   Copy,
+  Maximize2,
   OctagonAlert,
   ScanLine,
   Share2,
@@ -97,6 +98,56 @@ function AttendeeScanMeta({
         <p className="mt-1 break-words text-xs text-slate-500">{t("scanner.ticketNumber", { number: attendee.attendeeNumber })}</p>
       ) : null}
     </>
+  );
+}
+
+function ExpandableAttendeePhoto({
+  src,
+  alt,
+  className,
+  onExpand,
+}: {
+  src: string;
+  alt: string;
+  className: string;
+  onExpand: (image: { src: string; alt: string }) => void;
+}) {
+  return (
+    <div className="relative">
+      <img alt={alt} className={className} src={src} />
+      <button
+        aria-label={alt}
+        className="absolute bottom-2 right-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+        onClick={() => onExpand({ src, alt })}
+        type="button"
+      >
+        <Maximize2 className="size-4" />
+      </button>
+    </div>
+  );
+}
+
+function ImageLightbox({ image, onClose }: { image: { src: string; alt: string }; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"
+      onClick={onClose}
+    >
+      <button
+        aria-label="Close"
+        className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+        onClick={onClose}
+        type="button"
+      >
+        <X className="size-5" />
+      </button>
+      <img
+        alt={image.alt}
+        className="max-h-full max-w-full rounded-xl object-contain"
+        onClick={(event) => event.stopPropagation()}
+        src={image.src}
+      />
+    </div>
   );
 }
 
@@ -286,6 +337,7 @@ export function ScannerPage() {
   const recentTokenTimeoutRef = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
   const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
+  const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null);
 
   const seriesQuery = useQuery({
     queryKey: ["event-series", auth?.activeOrganizationId],
@@ -616,9 +668,10 @@ export function ScannerPage() {
             {lastResult.attendee ? (
               lastResult.attendee.profileImageUrl ? (
                 <div className="flex flex-col gap-3">
-                  <img
+                  <ExpandableAttendeePhoto
                     alt={`${lastResult.attendee.firstName} ${lastResult.attendee.surname}`}
-                    className="h-52 w-full rounded-xl object-cover object-top ring-1 ring-slate-200"
+                    className="h-52 w-full rounded-xl object-cover object-center ring-1 ring-slate-200"
+                    onExpand={setExpandedImage}
                     src={resolveMediaUrl(lastResult.attendee.profileImageUrl)!}
                   />
                   <div className="min-w-0">
@@ -672,6 +725,8 @@ export function ScannerPage() {
             submitError={checkInWithPhotoMutation.isError ? getErrorMessage(checkInWithPhotoMutation.error) : ""}
           />
         ) : null}
+
+        {expandedImage ? <ImageLightbox image={expandedImage} onClose={() => setExpandedImage(null)} /> : null}
       </div>
     );
   }
@@ -839,9 +894,10 @@ export function ScannerPage() {
               {lastResult.attendee ? (
                 <div className="mt-6 flex flex-col gap-3 rounded-[8px] bg-white p-4">
                   {lastResult.attendee.profileImageUrl ? (
-                    <img
+                    <ExpandableAttendeePhoto
                       alt={`${lastResult.attendee.firstName} ${lastResult.attendee.surname}`}
-                      className="h-56 w-full rounded-[8px] object-cover object-top ring-1 ring-[var(--color-border)]"
+                      className="h-56 w-full rounded-[8px] object-cover object-center ring-1 ring-[var(--color-border)]"
+                      onExpand={setExpandedImage}
                       src={resolveMediaUrl(lastResult.attendee.profileImageUrl)!}
                     />
                   ) : (
@@ -906,6 +962,8 @@ export function ScannerPage() {
           </div>
         </Card>
       </div>
+
+      {expandedImage ? <ImageLightbox image={expandedImage} onClose={() => setExpandedImage(null)} /> : null}
     </div>
   );
 }

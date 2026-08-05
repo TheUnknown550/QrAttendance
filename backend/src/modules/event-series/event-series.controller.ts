@@ -90,6 +90,8 @@ export const createEventSeries = asyncHandler(async (request, response) => {
   const body = createEventSeriesSchema.parse(request.body);
   const organizationId = request.auth!.organizationId as string;
 
+  const requireCheckInPhoto = body.requireCheckInApproval ? body.requireCheckInPhoto : false;
+
   const eventSeries = await prisma.eventSeries.create({
     data: {
       name: body.name,
@@ -102,7 +104,7 @@ export const createEventSeries = asyncHandler(async (request, response) => {
       showPhone: body.showPhone,
       showEmail: body.showEmail,
       showAttendeeNumber: body.showAttendeeNumber,
-      requireCheckInPhoto: body.requireCheckInPhoto,
+      requireCheckInPhoto,
       organizationId,
     },
   });
@@ -261,7 +263,10 @@ export const updateEventSeries = asyncHandler(async (request, response) => {
   const organizationId = request.auth!.organizationId as string;
   const body = updateEventSeriesSchema.parse(request.body);
 
-  await requireScopedSeries(eventSeriesId, organizationId);
+  const existingSeries = await requireScopedSeries(eventSeriesId, organizationId);
+
+  const effectiveApproval = body.requireCheckInApproval ?? existingSeries.requireCheckInApproval;
+  const requireCheckInPhoto = effectiveApproval ? body.requireCheckInPhoto : false;
 
   const eventSeries = await prisma.eventSeries.update({
     where: {
@@ -278,7 +283,7 @@ export const updateEventSeries = asyncHandler(async (request, response) => {
       showPhone: body.showPhone,
       showEmail: body.showEmail,
       showAttendeeNumber: body.showAttendeeNumber,
-      requireCheckInPhoto: body.requireCheckInPhoto,
+      requireCheckInPhoto,
     },
   });
 

@@ -495,26 +495,75 @@ export function EventSeriesDetailPage() {
 
         {settings ? (
           <div className="mt-6 space-y-3">
-            {settingsToggles.map((toggle) => (
-              <label
-                className="flex cursor-pointer items-start gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-4 transition hover:bg-white"
-                key={toggle.key}
-              >
-                <input
-                  checked={settings[toggle.key]}
-                  className="mt-0.5 size-4 shrink-0 rounded border-[var(--color-border)] text-amber-600 focus:ring-amber-500/40"
-                  onChange={(event) => {
-                    settingsMutation.reset();
-                    setSettings((current) => (current ? { ...current, [toggle.key]: event.target.checked } : current));
-                  }}
-                  type="checkbox"
-                />
-                <span>
-                  <span className="block text-sm font-medium text-slate-900">{toggle.label}</span>
-                  <span className="mt-1 block text-xs leading-5 text-slate-500">{toggle.description}</span>
-                </span>
-              </label>
-            ))}
+            {settingsToggles
+              .filter((toggle) => toggle.key !== "requireCheckInPhoto")
+              .map((toggle) => (
+                <div key={toggle.key}>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-4 transition hover:bg-white">
+                    <input
+                      checked={settings[toggle.key]}
+                      className="mt-0.5 size-4 shrink-0 rounded border-[var(--color-border)] text-amber-600 focus:ring-amber-500/40"
+                      onChange={(event) => {
+                        settingsMutation.reset();
+                        setSettings((current) => {
+                          if (!current) return current;
+                          const next = { ...current, [toggle.key]: event.target.checked };
+                          if (toggle.key === "requireCheckInApproval" && !event.target.checked) {
+                            next.requireCheckInPhoto = false;
+                          }
+                          return next;
+                        });
+                      }}
+                      type="checkbox"
+                    />
+                    <span>
+                      <span className="block text-sm font-medium text-slate-900">{toggle.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">{toggle.description}</span>
+                    </span>
+                  </label>
+
+                  {toggle.key === "requireCheckInApproval"
+                    ? (() => {
+                        const photoToggle = settingsToggles.find((item) => item.key === "requireCheckInPhoto");
+                        if (!photoToggle) return null;
+                        const locked = !settings.requireCheckInApproval;
+                        return (
+                          <label
+                            className={
+                              locked
+                                ? "ml-6 mt-2 flex cursor-not-allowed items-start gap-3 rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4 opacity-60"
+                                : "ml-6 mt-2 flex cursor-pointer items-start gap-3 rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4 transition hover:bg-white"
+                            }
+                          >
+                            <input
+                              checked={settings.requireCheckInPhoto}
+                              className="mt-0.5 size-4 shrink-0 rounded border-[var(--color-border)] text-amber-600 focus:ring-amber-500/40 disabled:cursor-not-allowed"
+                              disabled={locked}
+                              onChange={(event) => {
+                                settingsMutation.reset();
+                                setSettings((current) =>
+                                  current ? { ...current, requireCheckInPhoto: event.target.checked } : current,
+                                );
+                              }}
+                              type="checkbox"
+                            />
+                            <span>
+                              <span className="block text-sm font-medium text-slate-900">{photoToggle.label}</span>
+                              <span className="mt-1 block text-xs leading-5 text-slate-500">
+                                {photoToggle.description}
+                              </span>
+                              {locked ? (
+                                <span className="mt-1 block text-xs font-medium text-amber-700">
+                                  {t("eventSeries.settings.requireCheckInPhoto.locked")}
+                                </span>
+                              ) : null}
+                            </span>
+                          </label>
+                        );
+                      })()
+                    : null}
+                </div>
+              ))}
 
             {settingsMutation.isError ? (
               <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">

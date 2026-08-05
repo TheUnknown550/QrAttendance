@@ -318,7 +318,8 @@
       },
       "requireCheckInPhoto": {
         "label": "Require photo at check-in",
-        "description": "On the public phone scanner, staff must take a photo of the attendee before the check-in is confirmed. The photo is saved and shown in this event's attendance report."
+        "description": "On the public phone scanner, staff must take a photo of the attendee before the check-in is confirmed. The photo is saved and shown in this event's attendance report.",
+        "locked": "Turn on \"Require confirmation before check-in\" above to enable this."
       }
     }
   },
