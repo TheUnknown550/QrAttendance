@@ -411,7 +411,10 @@
     "deleteAttendee": "ลบผู้เข้าร่วม",
     "attendanceHistory": "ประวัติการเข้าร่วม",
     "checkInsCount": "เช็คอิน {{count}} ครั้ง",
-    "noAttendanceRecords": "ยังไม่มีประวัติการเข้าร่วม"
+    "noAttendanceRecords": "ยังไม่มีเซสชัน สร้างเซสชันเพื่อจัดการการเข้าร่วมที่นี่",
+    "manageAttendanceHint": "ทำเครื่องหมายว่าผู้เข้าร่วมคนนี้เข้าร่วมหรือไม่เข้าร่วมในเซสชันใด ๆ",
+    "checkedInAt": "เช็คอินเมื่อ {{date}}",
+    "notAttended": "ไม่เข้าร่วม"
   },
   "reports": {
     "eyebrow": "รายงาน",

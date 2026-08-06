@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import type { z } from "zod";
-import { Mail } from "lucide-react";
+import { CircleCheckBig, CircleX, Mail } from "lucide-react";
 import { AttendeeTypeSelect } from "../components/attendees/attendee-type-select";
 import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { BrandBadge } from "../components/brand/brand-badge";
@@ -16,14 +16,16 @@ import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAttendeeFormSchema } from "../lib/attendee-schema";
-import { formatDate, resolveMediaUrl } from "../lib/utils";
-import type { Attendee, AttendeeDetail, OrganizationDetail } from "../types/api";
+import { useAuth } from "../lib/auth";
+import { cn, formatDate, resolveMediaUrl } from "../lib/utils";
+import type { Attendee, AttendeeDetail, EventSeries, OrganizationDetail } from "../types/api";
 
 export function AttendeeDetailPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { auth } = useAuth();
 
   const organizationQuery = useQuery({
     queryKey: ["organization-current"],
@@ -46,6 +48,45 @@ export function AttendeeDetailPage() {
   });
 
   const attendee = attendeeQuery.data;
+
+  const seriesQuery = useQuery({
+    queryKey: ["event-series", auth?.activeOrganizationId],
+    queryFn: async () => unwrapResponse<EventSeries[]>(await api.get("/event-series")),
+  });
+
+  const allSessions = (seriesQuery.data ?? []).flatMap((series) =>
+    series.sessions.map((session) => ({
+      seriesId: series.id,
+      seriesName: series.name,
+      sessionId: session.id,
+      title: session.title,
+      sessionDate: session.sessionDate,
+    })),
+  );
+
+  const attendanceBySessionId = new Map(
+    (attendee?.attendance ?? []).map((record) => [record.eventSession.id, record]),
+  );
+
+  const markAttendedMutation = useMutation({
+    mutationFn: async ({ seriesId, sessionId }: { seriesId: string; sessionId: string }) =>
+      unwrapResponse(
+        await api.post(`/event-series/${seriesId}/sessions/${sessionId}/attendance`, {
+          attendeeId: id,
+        }),
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendee", id] });
+    },
+  });
+
+  const markNotAttendedMutation = useMutation({
+    mutationFn: async ({ seriesId, sessionId }: { seriesId: string; sessionId: string }) =>
+      unwrapResponse(await api.delete(`/event-series/${seriesId}/sessions/${sessionId}/attendance/${id}`)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendee", id] });
+    },
+  });
 
   const {
     register,
@@ -405,21 +446,78 @@ export function AttendeeDetailPage() {
           <h2 className="mt-2 text-2xl font-semibold text-slate-900">
             {t("attendeeDetail.checkInsCount", { count: attendee.attendance.length })}
           </h2>
+          <p className="mt-2 text-sm text-slate-500">{t("attendeeDetail.manageAttendanceHint")}</p>
+
+          {(markAttendedMutation.isError || markNotAttendedMutation.isError) ? (
+            <p className="mt-4 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {getErrorMessage(markAttendedMutation.error ?? markNotAttendedMutation.error)}
+            </p>
+          ) : null}
 
           <div className="mt-6 space-y-3">
-            {attendee.attendance.map((record) => (
-              <div key={record.id} className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="break-words font-medium text-slate-900">{record.eventSession.title}</p>
-                    <p className="mt-1 break-words text-sm text-slate-500">{record.eventSession.eventSeries.name}</p>
-                  </div>
-                  <p className="text-sm text-slate-600">{formatDate(record.checkedInAt)}</p>
-                </div>
-              </div>
-            ))}
+            {allSessions.map((session) => {
+              const record = attendanceBySessionId.get(session.sessionId);
+              const isBusy =
+                (markAttendedMutation.isPending &&
+                  markAttendedMutation.variables?.sessionId === session.sessionId) ||
+                (markNotAttendedMutation.isPending &&
+                  markNotAttendedMutation.variables?.sessionId === session.sessionId);
 
-            {attendee.attendance.length === 0 ? (
+              return (
+                <div
+                  className={cn(
+                    "flex flex-wrap items-center justify-between gap-3 rounded-[8px] border-l-4 p-4 transition",
+                    record
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-slate-300 bg-[var(--color-surface-soft)]",
+                  )}
+                  key={session.sessionId}
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div
+                      className={cn(
+                        "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
+                        record ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500",
+                      )}
+                    >
+                      {record ? <CircleCheckBig className="size-4" /> : <CircleX className="size-4" />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="break-words font-medium text-slate-900">{session.title}</p>
+                      <p className="mt-1 break-words text-sm text-slate-500">{session.seriesName}</p>
+                      <span
+                        className={cn(
+                          "mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
+                          record ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600",
+                        )}
+                      >
+                        {record
+                          ? t("attendeeDetail.checkedInAt", { date: formatDate(record.checkedInAt) })
+                          : t("attendeeDetail.notAttended")}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    disabled={isBusy}
+                    icon={record ? undefined : <CircleCheckBig className="size-4" />}
+                    onClick={() => {
+                      const payload = { seriesId: session.seriesId, sessionId: session.sessionId };
+                      if (record) {
+                        markNotAttendedMutation.mutate(payload);
+                        return;
+                      }
+                      markAttendedMutation.mutate(payload);
+                    }}
+                    type="button"
+                    variant={record ? "ghost" : "secondary"}
+                  >
+                    {record ? t("session.markNotAttended") : t("session.markAttended")}
+                  </Button>
+                </div>
+              );
+            })}
+
+            {allSessions.length === 0 ? (
               <p className="rounded-[8px] bg-[var(--color-surface-soft)] p-4 text-sm text-slate-500">
                 {t("attendeeDetail.noAttendanceRecords")}
               </p>

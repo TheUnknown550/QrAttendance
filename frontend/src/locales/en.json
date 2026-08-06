@@ -413,7 +413,10 @@
     "attendanceHistory": "Attendance history",
     "checkInsCount": "{{count}} check-in",
     "checkInsCount_other": "{{count}} check-ins",
-    "noAttendanceRecords": "No attendance records yet."
+    "noAttendanceRecords": "No sessions yet. Create a session to manage attendance here.",
+    "manageAttendanceHint": "Mark this attendee as attended or not attended for any session.",
+    "checkedInAt": "Checked in {{date}}",
+    "notAttended": "Not attended"
   },
   "reports": {
     "eyebrow": "Reports",

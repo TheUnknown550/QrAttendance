@@ -15,6 +15,36 @@ import { useAuth } from "../lib/auth";
 import { cn, formatAttendeeOrgType, formatDate, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, EventSeriesSettings, EventSession, EventSessionDetail } from "../types/api";
 
+function attendeeTooltip(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  attendee: Attendee,
+  settings: EventSeriesSettings,
+) {
+  const lines = [`${attendee.firstName} ${attendee.surname}`];
+
+  if (settings.showOrganizationName && attendee.organizationName) {
+    lines.push(attendee.organizationName);
+  }
+
+  if (settings.showAttendeeType && attendee.attendeeType) {
+    lines.push(attendee.attendeeType);
+  }
+
+  if (settings.showEmail) {
+    lines.push(attendee.email ?? t("scanner.noEmail"));
+  }
+
+  if (settings.showPhone) {
+    lines.push(attendee.phone ?? t("session.noPhone"));
+  }
+
+  if (settings.showAttendeeNumber && attendee.attendeeNumber != null) {
+    lines.push(t("scanner.ticketNumber", { number: attendee.attendeeNumber }));
+  }
+
+  return lines.join("\n");
+}
+
 function AttendeeRosterMeta({ attendee, settings }: { attendee: Attendee; settings: EventSeriesSettings }) {
   const { t } = useTranslation();
   const orgAndType = formatAttendeeOrgType(
@@ -201,6 +231,27 @@ export function SessionDetailPage() {
               <Badge>{t("session.attendeesMarkedAttended", { count: session._count?.attendance ?? 0 })}</Badge>
               <Badge>{t("session.created", { date: formatDate(session.createdAt) })}</Badge>
             </div>
+
+            <div className="mt-6 flex items-center gap-3">
+              <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
+                <CalendarClock className="size-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.details")}</p>
+                <p className="text-sm text-slate-500">{t("session.overview")}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("eventSeries.detail.eyebrow")}</p>
+                <p className="mt-2 font-medium text-slate-900">{session.eventSeries.name}</p>
+              </div>
+              <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("session.scheduledFor")}</p>
+                <p className="mt-2 font-medium text-slate-900">{formatDate(session.sessionDate)}</p>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:min-w-[220px]">
@@ -234,78 +285,52 @@ export function SessionDetailPage() {
         </div>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
-        <div className="space-y-6">
-          <Card>
-            <div className="flex items-center gap-3">
-              <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
-                <CalendarClock className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">{t("eventSeries.detail.details")}</p>
-                <p className="text-sm text-slate-500">{t("session.overview")}</p>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("eventSeries.detail.eyebrow")}</p>
-                <p className="mt-2 font-medium text-slate-900">{session.eventSeries.name}</p>
-              </div>
-              <div className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{t("session.scheduledFor")}</p>
-                <p className="mt-2 font-medium text-slate-900">{formatDate(session.sessionDate)}</p>
-              </div>
-            </div>
-          </Card>
-
-          {isEditing ? (
-            <Card>
-              <p className="text-sm font-semibold text-slate-900">{t("session.editSession")}</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("session.updateDetails")}</h2>
-
-              <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => updateMutation.mutate(values))}>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
-                  <Input autoComplete="off" {...register("title")} />
-                  {errors.title ? <p className="mt-2 text-xs text-rose-500">{errors.title.message}</p> : null}
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
-                  <Input {...register("description")} />
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionDateAndTime")}</span>
-                  <Input type="datetime-local" {...register("sessionDate")} />
-                  {errors.sessionDate ? <p className="mt-2 text-xs text-rose-500">{errors.sessionDate.message}</p> : null}
-                </label>
-                {updateMutation.isError ? (
-                  <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                    {getErrorMessage(updateMutation.error)}
-                  </p>
-                ) : null}
-                {deleteMutation.isError ? (
-                  <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                    {getErrorMessage(deleteMutation.error)}
-                  </p>
-                ) : null}
-                <div className="flex flex-wrap gap-3">
-                  <Button type="submit">{updateMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveChanges")}</Button>
-                  <Button onClick={() => setIsEditing(false)} type="button" variant="ghost">
-                    {t("common.cancel")}
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          ) : null}
-        </div>
-
+      {isEditing ? (
         <Card>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">{t("session.attendanceDirectory")}</p>
-              <h2 className="mt-2 text-3xl font-semibold text-slate-900">{session.allAttendees.length}</h2>
+          <p className="text-sm font-semibold text-slate-900">{t("session.editSession")}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">{t("session.updateDetails")}</h2>
+
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => updateMutation.mutate(values))}>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
+              <Input autoComplete="off" {...register("title")} />
+              {errors.title ? <p className="mt-2 text-xs text-rose-500">{errors.title.message}</p> : null}
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>
+              <Input {...register("description")} />
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionDateAndTime")}</span>
+              <Input type="datetime-local" {...register("sessionDate")} />
+              {errors.sessionDate ? <p className="mt-2 text-xs text-rose-500">{errors.sessionDate.message}</p> : null}
+            </label>
+            {updateMutation.isError ? (
+              <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {getErrorMessage(updateMutation.error)}
+              </p>
+            ) : null}
+            {deleteMutation.isError ? (
+              <p className="rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {getErrorMessage(deleteMutation.error)}
+              </p>
+            ) : null}
+            <div className="flex flex-wrap gap-3">
+              <Button type="submit">{updateMutation.isPending ? t("eventSeries.detail.saving") : t("eventSeries.detail.saveChanges")}</Button>
+              <Button onClick={() => setIsEditing(false)} type="button" variant="ghost">
+                {t("common.cancel")}
+              </Button>
             </div>
+          </form>
+        </Card>
+      ) : null}
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{t("session.attendanceDirectory")}</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-900">{session.allAttendees.length}</h2>
+          </div>
 
             <div className="relative w-full max-w-sm">
               <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
@@ -360,7 +385,7 @@ export function SessionDetailPage() {
           <div className="mt-6 space-y-3 md:hidden">
             {attendeeRows.map(({ attendee, attendanceRecord }) => (
               <div key={attendee.id} className="rounded-[8px] bg-[var(--color-surface-soft)] p-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" title={attendeeTooltip(t, attendee, session.eventSeries)}>
                   <img
                     alt={`${attendee.firstName} ${attendee.surname}`}
                     className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
@@ -411,7 +436,6 @@ export function SessionDetailPage() {
             ) : null}
           </div>
         </Card>
-      </div>
     </div>
   );
 }
@@ -433,7 +457,7 @@ function AttendeeAttendanceRow({
 
   return (
     <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] items-center gap-4 bg-white px-5 py-4">
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3" title={attendeeTooltip(t, attendee, settings)}>
         <img
           alt={`${attendee.firstName} ${attendee.surname}`}
           className="size-12 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
