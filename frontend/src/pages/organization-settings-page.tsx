@@ -220,6 +220,7 @@ export function OrganizationSettingsPage() {
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-600">{t("organizationSettings.organizationName")}</span>
             <Input
+              autoComplete="off"
               disabled={!canManageOrganization}
               onChange={(event) => setOrganizationName(event.target.value)}
               value={organizationName}

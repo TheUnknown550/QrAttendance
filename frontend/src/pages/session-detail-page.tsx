@@ -267,7 +267,7 @@ export function SessionDetailPage() {
               <form className="mt-6 space-y-4" onSubmit={handleSubmit((values) => updateMutation.mutate(values))}>
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
-                  <Input {...register("title")} />
+                  <Input autoComplete="off" {...register("title")} />
                   {errors.title ? <p className="mt-2 text-xs text-rose-500">{errors.title.message}</p> : null}
                 </label>
                 <label className="block">

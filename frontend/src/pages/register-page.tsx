@@ -107,7 +107,7 @@ export function RegisterPage() {
                 <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.register.name")}</span>
                 <div className="relative">
                   <UserRound className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
-                  <Input className="pl-11" placeholder="Jordan Lee" {...register("name")} />
+                  <Input autoComplete="name" className="pl-11" placeholder="Jordan Lee" {...register("name")} />
                 </div>
                 {errors.name ? <p className="mt-2 text-xs text-rose-500">{errors.name.message}</p> : null}
               </label>

@@ -262,7 +262,7 @@ export function EventSeriesDetailPage() {
             </div>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.seriesName")}</span>
-              <Input {...register("name")} />
+              <Input autoComplete="off" {...register("name")} />
               {errors.name ? <p className="mt-2 text-xs text-rose-500">{errors.name.message}</p> : null}
             </label>
             <label className="block">
@@ -354,7 +354,7 @@ export function EventSeriesDetailPage() {
           >
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
-              <Input placeholder="Session 1" {...sessionForm.register("title")} />
+              <Input autoComplete="off" placeholder="Session 1" {...sessionForm.register("title")} />
               {sessionForm.formState.errors.title ? (
                 <p className="mt-2 text-xs text-rose-500">{sessionForm.formState.errors.title.message}</p>
               ) : null}
@@ -394,7 +394,7 @@ export function EventSeriesDetailPage() {
                   >
                     <label className="block">
                       <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.sessionTitle")}</span>
-                      <Input {...editSessionForm.register("title")} />
+                      <Input autoComplete="off" {...editSessionForm.register("title")} />
                     </label>
                     <label className="block">
                       <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.description")}</span>

@@ -87,7 +87,7 @@ export function AccountSettingsPage() {
         <form className="mt-8 space-y-4" onSubmit={accountForm.handleSubmit((values) => accountMutation.mutate(values))}>
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-600">{t("accountSettings.name")}</span>
-            <Input {...accountForm.register("name")} />
+            <Input autoComplete="name" {...accountForm.register("name")} />
           </label>
 
           <label className="block">

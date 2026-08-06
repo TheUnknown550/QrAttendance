@@ -99,7 +99,7 @@ export function EventSeriesListPage() {
             >
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-slate-600">{t("eventSeries.eventName")}</span>
-                <Input placeholder="AI Workshop Series" {...seriesForm.register("name")} />
+                <Input autoComplete="off" placeholder="AI Workshop Series" {...seriesForm.register("name")} />
                 {seriesForm.formState.errors.name ? (
                   <p className="mt-2 text-xs text-rose-500">{seriesForm.formState.errors.name.message}</p>
                 ) : null}

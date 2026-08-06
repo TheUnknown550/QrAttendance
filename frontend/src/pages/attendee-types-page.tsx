@@ -61,6 +61,7 @@ export function AttendeeTypesPage() {
         }}
       >
         <Input
+          autoComplete="off"
           onChange={(event) => setNewLabel(event.target.value)}
           placeholder={t("attendeeTypesPage.newTypePlaceholder")}
           value={newLabel}

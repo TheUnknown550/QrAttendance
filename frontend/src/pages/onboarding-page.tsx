@@ -181,7 +181,7 @@ export function OnboardingPage() {
           <form className="mt-6 space-y-4" onSubmit={createForm.handleSubmit((values) => createMutation.mutate(values))}>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-600">{t("onboarding.organizationName")}</span>
-              <Input placeholder="Acme Learning Lab" {...createForm.register("name")} />
+              <Input autoComplete="off" placeholder="Acme Learning Lab" {...createForm.register("name")} />
               {createForm.formState.errors.name ? (
                 <p className="mt-2 text-xs text-rose-500">{createForm.formState.errors.name.message}</p>
               ) : null}
