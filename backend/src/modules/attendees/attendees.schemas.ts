@@ -50,6 +50,7 @@ export const updateAttendeeSchema = createAttendeeSchema.partial().extend({
 
 export const sendQrEmailsSchema = z.object({
   eventName: z.string().trim().min(1),
+  subject: optionalString,
   eventDate: optionalString,
   eventLocation: optionalString,
   message: optionalString,

@@ -39,6 +39,7 @@ export function SendQrEmailsModal({
 
   const sendQrEmailsSchema = z.object({
     eventName: z.string().trim().min(1, t("sendQrEmailsModal.eventNameRequired")),
+    subject: z.string().optional(),
     eventDate: z.string().optional(),
     eventLocation: z.string().optional(),
     message: z.string().optional(),
@@ -91,6 +92,12 @@ export function SendQrEmailsModal({
           <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.eventName")}</span>
           <Input placeholder="Product Launch Night" {...register("eventName")} />
           {errors.eventName ? <p className="mt-2 text-xs text-rose-500">{errors.eventName.message}</p> : null}
+        </label>
+
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.subjectOptional")}</span>
+          <Input placeholder={t("sendQrEmailsModal.subjectPlaceholder")} {...register("subject")} />
+          <p className="mt-2 text-xs text-slate-500">{t("sendQrEmailsModal.subjectHint")}</p>
         </label>
 
         <label className="block">

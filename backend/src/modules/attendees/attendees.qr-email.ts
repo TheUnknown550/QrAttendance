@@ -3,7 +3,14 @@ import { prisma } from "../../lib/prisma";
 import { ApiError } from "../../utils/api-error";
 import { successResponse } from "../../utils/api-response";
 import { asyncHandler } from "../../utils/async-handler";
-import { generateQrPngBuffer } from "../../utils/qr-image";
+import { generateAttendeeQrAttachment, type QrPlacementTemplate } from "../../utils/qr-image";
+import {
+  QR_TEMPLATE_CANVAS_HEIGHT,
+  QR_TEMPLATE_CANVAS_WIDTH,
+  QR_TEMPLATE_DEFAULT_QR_SIZE,
+  QR_TEMPLATE_DEFAULT_QR_X,
+  QR_TEMPLATE_DEFAULT_QR_Y,
+} from "../organizations/qr-template.constants";
 import { touchOrganizationActivity } from "../organizations/organizations.activity";
 import { sendQrEmailsSchema } from "./attendees.schemas";
 
@@ -15,6 +22,7 @@ function delay(ms: number) {
 
 type EventDetails = {
   eventName: string;
+  subject?: string | null;
   eventDate?: string | null;
   eventLocation?: string | null;
   message?: string | null;
@@ -34,11 +42,15 @@ type QrEmailAttendee = {
 async function dispatchAttendeeQrEmails(
   attendees: QrEmailAttendee[],
   organizationName: string,
+  qrTemplate: QrPlacementTemplate,
   eventDetails: EventDetails,
 ) {
   for (const attendee of attendees) {
     try {
-      const qrPngBuffer = await generateQrPngBuffer(attendee.qrToken);
+      const { buffer: qrPngBuffer, width, height } = await generateAttendeeQrAttachment(
+        attendee.qrToken,
+        qrTemplate,
+      );
 
       await sendAttendeeQrCodeEmail({
         to: attendee.email,
@@ -49,6 +61,8 @@ async function dispatchAttendeeQrEmails(
         attendeeNumber: attendee.attendeeNumber,
         organizationName,
         qrPngBuffer,
+        qrImageWidth: width,
+        qrImageHeight: height,
         ...eventDetails,
       });
     } catch (error) {
@@ -69,6 +83,10 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     },
     select: {
       name: true,
+      qrTemplateImageUrl: true,
+      qrTemplateX: true,
+      qrTemplateY: true,
+      qrTemplateSize: true,
     },
   });
 
@@ -114,6 +132,15 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
 
   const { attendeeIds, ...eventDetails } = body;
 
+  const qrTemplate: QrPlacementTemplate = {
+    imageUrl: organization.qrTemplateImageUrl,
+    canvasWidth: QR_TEMPLATE_CANVAS_WIDTH,
+    canvasHeight: QR_TEMPLATE_CANVAS_HEIGHT,
+    qrX: organization.qrTemplateX ?? QR_TEMPLATE_DEFAULT_QR_X,
+    qrY: organization.qrTemplateY ?? QR_TEMPLATE_DEFAULT_QR_Y,
+    qrSize: organization.qrTemplateSize ?? QR_TEMPLATE_DEFAULT_QR_SIZE,
+  };
+
   await touchOrganizationActivity(organizationId);
 
   response.status(202).json(
@@ -126,7 +153,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     ),
   );
 
-  void dispatchAttendeeQrEmails(attendees, organization.name, eventDetails).catch((error) => {
+  void dispatchAttendeeQrEmails(attendees, organization.name, qrTemplate, eventDetails).catch((error) => {
     console.error("Bulk attendee QR email dispatch failed", error);
   });
 });
