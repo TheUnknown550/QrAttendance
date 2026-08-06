@@ -282,6 +282,7 @@
       "addingSession": "Adding...",
       "addSession": "Add session",
       "noDescriptionSet": "No description set.",
+      "viewDetails": "Details",
       "checkInsCount": "{{count}} check-ins",
       "saveSession": "Save session",
       "confirmDeleteSession": "Delete {{title}} and all of its attendance records?",

@@ -282,6 +282,7 @@
       "addingSession": "กำลังเพิ่ม...",
       "addSession": "เพิ่มเซสชัน",
       "noDescriptionSet": "ไม่มีรายละเอียด",
+      "viewDetails": "รายละเอียด",
       "checkInsCount": "{{count}} การเช็คอิน",
       "saveSession": "บันทึกเซสชัน",
       "confirmDeleteSession": "ลบ {{title}} รวมถึงประวัติการเข้าร่วมทั้งหมดหรือไม่?",

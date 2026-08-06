@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, Pencil, Plus, QrCode, Tags, TableProperties, Trash2, X } from "lucide-react";
+import { CalendarClock, Eye, Pencil, Plus, QrCode, Tags, TableProperties, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -442,6 +442,11 @@ export function EventSeriesDetailPage() {
 
                 {editingSessionId !== session.id ? (
                   <div className="mt-4 flex flex-wrap gap-3">
+                    <Link to={`/app/event-series/${series.id}/sessions/${session.id}`}>
+                      <Button icon={<Eye className="size-4" />} type="button" variant="secondary">
+                        {t("eventSeries.detail.viewDetails")}
+                      </Button>
+                    </Link>
                     <Button
                       icon={<Pencil className="size-4" />}
                       onClick={() => {
