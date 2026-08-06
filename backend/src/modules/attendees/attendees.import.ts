@@ -125,6 +125,30 @@ function cell(row: string[], columnIndex?: number) {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+async function registerNewAttendeeTypeLabels(organizationId: string, labels: Array<string | undefined>) {
+  const uniqueLabels = Array.from(new Set(labels.filter((label): label is string => Boolean(label))));
+
+  if (uniqueLabels.length === 0) {
+    return;
+  }
+
+  const existing = await prisma.attendeeType.findMany({
+    where: { organizationId },
+    select: { label: true },
+  });
+  const existingLower = new Set(existing.map((type) => type.label.toLowerCase()));
+  const newLabels = uniqueLabels.filter((label) => !existingLower.has(label.toLowerCase()));
+
+  if (newLabels.length === 0) {
+    return;
+  }
+
+  await prisma.attendeeType.createMany({
+    data: newLabels.map((label) => ({ organizationId, label })),
+    skipDuplicates: true,
+  });
+}
+
 export const confirmAttendeeImport = asyncHandler(async (request, response) => {
   const organizationId = request.auth!.organizationId as string;
   const body = confirmAttendeeImportSchema.parse(request.body);
@@ -143,12 +167,14 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
 
   const existingAttendees = await prisma.attendee.findMany({
     where: { organizationId, deletedAt: null },
-    select: { email: true },
+    select: { firstName: true, surname: true },
   });
-  const existingEmails = new Set(existingAttendees.map((attendee) => attendee.email.toLowerCase()));
+  const existingNames = new Set(
+    existingAttendees.map((attendee) => `${attendee.firstName}|${attendee.surname}`.toLowerCase()),
+  );
 
   const skipped: Array<{ row: number; reason: string }> = [];
-  const seenEmailsInFile = new Set<string>();
+  const seenNamesInFile = new Set<string>();
   const toCreate: Array<{
     organizationId: string;
     firstName: string;
@@ -192,17 +218,19 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
       return;
     }
 
-    if (existingEmails.has(email)) {
-      skipped.push({ row: rowNumber, reason: `Duplicate email (already an attendee): ${email}` });
+    const nameKey = `${firstName}|${surname || firstName}`.toLowerCase();
+
+    if (existingNames.has(nameKey)) {
+      skipped.push({ row: rowNumber, reason: `Duplicate name (already an attendee): ${firstName} ${surname}` });
       return;
     }
 
-    if (seenEmailsInFile.has(email)) {
-      skipped.push({ row: rowNumber, reason: `Duplicate email within file: ${email}` });
+    if (seenNamesInFile.has(nameKey)) {
+      skipped.push({ row: rowNumber, reason: `Duplicate name within file: ${firstName} ${surname}` });
       return;
     }
 
-    seenEmailsInFile.add(email);
+    seenNamesInFile.add(nameKey);
 
     const attendeeNumberRaw = cell(row, mapping.attendeeNumber);
     const parsedAttendeeNumber = attendeeNumberRaw ? Number.parseInt(attendeeNumberRaw, 10) : NaN;
@@ -224,6 +252,11 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
     await prisma.attendee.createMany({
       data: toCreate,
     });
+
+    await registerNewAttendeeTypeLabels(
+      organizationId,
+      toCreate.map((attendee) => attendee.attendeeType),
+    );
 
     await touchOrganizationActivity(organizationId);
   }

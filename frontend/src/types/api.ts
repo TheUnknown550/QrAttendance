@@ -165,6 +165,13 @@ export type AttendeeDetail = Attendee & {
   attendance: AttendanceHistory[];
 };
 
+export type AttendeeType = {
+  id: string;
+  organizationId: string;
+  label: string;
+  createdAt: string;
+};
+
 export type PaginatedResult<T> = {
   items: T[];
   pagination: {

@@ -8,6 +8,7 @@ const AccountSettingsPage = lazy(() => import("./pages/account-settings-page").t
 const AttendanceReportPage = lazy(() => import("./pages/attendance-report-page").then((module) => ({ default: module.AttendanceReportPage })));
 const AttendeeDetailPage = lazy(() => import("./pages/attendee-detail-page").then((module) => ({ default: module.AttendeeDetailPage })));
 const AttendeesPage = lazy(() => import("./pages/attendees-page").then((module) => ({ default: module.AttendeesPage })));
+const AttendeeTypesPage = lazy(() => import("./pages/attendee-types-page").then((module) => ({ default: module.AttendeeTypesPage })));
 const AboutPage = lazy(() => import("./pages/about-page").then((module) => ({ default: module.AboutPage })));
 const ContactPage = lazy(() => import("./pages/contact-page").then((module) => ({ default: module.ContactPage })));
 const DashboardPage = lazy(() => import("./pages/dashboard-page").then((module) => ({ default: module.DashboardPage })));
@@ -58,6 +59,7 @@ function App() {
               <Route path="event-series/:id/sessions/:sessionId" element={<SessionDetailPage />} />
               <Route path="attendees" element={<AttendeesPage />} />
               <Route path="attendees/:id" element={<AttendeeDetailPage />} />
+              <Route path="settings/attendee-types" element={<AttendeeTypesPage />} />
               <Route path="scanner" element={<ScannerPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="reports/event-series/:id" element={<AttendanceReportPage />} />

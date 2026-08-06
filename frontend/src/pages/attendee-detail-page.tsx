@@ -2,11 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { Mail } from "lucide-react";
+import { AttendeeTypeSelect } from "../components/attendees/attendee-type-select";
 import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { BrandBadge } from "../components/brand/brand-badge";
 import { Badge } from "../components/ui/badge";
@@ -65,6 +66,7 @@ export function AttendeeDetailPage() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<UpdateAttendeeValues>({
     resolver: zodResolver(updateAttendeeSchema),
@@ -311,7 +313,13 @@ export function AttendeeDetailPage() {
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.typeOfAttendeeOptional")}</span>
-              <Input {...register("attendeeType")} />
+              <Controller
+                control={control}
+                name="attendeeType"
+                render={({ field }) => (
+                  <AttendeeTypeSelect onChange={field.onChange} value={field.value ?? ""} />
+                )}
+              />
               {errors.attendeeType ? (
                 <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
               ) : null}

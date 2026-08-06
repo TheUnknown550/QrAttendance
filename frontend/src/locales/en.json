@@ -288,6 +288,7 @@
       "manageEvent": "Manage event",
       "eventSettings": "Event settings",
       "eventSettingsHint": "Controls how check-in works and what attendee details show up on the scanner and session roster for",
+      "manageAttendeeTypes": "Manage attendee types",
       "settingsSaved": "Event settings saved.",
       "saveEventSettings": "Save event settings"
     },
@@ -994,5 +995,21 @@
       "p2": "We may update these Terms from time to time. Continued use of EventQR after an update becomes effective constitutes acceptance of the revised Terms.",
       "p3": "This Terms page is a professional product draft and should be reviewed for final business entity details, jurisdiction-specific rules, and production legal approval before final publication."
     }
+  },
+  "attendeeTypeSelect": {
+    "none": "None",
+    "addNewType": "Add new type",
+    "newTypePlaceholder": "e.g. Speaker",
+    "adding": "Adding..."
+  },
+  "attendeeTypesPage": {
+    "eyebrow": "Settings",
+    "title": "Attendee types",
+    "description": "Manage the list of attendee types available when creating or editing an attendee, or importing a spreadsheet. These are shared across all events in this organization.",
+    "newTypePlaceholder": "e.g. Speaker",
+    "addType": "Add type",
+    "adding": "Adding...",
+    "confirmDelete": "Delete the attendee type \"{{label}}\"? Attendees already using it will keep the text but it will no longer appear in the dropdown.",
+    "noTypesYet": "No attendee types yet."
   }
 }

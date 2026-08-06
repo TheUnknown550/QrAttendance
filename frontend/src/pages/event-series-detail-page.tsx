@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, Pencil, Plus, QrCode, TableProperties, Trash2, X } from "lucide-react";
+import { CalendarClock, Pencil, Plus, QrCode, Tags, TableProperties, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -491,6 +491,12 @@ export function EventSeriesDetailPage() {
             {t("eventSeries.detail.eventSettingsHint")}{" "}
             <strong>{series.name}</strong>.
           </p>
+
+          <Link to="/app/settings/attendee-types">
+            <Button className="mt-4" icon={<Tags className="size-4" />} type="button" variant="secondary">
+              {t("eventSeries.detail.manageAttendeeTypes")}
+            </Button>
+          </Link>
         </div>
 
         {settings ? (

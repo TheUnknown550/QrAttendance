@@ -2,10 +2,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Mail, Plus, Search, Upload, Users } from "lucide-react";
 import { useDeferredValue, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { AttendeeTypeSelect } from "../components/attendees/attendee-type-select";
 import { BulkImportModal } from "../components/attendees/bulk-import-modal";
 import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
 import { Button } from "../components/ui/button";
@@ -66,9 +67,11 @@ export function AttendeesPage() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<AttendeeFormValues>({
     resolver: zodResolver(attendeeSchema),
+    defaultValues: { attendeeType: "" },
   });
 
   const attendeesQuery = useQuery({
@@ -180,7 +183,13 @@ export function AttendeesPage() {
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.typeOfAttendeeOptional")}</span>
-            <Input placeholder="Guest" {...register("attendeeType")} />
+            <Controller
+              control={control}
+              name="attendeeType"
+              render={({ field }) => (
+                <AttendeeTypeSelect onChange={field.onChange} value={field.value ?? ""} />
+              )}
+            />
             {errors.attendeeType ? (
               <p className="mt-2 text-xs text-rose-500">{errors.attendeeType.message}</p>
             ) : null}

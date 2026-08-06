@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma";
 import { requireActiveOrganization, requireAuth } from "../middleware/auth";
+import { attendeeTypesRouter } from "../modules/attendee-types/attendee-types.routes";
 import { attendeesRouter } from "../modules/attendees/attendees.routes";
 import { authRouter } from "../modules/auth/auth.routes";
 import { eventSeriesRouter } from "../modules/event-series/event-series.routes";
@@ -44,6 +45,7 @@ router.use("/organizations", organizationsRouter);
 router.use(requireActiveOrganization);
 router.use("/event-series", eventSeriesRouter);
 router.use("/attendees", attendeesRouter);
+router.use("/attendee-types", attendeeTypesRouter);
 router.use("/scan", scanRouter);
 router.use("/reports", reportsRouter);
 
