@@ -9,7 +9,8 @@
     "close": "ปิด",
     "back": "กลับ",
     "yes": "ใช่",
-    "no": "ไม่"
+    "no": "ไม่",
+    "optional": "ไม่บังคับ"
   },
   "siteHeader": {
     "home": "หน้าแรก",
@@ -363,6 +364,10 @@
     "attendeeNumber": "หมายเลขผู้เข้าร่วม",
     "attendeeNumberPlaceholder": "เช่น 42",
     "attendeeNumberWholeNumber": "หมายเลขผู้เข้าร่วมต้องเป็นจำนวนเต็ม",
+    "emailRequired": "กรุณาระบุอีเมล",
+    "invalidEmail": "กรุณาระบุอีเมลที่ถูกต้อง",
+    "phoneRequired": "กรุณาระบุโทรศัพท์",
+    "attendeeNumberRequired": "กรุณาระบุหมายเลขผู้เข้าร่วม",
     "photo": "รูปภาพ",
     "selected": "เลือกแล้ว: {{name}}",
     "creating": "กำลังสร้าง...",
@@ -470,6 +475,22 @@
     "organizationName": "ชื่อองค์กร",
     "saving": "กำลังบันทึก...",
     "saveOrganization": "บันทึกองค์กร",
+    "attendeeRequirements": "ข้อมูลที่ต้องกรอกของผู้เข้าร่วม",
+    "attendeeRequirementsHint": "เลือกฟิลด์ของผู้เข้าร่วมที่ต้องกรอกเมื่อสร้าง แก้ไข หรือนำเข้าผู้เข้าร่วม",
+    "requireAttendeeEmail": {
+      "label": "ต้องมีอีเมล",
+      "description": "ผู้เข้าร่วมต้องมีอีเมลจึงจะสร้างหรือนำเข้าได้"
+    },
+    "requireAttendeePhone": {
+      "label": "ต้องมีโทรศัพท์",
+      "description": "ผู้เข้าร่วมต้องมีหมายเลขโทรศัพท์จึงจะสร้างหรือนำเข้าได้"
+    },
+    "requireAttendeeNumber": {
+      "label": "ต้องมีหมายเลขผู้เข้าร่วม",
+      "description": "ผู้เข้าร่วมต้องมีหมายเลขผู้เข้าร่วมจึงจะสร้างหรือนำเข้าได้"
+    },
+    "settingsSaved": "บันทึกการตั้งค่าแล้ว",
+    "saveRequirements": "บันทึกข้อกำหนด",
     "joinCode": "โค้ดเข้าร่วม",
     "shareForManualJoins": "แชร์สำหรับการเข้าร่วมด้วยตนเอง",
     "copied": "คัดลอกแล้ว",
@@ -545,7 +566,7 @@
     "separateNameSurnameColumns": "คอลัมน์ชื่อ / นามสกุลแยกกัน",
     "notImported": "ไม่นำเข้า",
     "columnN": "คอลัมน์ {{number}}",
-    "mapRequiredFields": "จับคู่คอลัมน์ชื่อและอีเมลก่อนนำเข้า",
+    "mapRequiredFields": "จับคู่คอลัมน์ชื่อและฟิลด์ที่ต้องกรอกอื่น ๆ (มีเครื่องหมาย *) ก่อนนำเข้า",
     "importing": "กำลังนำเข้า...",
     "importRows": "นำเข้า {{count}} แถว",
     "chooseDifferentFile": "เลือกไฟล์อื่น",

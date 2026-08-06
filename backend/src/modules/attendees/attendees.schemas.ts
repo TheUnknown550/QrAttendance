@@ -6,6 +6,16 @@ const optionalString = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+const optionalEmail = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .optional()
+  .or(z.literal("").transform(() => undefined))
+  .refine((value) => value === undefined || z.email().safeParse(value).success, {
+    message: "Invalid email address",
+  });
+
 const optionalAttendeeNumber = z
   .union([z.number(), z.string()])
   .optional()
@@ -29,7 +39,7 @@ export const createAttendeeSchema = z.object({
   surname: z.string().trim().min(1),
   organizationName: optionalString,
   attendeeType: optionalString,
-  email: z.email(),
+  email: optionalEmail,
   phone: optionalString,
   attendeeNumber: optionalAttendeeNumber,
 });
@@ -54,7 +64,7 @@ export const importColumnMappingSchema = z.object({
   surname: columnIndexSchema.optional(),
   organizationName: columnIndexSchema.optional(),
   attendeeType: columnIndexSchema.optional(),
-  email: columnIndexSchema,
+  email: columnIndexSchema.optional(),
   phone: columnIndexSchema.optional(),
   attendeeNumber: columnIndexSchema.optional(),
 });

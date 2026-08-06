@@ -18,6 +18,11 @@ export function OrganizationSettingsPage() {
   const { activeMembership, auth, setAuthState } = useAuth();
   const queryClient = useQueryClient();
   const [organizationName, setOrganizationName] = useState("");
+  const [attendeeFieldSettings, setAttendeeFieldSettings] = useState<{
+    requireAttendeeEmail: boolean;
+    requireAttendeePhone: boolean;
+    requireAttendeeNumber: boolean;
+  } | null>(null);
   const [inviteExpiryDays, setInviteExpiryDays] = useState("30");
   const [copiedInviteId, setCopiedInviteId] = useState<string | null>(null);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
@@ -50,8 +55,27 @@ export function OrganizationSettingsPage() {
     }
   }, [organization?.name]);
 
+  useEffect(() => {
+    if (organization) {
+      setAttendeeFieldSettings({
+        requireAttendeeEmail: organization.requireAttendeeEmail,
+        requireAttendeePhone: organization.requireAttendeePhone,
+        requireAttendeeNumber: organization.requireAttendeeNumber,
+      });
+    }
+  }, [organization]);
+
   const updateMutation = useMutation({
     mutationFn: async (name: string) => unwrapResponse(await api.patch("/organizations/current", { name })),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["organization-current", auth?.activeOrganizationId] }),
+  });
+
+  const attendeeFieldSettingsMutation = useMutation({
+    mutationFn: async (settings: {
+      requireAttendeeEmail: boolean;
+      requireAttendeePhone: boolean;
+      requireAttendeeNumber: boolean;
+    }) => unwrapResponse(await api.patch("/organizations/current", settings)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["organization-current", auth?.activeOrganizationId] }),
   });
 
@@ -216,6 +240,80 @@ export function OrganizationSettingsPage() {
             {updateMutation.isPending ? t("organizationSettings.saving") : t("organizationSettings.saveOrganization")}
           </Button>
         </div>
+
+        {attendeeFieldSettings ? (
+          <div className="mt-10 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
+            <p className="text-sm font-semibold text-slate-900">{t("organizationSettings.attendeeRequirements")}</p>
+            <p className="mt-1 text-sm text-slate-500">{t("organizationSettings.attendeeRequirementsHint")}</p>
+
+            <div className="mt-4 space-y-3">
+              {(
+                [
+                  {
+                    key: "requireAttendeeEmail" as const,
+                    label: t("organizationSettings.requireAttendeeEmail.label"),
+                    description: t("organizationSettings.requireAttendeeEmail.description"),
+                  },
+                  {
+                    key: "requireAttendeePhone" as const,
+                    label: t("organizationSettings.requireAttendeePhone.label"),
+                    description: t("organizationSettings.requireAttendeePhone.description"),
+                  },
+                  {
+                    key: "requireAttendeeNumber" as const,
+                    label: t("organizationSettings.requireAttendeeNumber.label"),
+                    description: t("organizationSettings.requireAttendeeNumber.description"),
+                  },
+                ]
+              ).map((toggle) => (
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-[8px] bg-white p-4 transition hover:bg-white/80"
+                  key={toggle.key}
+                >
+                  <input
+                    checked={attendeeFieldSettings[toggle.key]}
+                    className="mt-0.5 size-4 shrink-0 rounded border-[var(--color-border)] text-amber-600 focus:ring-amber-500/40"
+                    disabled={!canManageOrganization}
+                    onChange={(event) => {
+                      attendeeFieldSettingsMutation.reset();
+                      setAttendeeFieldSettings((current) =>
+                        current ? { ...current, [toggle.key]: event.target.checked } : current,
+                      );
+                    }}
+                    type="checkbox"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium text-slate-900">{toggle.label}</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-500">{toggle.description}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {attendeeFieldSettingsMutation.isError ? (
+              <p className="mt-4 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {getErrorMessage(attendeeFieldSettingsMutation.error)}
+              </p>
+            ) : null}
+
+            {attendeeFieldSettingsMutation.isSuccess ? (
+              <p className="mt-4 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                {t("organizationSettings.settingsSaved")}
+              </p>
+            ) : null}
+
+            <Button
+              className="mt-4"
+              disabled={!canManageOrganization || attendeeFieldSettingsMutation.isPending}
+              onClick={() => attendeeFieldSettingsMutation.mutate(attendeeFieldSettings)}
+              type="button"
+            >
+              {attendeeFieldSettingsMutation.isPending
+                ? t("organizationSettings.saving")
+                : t("organizationSettings.saveRequirements")}
+            </Button>
+          </div>
+        ) : null}
 
         <div className="mt-10 rounded-[8px] bg-[var(--color-surface-soft)] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">

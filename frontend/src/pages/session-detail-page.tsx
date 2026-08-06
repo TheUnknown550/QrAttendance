@@ -27,7 +27,9 @@ function AttendeeRosterMeta({ attendee, settings }: { attendee: Attendee; settin
       {settings.showOrganizationName || settings.showAttendeeType ? (
         <p className="truncate text-xs text-slate-500">{orgAndType}</p>
       ) : null}
-      {settings.showEmail ? <p className="truncate text-sm text-slate-500">{attendee.email}</p> : null}
+      {settings.showEmail ? (
+        <p className="truncate text-sm text-slate-500">{attendee.email ?? t("scanner.noEmail")}</p>
+      ) : null}
       {settings.showPhone ? (
         <p className="truncate text-xs text-slate-500">{attendee.phone ?? t("session.noPhone")}</p>
       ) : null}
@@ -149,7 +151,7 @@ export function SessionDetailPage() {
           attendee.surname,
           attendee.organizationName ?? "",
           attendee.attendeeType ?? "",
-          attendee.email,
+          attendee.email ?? "",
           attendee.phone ?? "",
         ].some((value) => value.toLowerCase().includes(normalizedSearch));
       })

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, FileSpreadsheet, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,7 @@ import type {
   ConfirmAttendeeImportResult,
   ImportColumnMapping,
   ImportTargetField,
+  OrganizationDetail,
   ParseAttendeeImportResult,
 } from "../../types/api";
 import { Button } from "../ui/button";
@@ -20,7 +21,6 @@ interface Props {
 
 type Step = "upload" | "map" | "summary";
 
-const REQUIRED_FIELDS: ImportTargetField[] = ["email"];
 const FIELD_ORDER: ImportTargetField[] = [
   "fullName",
   "firstName",
@@ -46,6 +46,18 @@ export function BulkImportModal({ open, onClose }: Props) {
   const queryClient = useQueryClient();
   const [state, setState] = useState(resetState);
   const { step, parseResult, mapping, nameMode } = state;
+
+  const organizationQuery = useQuery({
+    queryKey: ["organization-current"],
+    queryFn: async () => unwrapResponse<OrganizationDetail>(await api.get("/organizations/current")),
+  });
+  const organization = organizationQuery.data;
+
+  const REQUIRED_FIELDS: ImportTargetField[] = [
+    ...(organization?.requireAttendeeEmail ? (["email"] as const) : []),
+    ...(organization?.requireAttendeePhone ? (["phone"] as const) : []),
+    ...(organization?.requireAttendeeNumber ? (["attendeeNumber"] as const) : []),
+  ];
 
   const FIELD_LABELS: Record<ImportTargetField, string> = {
     fullName: t("bulkImportModal.fields.fullName"),

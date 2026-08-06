@@ -76,7 +76,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     throw new ApiError(404, "Organization not found");
   }
 
-  const attendees = await prisma.attendee.findMany({
+  const matchedAttendees = await prisma.attendee.findMany({
     where: {
       organizationId,
       deletedAt: null,
@@ -94,13 +94,22 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     },
   });
 
-  if (attendees.length === 0) {
+  if (matchedAttendees.length === 0) {
     throw new ApiError(
       404,
       body.attendeeIds && body.attendeeIds.length > 0
         ? "Attendee not found"
         : "No attendees found to email",
     );
+  }
+
+  const attendees = matchedAttendees.filter(
+    (attendee): attendee is QrEmailAttendee => Boolean(attendee.email),
+  );
+  const skippedNoEmailCount = matchedAttendees.length - attendees.length;
+
+  if (attendees.length === 0) {
+    throw new ApiError(400, "None of the selected attendees have an email address on file");
   }
 
   const { attendeeIds, ...eventDetails } = body;
@@ -111,6 +120,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
     successResponse(
       {
         recipientCount: attendees.length,
+        skippedNoEmailCount,
       },
       `Sending QR codes to ${attendees.length} attendee${attendees.length === 1 ? "" : "s"}`,
     ),

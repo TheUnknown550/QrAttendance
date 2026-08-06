@@ -8,6 +8,31 @@ import { createAttendeeSchema, updateAttendeeSchema } from "./attendees.schemas"
 import { removeStoredAttendeeImage, saveAttendeeImage } from "./attendees.upload";
 import { touchOrganizationActivity } from "../organizations/organizations.activity";
 
+function assertRequiredFields(
+  organization: {
+    requireAttendeeEmail: boolean;
+    requireAttendeePhone: boolean;
+    requireAttendeeNumber: boolean;
+  },
+  values: {
+    email?: string;
+    phone?: string;
+    attendeeNumber?: number | null;
+  },
+) {
+  if (organization.requireAttendeeEmail && !values.email) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  if (organization.requireAttendeePhone && !values.phone) {
+    throw new ApiError(400, "Phone is required");
+  }
+
+  if (organization.requireAttendeeNumber && values.attendeeNumber == null) {
+    throw new ApiError(400, "Attendee number is required");
+  }
+}
+
 function getRequestBody(request: { body?: Record<string, unknown> }) {
   const body = request.body ?? {};
 
@@ -125,12 +150,17 @@ export const createAttendee = asyncHandler(async (request, response) => {
     },
     select: {
       name: true,
+      requireAttendeeEmail: true,
+      requireAttendeePhone: true,
+      requireAttendeeNumber: true,
     },
   });
 
   if (!organization) {
     throw new ApiError(404, "Organization not found");
   }
+
+  assertRequiredFields(organization, body);
 
   const image = await saveAttendeeImage({
     attendeeName: `${body.firstName} ${body.surname}`,
@@ -206,12 +236,21 @@ export const updateAttendee = asyncHandler(async (request, response) => {
     },
     select: {
       name: true,
+      requireAttendeeEmail: true,
+      requireAttendeePhone: true,
+      requireAttendeeNumber: true,
     },
   });
 
   if (!organization) {
     throw new ApiError(404, "Organization not found");
   }
+
+  assertRequiredFields(organization, {
+    email: body.email ?? existing.email ?? undefined,
+    phone: body.phone ?? existing.phone ?? undefined,
+    attendeeNumber: body.attendeeNumber !== undefined ? body.attendeeNumber : existing.attendeeNumber,
+  });
 
   const image = await saveAttendeeImage({
     attendeeName: `${body.firstName ?? existing.firstName} ${body.surname ?? existing.surname}`,

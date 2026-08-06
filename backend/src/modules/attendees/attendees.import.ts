@@ -165,6 +165,19 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
     );
   }
 
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: {
+      requireAttendeeEmail: true,
+      requireAttendeePhone: true,
+      requireAttendeeNumber: true,
+    },
+  });
+
+  if (!organization) {
+    throw new ApiError(404, "Organization not found");
+  }
+
   const existingAttendees = await prisma.attendee.findMany({
     where: { organizationId, deletedAt: null },
     select: { firstName: true, surname: true },
@@ -181,7 +194,7 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
     surname: string;
     organizationName: string | undefined;
     attendeeType: string | undefined;
-    email: string;
+    email: string | undefined;
     phone: string | undefined;
     attendeeNumber: number | undefined;
     qrToken: string;
@@ -189,15 +202,23 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
 
   rows.forEach((row, index) => {
     const rowNumber = index + 2; // +1 for 1-indexing, +1 for the header row
-    const email = cell(row, mapping.email).toLowerCase();
+    const rawEmail = cell(row, mapping.email).toLowerCase();
+    const email = rawEmail || undefined;
 
-    if (!email) {
+    if (!email && organization.requireAttendeeEmail) {
       skipped.push({ row: rowNumber, reason: "Missing email" });
       return;
     }
 
-    if (!emailPattern.test(email)) {
+    if (email && !emailPattern.test(email)) {
       skipped.push({ row: rowNumber, reason: `Invalid email: ${email}` });
+      return;
+    }
+
+    const phone = cell(row, mapping.phone) || undefined;
+
+    if (!phone && organization.requireAttendeePhone) {
+      skipped.push({ row: rowNumber, reason: "Missing phone" });
       return;
     }
 
@@ -234,6 +255,12 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
 
     const attendeeNumberRaw = cell(row, mapping.attendeeNumber);
     const parsedAttendeeNumber = attendeeNumberRaw ? Number.parseInt(attendeeNumberRaw, 10) : NaN;
+    const attendeeNumber = Number.isFinite(parsedAttendeeNumber) ? parsedAttendeeNumber : undefined;
+
+    if (attendeeNumber === undefined && organization.requireAttendeeNumber) {
+      skipped.push({ row: rowNumber, reason: "Missing attendee number" });
+      return;
+    }
 
     toCreate.push({
       organizationId,
@@ -242,8 +269,8 @@ export const confirmAttendeeImport = asyncHandler(async (request, response) => {
       organizationName: cell(row, mapping.organizationName) || undefined,
       attendeeType: cell(row, mapping.attendeeType) || undefined,
       email,
-      phone: cell(row, mapping.phone) || undefined,
-      attendeeNumber: Number.isFinite(parsedAttendeeNumber) ? parsedAttendeeNumber : undefined,
+      phone,
+      attendeeNumber,
       qrToken: generateQrToken(),
     });
   });

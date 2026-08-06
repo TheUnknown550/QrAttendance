@@ -11,7 +11,10 @@ export const joinOrganizationSchema = z.object({
 });
 
 export const updateOrganizationSchema = z.object({
-  name: z.string().trim().min(2),
+  name: z.string().trim().min(2).optional(),
+  requireAttendeeEmail: z.boolean().optional(),
+  requireAttendeePhone: z.boolean().optional(),
+  requireAttendeeNumber: z.boolean().optional(),
 });
 
 export const createInviteSchema = z.object({

@@ -13,9 +13,10 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
+import { useAttendeeFormSchema } from "../lib/attendee-schema";
 import { useAuth } from "../lib/auth";
 import { formatAttendeeOrgType, resolveMediaUrl } from "../lib/utils";
-import type { Attendee, PaginatedResult } from "../types/api";
+import type { Attendee, OrganizationDetail, PaginatedResult } from "../types/api";
 
 function normalizeAttendeeResult(data: PaginatedResult<Attendee> | Attendee[] | undefined) {
   if (Array.isArray(data)) {
@@ -46,20 +47,13 @@ export function AttendeesPage() {
   const [qrEmailsToast, setQrEmailsToast] = useState("");
   const deferredSearch = useDeferredValue(search);
 
-  const attendeeSchema = z.object({
-    firstName: z.string().min(1),
-    surname: z.string().min(1),
-    organizationName: z.string().optional(),
-    attendeeType: z.string().optional(),
-    email: z.email(),
-    phone: z.string().optional(),
-    attendeeNumber: z
-      .string()
-      .optional()
-      .refine((value) => !value || /^\d+$/.test(value.trim()), {
-        message: t("attendees.attendeeNumberWholeNumber"),
-      }),
+  const organizationQuery = useQuery({
+    queryKey: ["organization-current", auth?.activeOrganizationId],
+    queryFn: async () => unwrapResponse<OrganizationDetail>(await api.get("/organizations/current")),
   });
+  const organization = organizationQuery.data;
+
+  const attendeeSchema = useAttendeeFormSchema(organization);
 
   type AttendeeFormValues = z.infer<typeof attendeeSchema>;
 
@@ -103,7 +97,9 @@ export function AttendeesPage() {
             if (values.attendeeType) {
               formData.append("attendeeType", values.attendeeType);
             }
-            formData.append("email", values.email);
+            if (values.email) {
+              formData.append("email", values.email);
+            }
             if (values.phone) {
               formData.append("phone", values.phone);
             }
@@ -196,18 +192,28 @@ export function AttendeesPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">
+              {t("auth.login.email")}
+              {organization && !organization.requireAttendeeEmail ? ` (${t("common.optional")})` : ""}
+            </span>
             <Input placeholder="alex@example.com" {...register("email")} />
             {errors.email ? <p className="mt-2 text-xs text-rose-500">{errors.email.message}</p> : null}
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.phone")}</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">
+              {t("attendees.phone")}
+              {organization && !organization.requireAttendeePhone ? ` (${t("common.optional")})` : ""}
+            </span>
             <Input placeholder="555-0101" {...register("phone")} />
+            {errors.phone ? <p className="mt-2 text-xs text-rose-500">{errors.phone.message}</p> : null}
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.attendeeNumber")}</span>
+            <span className="mb-2 block text-sm font-medium text-slate-600">
+              {t("attendees.attendeeNumber")}
+              {organization && !organization.requireAttendeeNumber ? ` (${t("common.optional")})` : ""}
+            </span>
             <Input
               inputMode="numeric"
               placeholder={t("attendees.attendeeNumberPlaceholder")}
@@ -342,7 +348,7 @@ export function AttendeesPage() {
                     <p className="truncate text-sm text-slate-500">
                       {formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}
                     </p>
-                    <p className="truncate text-sm text-slate-500">{attendee.email}</p>
+                    <p className="truncate text-sm text-slate-500">{attendee.email ?? t("scanner.noEmail")}</p>
                   </div>
                 </div>
 
@@ -403,7 +409,7 @@ export function AttendeesPage() {
                   <p className="truncate text-sm text-slate-500">
                     {formatAttendeeOrgType(attendee.organizationName, attendee.attendeeType)}
                   </p>
-                  <p className="truncate text-sm text-slate-500">{attendee.email}</p>
+                  <p className="truncate text-sm text-slate-500">{attendee.email ?? t("scanner.noEmail")}</p>
                 </div>
               </div>
 

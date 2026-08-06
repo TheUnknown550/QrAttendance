@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { z } from "zod";
+import type { z } from "zod";
 import { Mail } from "lucide-react";
 import { AttendeeTypeSelect } from "../components/attendees/attendee-type-select";
 import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal";
@@ -15,18 +15,9 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
+import { useAttendeeFormSchema } from "../lib/attendee-schema";
 import { formatDate, resolveMediaUrl } from "../lib/utils";
-import type { Attendee, AttendeeDetail } from "../types/api";
-
-type UpdateAttendeeValues = {
-  firstName: string;
-  surname: string;
-  organizationName?: string;
-  attendeeType?: string;
-  email: string;
-  phone?: string;
-  attendeeNumber?: string;
-};
+import type { Attendee, AttendeeDetail, OrganizationDetail } from "../types/api";
 
 export function AttendeeDetailPage() {
   const { t } = useTranslation();
@@ -34,20 +25,14 @@ export function AttendeeDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const updateAttendeeSchema = z.object({
-    firstName: z.string().min(1),
-    surname: z.string().min(1),
-    organizationName: z.string().optional(),
-    attendeeType: z.string().optional(),
-    email: z.email(),
-    phone: z.string().optional(),
-    attendeeNumber: z
-      .string()
-      .optional()
-      .refine((value) => !value || /^\d+$/.test(value.trim()), {
-        message: t("attendees.attendeeNumberWholeNumber"),
-      }),
+  const organizationQuery = useQuery({
+    queryKey: ["organization-current"],
+    queryFn: async () => unwrapResponse<OrganizationDetail>(await api.get("/organizations/current")),
   });
+  const organization = organizationQuery.data;
+
+  const updateAttendeeSchema = useAttendeeFormSchema(organization);
+  type UpdateAttendeeValues = z.infer<typeof updateAttendeeSchema>;
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
@@ -100,7 +85,7 @@ export function AttendeeDetailPage() {
       surname: attendee.surname,
       organizationName: attendee.organizationName ?? "",
       attendeeType: attendee.attendeeType ?? "",
-      email: attendee.email,
+      email: attendee.email ?? "",
       phone: attendee.phone ?? "",
       attendeeNumber: attendee.attendeeNumber != null ? String(attendee.attendeeNumber) : "",
     });
@@ -147,7 +132,9 @@ export function AttendeeDetailPage() {
             if (values.attendeeType) {
               formData.append("attendeeType", values.attendeeType);
             }
-            formData.append("email", values.email);
+            if (values.email) {
+              formData.append("email", values.email);
+            }
             if (values.phone) {
               formData.append("phone", values.phone);
             }
@@ -205,7 +192,7 @@ export function AttendeeDetailPage() {
               <h1 className="mt-2 break-words font-display text-3xl font-semibold text-slate-900">
                 {attendee.firstName} {attendee.surname}
               </h1>
-              <p className="mt-2 break-words text-sm text-slate-500">{attendee.email}</p>
+              <p className="mt-2 break-words text-sm text-slate-500">{attendee.email ?? t("scanner.noEmail")}</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {attendee.attendeeNumber != null ? <Badge>#{attendee.attendeeNumber}</Badge> : null}
                 {attendee.organizationName ? <Badge>{attendee.organizationName}</Badge> : null}
@@ -326,18 +313,28 @@ export function AttendeeDetailPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">{t("auth.login.email")}</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">
+                {t("auth.login.email")}
+                {organization && !organization.requireAttendeeEmail ? ` (${t("common.optional")})` : ""}
+              </span>
               <Input {...register("email")} />
               {errors.email ? <p className="mt-2 text-xs text-rose-500">{errors.email.message}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.phone")}</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">
+                {t("attendees.phone")}
+                {organization && !organization.requireAttendeePhone ? ` (${t("common.optional")})` : ""}
+              </span>
               <Input {...register("phone")} />
+              {errors.phone ? <p className="mt-2 text-xs text-rose-500">{errors.phone.message}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">{t("attendees.attendeeNumber")}</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">
+                {t("attendees.attendeeNumber")}
+                {organization && !organization.requireAttendeeNumber ? ` (${t("common.optional")})` : ""}
+              </span>
               <Input
                 inputMode="numeric"
                 placeholder={t("attendeeDetail.attendeeNumberPlaceholder")}

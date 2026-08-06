@@ -260,6 +260,9 @@ export const getCurrentOrganization = asyncHandler(async (request, response) => 
       id: organization.id,
       name: organization.name,
       joinCode: organization.joinCode,
+      requireAttendeeEmail: organization.requireAttendeeEmail,
+      requireAttendeePhone: organization.requireAttendeePhone,
+      requireAttendeeNumber: organization.requireAttendeeNumber,
       lifecycle: {
         status: organization.status,
         lastActivityAt: organization.lastActivityAt,
@@ -305,6 +308,9 @@ export const updateCurrentOrganization = asyncHandler(async (request, response) 
     },
     data: {
       name: body.name,
+      requireAttendeeEmail: body.requireAttendeeEmail,
+      requireAttendeePhone: body.requireAttendeePhone,
+      requireAttendeeNumber: body.requireAttendeeNumber,
     },
   });
 

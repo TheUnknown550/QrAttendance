@@ -9,7 +9,8 @@
     "close": "Close",
     "back": "Back",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "optional": "optional"
   },
   "siteHeader": {
     "home": "Home",
@@ -363,6 +364,10 @@
     "attendeeNumber": "Attendee number",
     "attendeeNumberPlaceholder": "e.g. 42",
     "attendeeNumberWholeNumber": "Attendee number must be a whole number",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Enter a valid email address",
+    "phoneRequired": "Phone is required",
+    "attendeeNumberRequired": "Attendee number is required",
     "photo": "Photo",
     "selected": "Selected: {{name}}",
     "creating": "Creating...",
@@ -475,6 +480,22 @@
     "organizationName": "Organization name",
     "saving": "Saving...",
     "saveOrganization": "Save organization",
+    "attendeeRequirements": "Attendee requirements",
+    "attendeeRequirementsHint": "Choose which attendee fields must be filled in when creating, editing, or importing attendees.",
+    "requireAttendeeEmail": {
+      "label": "Require email",
+      "description": "Attendees must have an email address to be created or imported."
+    },
+    "requireAttendeePhone": {
+      "label": "Require phone",
+      "description": "Attendees must have a phone number to be created or imported."
+    },
+    "requireAttendeeNumber": {
+      "label": "Require attendee number",
+      "description": "Attendees must have an attendee number to be created or imported."
+    },
+    "settingsSaved": "Settings saved",
+    "saveRequirements": "Save requirements",
     "joinCode": "Join code",
     "shareForManualJoins": "Share for manual joins.",
     "copied": "Copied",
@@ -553,7 +574,7 @@
     "separateNameSurnameColumns": "Separate name / surname columns",
     "notImported": "Not imported",
     "columnN": "Column {{number}}",
-    "mapRequiredFields": "Map a name column and an email column before importing.",
+    "mapRequiredFields": "Map a name column and any other required fields (marked *) before importing.",
     "importing": "Importing...",
     "importRows": "Import {{count}} row",
     "importRows_other": "Import {{count}} rows",

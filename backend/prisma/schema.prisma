@@ -80,6 +80,9 @@ model Organization {
   attendees           Attendee[]
   eventSeries         EventSeries[]
   attendeeTypes       AttendeeType[]
+  requireAttendeeEmail  Boolean @default(false) @map("require_attendee_email")
+  requireAttendeePhone  Boolean @default(false) @map("require_attendee_phone")
+  requireAttendeeNumber Boolean @default(false) @map("require_attendee_number")
 
   @@map("organizations")
 }
@@ -163,7 +166,7 @@ model Attendee {
   surname          String
   organizationName String?            @map("organization_name")
   attendeeType     String?            @map("attendee_type")
-  email            String
+  email            String?
   phone            String?
   attendeeNumber   Int?               @map("attendee_number")
   profileImageUrl  String?

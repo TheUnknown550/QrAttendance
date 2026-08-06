@@ -41,6 +41,9 @@ export type OrganizationDetail = {
   id: string;
   name: string;
   joinCode: string;
+  requireAttendeeEmail: boolean;
+  requireAttendeePhone: boolean;
+  requireAttendeeNumber: boolean;
   lifecycle: {
     status: "ACTIVE" | "INACTIVE";
     lastActivityAt: string;
@@ -152,7 +155,7 @@ export type Attendee = {
   surname: string;
   organizationName?: string | null;
   attendeeType?: string | null;
-  email: string;
+  email?: string | null;
   phone?: string | null;
   attendeeNumber?: number | null;
   profileImageUrl?: string | null;
@@ -190,7 +193,7 @@ export type ScanResult = {
     surname: string;
     organizationName?: string | null;
     attendeeType?: string | null;
-    email?: string;
+    email?: string | null;
     phone?: string | null;
     attendeeNumber?: number | null;
     profileImageUrl?: string | null;
@@ -234,7 +237,7 @@ export type ReportItem = {
   surname: string;
   organizationName?: string | null;
   attendeeType?: string | null;
-  email: string;
+  email?: string | null;
   attendedSessions: number;
   totalSessions: number;
   attendancePercentage: number;

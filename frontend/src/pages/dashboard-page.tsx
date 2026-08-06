@@ -152,7 +152,7 @@ export function DashboardPage() {
                     <div>
                       <p className="font-medium text-slate-900">{item.firstName} {item.surname}</p>
                       <p className="text-xs text-slate-500">{formatAttendeeOrgType(item.organizationName, item.attendeeType)}</p>
-                      <p className="text-sm text-slate-500">{item.email}</p>
+                      <p className="text-sm text-slate-500">{item.email ?? t("scanner.noEmail")}</p>
                     </div>
                   </div>
                   <div className="text-right">
