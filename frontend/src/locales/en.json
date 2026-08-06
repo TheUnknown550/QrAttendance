@@ -1035,5 +1035,24 @@
     "adding": "Adding...",
     "confirmDelete": "Delete the attendee type \"{{label}}\"? Attendees already using it will keep the text but it will no longer appear in the dropdown.",
     "noTypesYet": "No attendee types yet."
+  },
+  "qrTemplate": {
+    "eyebrow": "QR code template",
+    "title": "Design your branded QR card",
+    "description": "Upload a background image for the QR card attendees receive, then position the QR code on top of it. This is used everywhere a check-in QR is generated, downloaded, or emailed.",
+    "backgroundImage": "Background image",
+    "backgroundImageHint": "Recommended size {{width}}x{{height}}px. The image will be scaled to fill the card exactly.",
+    "qrX": "QR X",
+    "qrY": "QR Y",
+    "qrSize": "QR size",
+    "dragHint": "Drag the QR box on the preview to move it, or drag the small handle in its corner to resize it.",
+    "livePreview": "Live preview",
+    "saving": "Saving...",
+    "saved": "Template saved",
+    "downloadGuide": "Download placement guide",
+    "removeImage": "Remove background image",
+    "removing": "Removing...",
+    "guideLabel": "QR code area ({{size}}px)",
+    "guideCanvasSize": "Canvas size: {{width}} x {{height}}px"
   }
 }

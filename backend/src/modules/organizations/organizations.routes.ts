@@ -16,6 +16,8 @@ import {
   updateMembershipRole,
   updateCurrentOrganization,
 } from "./organizations.controller";
+import { deleteQrTemplateImage, getQrTemplate, updateQrTemplate } from "./qr-template.controller";
+import { qrTemplateImageUpload } from "./qr-template.upload";
 
 const organizationsRouter = Router();
 const publicOrganizationsRouter = Router();
@@ -64,6 +66,20 @@ organizationsRouter.delete(
   requireActiveOrganization,
   requireOrganizationRole([OrganizationRole.OWNER]),
   removeMembership,
+);
+organizationsRouter.get("/current/qr-template", requireActiveOrganization, getQrTemplate);
+organizationsRouter.patch(
+  "/current/qr-template",
+  requireActiveOrganization,
+  requireOrganizationRole([OrganizationRole.OWNER, OrganizationRole.ADMIN]),
+  qrTemplateImageUpload.single("image"),
+  updateQrTemplate,
+);
+organizationsRouter.delete(
+  "/current/qr-template/image",
+  requireActiveOrganization,
+  requireOrganizationRole([OrganizationRole.OWNER, OrganizationRole.ADMIN]),
+  deleteQrTemplateImage,
 );
 
 export { organizationsRouter, publicOrganizationsRouter };

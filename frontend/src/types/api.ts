@@ -175,6 +175,15 @@ export type AttendeeType = {
   createdAt: string;
 };
 
+export type QrTemplate = {
+  canvasWidth: number;
+  canvasHeight: number;
+  imageUrl: string | null;
+  qrX: number;
+  qrY: number;
+  qrSize: number;
+};
+
 export type PaginatedResult<T> = {
   items: T[];
   pagination: {

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { QrTemplateEditor } from "../components/qr-template/qr-template-editor";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -181,6 +182,8 @@ export function EventSeriesListPage() {
           ) : null}
         </div>
       </Card>
+
+      <QrTemplateEditor />
     </div>
   );
 }

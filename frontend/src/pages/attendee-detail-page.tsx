@@ -18,7 +18,7 @@ import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAttendeeFormSchema } from "../lib/attendee-schema";
 import { useAuth } from "../lib/auth";
 import { cn, formatDate, resolveMediaUrl } from "../lib/utils";
-import type { Attendee, AttendeeDetail, EventSeries, OrganizationDetail } from "../types/api";
+import type { Attendee, AttendeeDetail, EventSeries, OrganizationDetail, QrTemplate } from "../types/api";
 
 export function AttendeeDetailPage() {
   const { t } = useTranslation();
@@ -32,6 +32,11 @@ export function AttendeeDetailPage() {
     queryFn: async () => unwrapResponse<OrganizationDetail>(await api.get("/organizations/current")),
   });
   const organization = organizationQuery.data;
+
+  const qrTemplateQuery = useQuery({
+    queryKey: ["qr-template", auth?.activeOrganizationId],
+    queryFn: async () => unwrapResponse<QrTemplate>(await api.get("/organizations/current/qr-template")),
+  });
 
   const updateAttendeeSchema = useAttendeeFormSchema(organization);
   type UpdateAttendeeValues = z.infer<typeof updateAttendeeSchema>;
@@ -99,7 +104,7 @@ export function AttendeeDetailPage() {
   });
 
   useEffect(() => {
-    if (!attendee?.qrToken) {
+    if (!attendee?.qrToken || !qrTemplateQuery.data) {
       return;
     }
 
@@ -111,10 +116,10 @@ export function AttendeeDetailPage() {
         light: "#f8fafc",
       },
     }).then(async (rawQrCodeUrl) => {
-      const brandedQrCodeUrl = await createBrandedQrCode(rawQrCodeUrl);
+      const brandedQrCodeUrl = await createBrandedQrCode(rawQrCodeUrl, qrTemplateQuery.data!);
       setQrCodeDataUrl(brandedQrCodeUrl);
     });
-  }, [attendee?.qrToken]);
+  }, [attendee?.qrToken, qrTemplateQuery.data]);
 
   useEffect(() => {
     if (!attendee) {
@@ -529,9 +534,8 @@ export function AttendeeDetailPage() {
   );
 }
 
-async function createBrandedQrCode(qrCodeUrl: string) {
+async function createBrandedQrCode(qrCodeUrl: string, template: QrTemplate) {
   const qrImage = await loadImage(qrCodeUrl);
-  const logoImage = await loadImage("/logo.png");
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -539,8 +543,17 @@ async function createBrandedQrCode(qrCodeUrl: string) {
     return qrCodeUrl;
   }
 
-  canvas.width = 900;
-  canvas.height = 1120;
+  canvas.width = template.canvasWidth;
+  canvas.height = template.canvasHeight;
+
+  if (template.imageUrl) {
+    const backgroundImage = await loadImage(resolveMediaUrl(template.imageUrl)!);
+    context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    context.drawImage(qrImage, template.qrX, template.qrY, template.qrSize, template.qrSize);
+    return canvas.toDataURL("image/png");
+  }
+
+  const logoImage = await loadImage("/logo.png");
 
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -554,8 +567,7 @@ async function createBrandedQrCode(qrCodeUrl: string) {
   const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
   context.drawImage(logoImage, (canvas.width - logoWidth) / 2, 70, logoWidth, logoHeight);
 
-  const qrSize = 540;
-  context.drawImage(qrImage, (canvas.width - qrSize) / 2, 260, qrSize, qrSize);
+  context.drawImage(qrImage, template.qrX, template.qrY, template.qrSize, template.qrSize);
 
   context.fillStyle = "#1f2937";
   context.font = "700 38px 'DM Sans', sans-serif";

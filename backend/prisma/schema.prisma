@@ -83,6 +83,10 @@ model Organization {
   requireAttendeeEmail  Boolean @default(false) @map("require_attendee_email")
   requireAttendeePhone  Boolean @default(false) @map("require_attendee_phone")
   requireAttendeeNumber Boolean @default(false) @map("require_attendee_number")
+  qrTemplateImageUrl    String? @map("qr_template_image_url")
+  qrTemplateX           Int?    @map("qr_template_x")
+  qrTemplateY           Int?    @map("qr_template_y")
+  qrTemplateSize        Int?    @map("qr_template_size")
 
   @@map("organizations")
 }
