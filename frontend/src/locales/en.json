@@ -417,7 +417,9 @@
     "noAttendanceRecords": "No sessions yet. Create a session to manage attendance here.",
     "manageAttendanceHint": "Mark this attendee as attended or not attended for any session.",
     "checkedInAt": "Checked in {{date}}",
-    "notAttended": "Not attended"
+    "notAttended": "Not attended",
+    "emailedAt": "QR emailed {{date}}",
+    "notYetEmailed": "Not yet emailed"
   },
   "reports": {
     "eyebrow": "Reports",
@@ -548,8 +550,14 @@
     "sendToName": "Send to {{name}}",
     "sendToCount": "Send to {{count}} attendee",
     "sendToCount_other": "Send to {{count}} attendees",
+    "sendToNew": "Send to new attendees",
     "descriptionSingle": "{{name}} will receive their personal check-in QR code by email, along with the event details you enter below.",
     "descriptionAll": "Every attendee in your directory will receive their personal check-in QR code by email, along with the event details you enter below.",
+    "recipients": "Recipients",
+    "allAttendees": "All attendees",
+    "allAttendeesHint": "Send to everyone, including attendees who were already emailed before.",
+    "newAttendeesOnly": "New attendees only",
+    "newAttendeesOnlyHint": "Only send to attendees who haven't received a QR code email yet.",
     "eventName": "Event name",
     "subjectOptional": "Email subject (optional)",
     "subjectPlaceholder": "Your check-in QR code for Product Launch Night",

@@ -388,7 +388,7 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
                     <tr>
                       <td style="padding:26px 28px;">
                         <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:#334155;">
-                          Dear Sir/Madam, ${safeFullName},
+                          Dear Sir/Madam,
                         </p>
                         <p style="margin:0 0 20px;font-size:15px;line-height:1.7;color:#334155;">
                           Here is your personal check-in QR code. Show it at the entrance and it will be scanned for attendance &mdash; no need to print anything, just have this email open on your phone.
@@ -471,7 +471,7 @@ export async function sendAttendeeQrCodeEmail(payload: AttendeeQrCodeMailPayload
   const text = [
     `Your check-in QR code for ${payload.eventName}`,
     "",
-    `Dear Sir/Madam, ${fullName},`,
+    "Dear Sir/Madam,",
     "",
     "Your personal check-in QR code is attached to this email as an image.",
     "Open it on your phone and show it at the entrance to check in.",

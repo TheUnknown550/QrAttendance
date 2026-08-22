@@ -65,6 +65,11 @@ async function dispatchAttendeeQrEmails(
         qrImageHeight: height,
         ...eventDetails,
       });
+
+      await prisma.attendee.update({
+        where: { id: attendee.id },
+        data: { emailedAt: new Date() },
+      });
     } catch (error) {
       console.error(`Failed to send QR email to attendee ${attendee.id}`, error);
     }
@@ -99,6 +104,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
       organizationId,
       deletedAt: null,
       ...(body.attendeeIds && body.attendeeIds.length > 0 ? { id: { in: body.attendeeIds } } : {}),
+      ...(body.recipientFilter === "new" ? { emailedAt: null } : {}),
     },
     select: {
       id: true,
@@ -117,7 +123,9 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
       404,
       body.attendeeIds && body.attendeeIds.length > 0
         ? "Attendee not found"
-        : "No attendees found to email",
+        : body.recipientFilter === "new"
+          ? "Every attendee has already been emailed"
+          : "No attendees found to email",
     );
   }
 

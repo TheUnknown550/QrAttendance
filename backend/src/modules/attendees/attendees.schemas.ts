@@ -55,6 +55,7 @@ export const sendQrEmailsSchema = z.object({
   eventLocation: optionalString,
   message: optionalString,
   attendeeIds: z.array(z.string().uuid()).optional(),
+  recipientFilter: z.enum(["all", "new"]).optional(),
 });
 
 const columnIndexSchema = z.number().int().min(0);

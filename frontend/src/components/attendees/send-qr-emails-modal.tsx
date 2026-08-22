@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Mail } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -13,6 +13,8 @@ import { Input } from "../ui/input";
 type SendQrEmailsResult = {
   recipientCount: number;
 };
+
+type RecipientFilter = "all" | "new";
 
 interface Props {
   open: boolean;
@@ -35,7 +37,9 @@ export function SendQrEmailsModal({
   onSent,
 }: Props) {
   const { t } = useTranslation();
+  const isBulk = !attendeeIds;
   const recipientCount = attendeeIds ? attendeeIds.length : totalAttendees;
+  const [recipientFilter, setRecipientFilter] = useState<RecipientFilter>("all");
 
   const sendQrEmailsSchema = z.object({
     eventName: z.string().trim().min(1, t("sendQrEmailsModal.eventNameRequired")),
@@ -59,7 +63,11 @@ export function SendQrEmailsModal({
   const mutation = useMutation({
     mutationFn: async (values: SendQrEmailsValues) =>
       unwrapResponse<SendQrEmailsResult>(
-        await api.post("/attendees/send-qr-emails", { ...values, attendeeIds }),
+        await api.post("/attendees/send-qr-emails", {
+          ...values,
+          attendeeIds,
+          ...(isBulk ? { recipientFilter } : {}),
+        }),
       ),
     onSuccess: (result) => {
       reset();
@@ -71,13 +79,16 @@ export function SendQrEmailsModal({
   useEffect(() => {
     if (open) {
       mutation.reset();
+      setRecipientFilter("all");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const buttonLabel = recipientLabel
     ? t("sendQrEmailsModal.sendToName", { name: recipientLabel })
-    : t("sendQrEmailsModal.sendToCount", { count: recipientCount });
+    : recipientFilter === "new"
+      ? t("sendQrEmailsModal.sendToNew")
+      : t("sendQrEmailsModal.sendToCount", { count: recipientCount });
 
   return (
     <Dialog onClose={onClose} open={open} title={t("sendQrEmailsModal.title")}>
@@ -87,6 +98,52 @@ export function SendQrEmailsModal({
             ? t("sendQrEmailsModal.descriptionSingle", { name: recipientLabel })
             : t("sendQrEmailsModal.descriptionAll")}
         </p>
+
+        {isBulk ? (
+          <div className="space-y-2">
+            <span className="block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.recipients")}</span>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label
+                className={`flex cursor-pointer items-start gap-2 rounded-[8px] border p-3 text-sm transition ${
+                  recipientFilter === "all"
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-[var(--color-border)] bg-white hover:bg-[var(--color-surface-soft)]"
+                }`}
+              >
+                <input
+                  checked={recipientFilter === "all"}
+                  className="mt-0.5"
+                  onChange={() => setRecipientFilter("all")}
+                  type="radio"
+                  value="all"
+                />
+                <span>
+                  <span className="block font-medium text-slate-900">{t("sendQrEmailsModal.allAttendees")}</span>
+                  <span className="block text-xs text-slate-500">{t("sendQrEmailsModal.allAttendeesHint")}</span>
+                </span>
+              </label>
+              <label
+                className={`flex cursor-pointer items-start gap-2 rounded-[8px] border p-3 text-sm transition ${
+                  recipientFilter === "new"
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-[var(--color-border)] bg-white hover:bg-[var(--color-surface-soft)]"
+                }`}
+              >
+                <input
+                  checked={recipientFilter === "new"}
+                  className="mt-0.5"
+                  onChange={() => setRecipientFilter("new")}
+                  type="radio"
+                  value="new"
+                />
+                <span>
+                  <span className="block font-medium text-slate-900">{t("sendQrEmailsModal.newAttendeesOnly")}</span>
+                  <span className="block text-xs text-slate-500">{t("sendQrEmailsModal.newAttendeesOnlyHint")}</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        ) : null}
 
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-600">{t("sendQrEmailsModal.eventName")}</span>

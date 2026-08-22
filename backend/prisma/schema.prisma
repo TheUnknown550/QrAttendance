@@ -175,6 +175,7 @@ model Attendee {
   attendeeNumber   Int?               @map("attendee_number")
   profileImageUrl  String?
   qrToken          String             @unique
+  emailedAt        DateTime?          @map("emailed_at")
   deletedAt        DateTime?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt

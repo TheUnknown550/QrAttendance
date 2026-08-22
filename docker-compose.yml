@@ -3,19 +3,19 @@ services:
     image: postgres:16-alpine
     container_name: qrattendance-client-postgres
     restart: unless-stopped
-    mem_limit: 512m
-    mem_reservation: 128m
-    cpu_shares: 512
+    mem_limit: 1024m
+    mem_reservation: 256m
+    cpu_shares: 1024
     command:
       - postgres
       - -c
-      - shared_buffers=128MB
+      - shared_buffers=256MB
       - -c
       - work_mem=4MB
       - -c
-      - max_connections=30
+      - max_connections=60
       - -c
-      - effective_cache_size=256MB
+      - effective_cache_size=512MB
     ports:
       - "127.0.0.1:5434:5432"
     environment:

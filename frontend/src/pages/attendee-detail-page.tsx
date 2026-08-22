@@ -245,6 +245,15 @@ export function AttendeeDetailPage() {
                 {attendee.attendeeType ? <Badge>{attendee.attendeeType}</Badge> : null}
                 <Badge>{attendee.phone ?? t("session.noPhone")}</Badge>
                 <Badge>{t("attendeeDetail.created", { date: formatDate(attendee.createdAt) })}</Badge>
+                {attendee.emailedAt ? (
+                  <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                    {t("attendeeDetail.emailedAt", { date: formatDate(attendee.emailedAt) })}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                    {t("attendeeDetail.notYetEmailed")}
+                  </span>
+                )}
               </div>
 
               <Button

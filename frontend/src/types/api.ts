@@ -160,6 +160,7 @@ export type Attendee = {
   attendeeNumber?: number | null;
   profileImageUrl?: string | null;
   qrToken: string;
+  emailedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
