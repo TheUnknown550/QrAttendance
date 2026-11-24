@@ -28,7 +28,7 @@ type EventDetails = {
   message?: string | null;
 };
 
-type QrEmailAttendee = {
+export type QrEmailAttendee = {
   id: string;
   firstName: string;
   surname: string;
@@ -39,7 +39,7 @@ type QrEmailAttendee = {
   qrToken: string;
 };
 
-async function dispatchAttendeeQrEmails(
+export async function dispatchAttendeeQrEmails(
   attendees: QrEmailAttendee[],
   organizationName: string,
   qrTemplate: QrPlacementTemplate,
@@ -76,6 +76,22 @@ async function dispatchAttendeeQrEmails(
 
     await delay(SEND_DELAY_MS);
   }
+}
+
+export function buildOrganizationQrTemplate(organization: {
+  qrTemplateImageUrl: string | null;
+  qrTemplateX: number | null;
+  qrTemplateY: number | null;
+  qrTemplateSize: number | null;
+}): QrPlacementTemplate {
+  return {
+    imageUrl: organization.qrTemplateImageUrl,
+    canvasWidth: QR_TEMPLATE_CANVAS_WIDTH,
+    canvasHeight: QR_TEMPLATE_CANVAS_HEIGHT,
+    qrX: organization.qrTemplateX ?? QR_TEMPLATE_DEFAULT_QR_X,
+    qrY: organization.qrTemplateY ?? QR_TEMPLATE_DEFAULT_QR_Y,
+    qrSize: organization.qrTemplateSize ?? QR_TEMPLATE_DEFAULT_QR_SIZE,
+  };
 }
 
 export const sendQrEmails = asyncHandler(async (request, response) => {
@@ -140,14 +156,7 @@ export const sendQrEmails = asyncHandler(async (request, response) => {
 
   const { attendeeIds, ...eventDetails } = body;
 
-  const qrTemplate: QrPlacementTemplate = {
-    imageUrl: organization.qrTemplateImageUrl,
-    canvasWidth: QR_TEMPLATE_CANVAS_WIDTH,
-    canvasHeight: QR_TEMPLATE_CANVAS_HEIGHT,
-    qrX: organization.qrTemplateX ?? QR_TEMPLATE_DEFAULT_QR_X,
-    qrY: organization.qrTemplateY ?? QR_TEMPLATE_DEFAULT_QR_Y,
-    qrSize: organization.qrTemplateSize ?? QR_TEMPLATE_DEFAULT_QR_SIZE,
-  };
+  const qrTemplate = buildOrganizationQrTemplate(organization);
 
   await touchOrganizationActivity(organizationId);
 

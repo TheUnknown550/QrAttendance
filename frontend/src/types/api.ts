@@ -296,3 +296,152 @@ export type ConfirmAttendeeImportResult = {
   skippedCount: number;
   skipped: Array<{ row: number; reason: string }>;
 };
+
+export type FormStatus = "DRAFT" | "PUBLISHED" | "CLOSED";
+
+export type FormItemType =
+  | "TITLE_TEXT"
+  | "IMAGE"
+  | "DIVIDER"
+  | "SECTION"
+  | "SHORT_TEXT"
+  | "PARAGRAPH"
+  | "MULTIPLE_CHOICE"
+  | "DROPDOWN"
+  | "CHECKBOXES"
+  | "NUMBER"
+  | "DATE"
+  | "EMAIL"
+  | "PHONE";
+
+export type AttendeeSystemField =
+  | "FIRST_NAME"
+  | "SURNAME"
+  | "EMAIL"
+  | "PHONE"
+  | "ORGANIZATION_NAME"
+  | "ATTENDEE_TYPE"
+  | "ATTENDEE_NUMBER";
+
+export type FormLayout = "cards" | "single" | "minimal";
+export type FormRadius = "none" | "small" | "medium" | "large";
+export type FormWidth = "narrow" | "medium" | "wide";
+export type FormHeaderStyle = "banner" | "cover" | "simple";
+export type FormInputStyle = "outline" | "filled" | "underline";
+export type FormFont = "dm-sans" | "prompt" | "sarabun" | "kanit" | "ibm-plex-thai" | "noto-serif-thai" | "chakra-petch";
+
+export type FormTheme = {
+  headerImageUrl?: string | null;
+  backgroundImageUrl?: string | null;
+  primaryColor?: string | null;
+  backgroundColor?: string | null;
+  cardColor?: string | null;
+  textColor?: string | null;
+  font?: FormFont | null;
+  layout?: FormLayout | null;
+  radius?: FormRadius | null;
+  width?: FormWidth | null;
+  headerStyle?: FormHeaderStyle | null;
+  headerAlign?: "left" | "center" | null;
+  inputStyle?: FormInputStyle | null;
+};
+
+export type FormSettings = {
+  confirmationMessage?: string | null;
+  sendQrEmailOnSubmit?: boolean;
+  showQrOnSuccess?: boolean;
+  closesAt?: string | null;
+};
+
+export type FormItemConfig = {
+  placeholder?: string | null;
+  min?: number | null;
+  max?: number | null;
+  imageSize?: "small" | "medium" | "full" | null;
+  align?: "left" | "center" | null;
+  /** Half-width questions sit side by side on wider screens. */
+  width?: "full" | "half" | null;
+  /** Columns for multiple choice / checkbox options. */
+  columns?: 1 | 2 | 3 | null;
+};
+
+export type FormItemOption = {
+  id: string;
+  label: string;
+  imageUrl: string | null;
+};
+
+export type FormItem = {
+  id: string;
+  type: FormItemType;
+  systemField: AttendeeSystemField | null;
+  label: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  required: boolean;
+  config: FormItemConfig | null;
+  options: FormItemOption[];
+};
+
+export type FormSummary = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: FormStatus;
+  publicToken: string;
+  createdAt: string;
+  updatedAt: string;
+  responseCount: number;
+  eventSeries: { id: string; name: string } | null;
+};
+
+export type FormDetail = FormSummary & {
+  eventSeriesId: string | null;
+  theme: FormTheme | null;
+  settings: FormSettings | null;
+  items: FormItem[];
+  requiredSystemFields: AttendeeSystemField[];
+  attendeeTypeOptions: string[];
+};
+
+export type PublicForm = {
+  title: string;
+  description: string | null;
+  theme: FormTheme | null;
+  closesAt: string | null;
+  isClosed: boolean;
+  organizationName: string;
+  eventSeriesName: string | null;
+  attendeeTypeOptions: string[];
+  items: FormItem[];
+};
+
+export type FormSubmitResult = {
+  firstName: string;
+  surname: string;
+  matchedExisting: boolean;
+  emailSent: boolean;
+  qrToken: string | null;
+  confirmationMessage: string | null;
+};
+
+export type FormResponseColumn = {
+  id: string;
+  label: string;
+  systemField: AttendeeSystemField | null;
+  archived: boolean;
+};
+
+export type FormResponseRow = {
+  id: string;
+  submittedAt: string;
+  matchedExistingAttendee: boolean;
+  attendee: { id: string; firstName: string; surname: string } | null;
+  values: Record<string, string>;
+};
+
+export type FormResponsesPage = {
+  columns: FormResponseColumn[];
+  items: FormResponseRow[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+};

@@ -15,6 +15,8 @@ const DashboardPage = lazy(() => import("./pages/dashboard-page").then((module) 
 const DocsPage = lazy(() => import("./pages/docs-page").then((module) => ({ default: module.DocsPage })));
 const EventSeriesDetailPage = lazy(() => import("./pages/event-series-detail-page").then((module) => ({ default: module.EventSeriesDetailPage })));
 const EventSeriesListPage = lazy(() => import("./pages/event-series-list-page").then((module) => ({ default: module.EventSeriesListPage })));
+const FormBuilderPage = lazy(() => import("./pages/form-builder-page").then((module) => ({ default: module.FormBuilderPage })));
+const FormsListPage = lazy(() => import("./pages/forms-list-page").then((module) => ({ default: module.FormsListPage })));
 const ForgotPasswordPage = lazy(() => import("./pages/forgot-password-page").then((module) => ({ default: module.ForgotPasswordPage })));
 const HelpPage = lazy(() => import("./pages/help-page").then((module) => ({ default: module.HelpPage })));
 const InvitePage = lazy(() => import("./pages/invite-page").then((module) => ({ default: module.InvitePage })));
@@ -23,6 +25,7 @@ const LoginPage = lazy(() => import("./pages/login-page").then((module) => ({ de
 const OnboardingPage = lazy(() => import("./pages/onboarding-page").then((module) => ({ default: module.OnboardingPage })));
 const OrganizationSettingsPage = lazy(() => import("./pages/organization-settings-page").then((module) => ({ default: module.OrganizationSettingsPage })));
 const PrivacyPolicyPage = lazy(() => import("./pages/privacy-policy-page").then((module) => ({ default: module.PrivacyPolicyPage })));
+const PublicFormPage = lazy(() => import("./pages/public-form-page").then((module) => ({ default: module.PublicFormPage })));
 const RegisterPage = lazy(() => import("./pages/register-page").then((module) => ({ default: module.RegisterPage })));
 const ReportsPage = lazy(() => import("./pages/reports-page").then((module) => ({ default: module.ReportsPage })));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password-page").then((module) => ({ default: module.ResetPasswordPage })));
@@ -43,6 +46,7 @@ function App() {
         <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/invite/:token" element={<InvitePage />} />
         <Route path="/scan/:token" element={<ScannerPage />} />
+        <Route path="/f/:token" element={<PublicFormPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -60,6 +64,8 @@ function App() {
               <Route path="attendees" element={<AttendeesPage />} />
               <Route path="attendees/:id" element={<AttendeeDetailPage />} />
               <Route path="settings/attendee-types" element={<AttendeeTypesPage />} />
+              <Route path="forms" element={<FormsListPage />} />
+              <Route path="forms/:id" element={<FormBuilderPage />} />
               <Route path="scanner" element={<ScannerPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="reports/event-series/:id" element={<AttendanceReportPage />} />

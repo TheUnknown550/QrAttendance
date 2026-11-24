@@ -18,6 +18,40 @@ enum OrganizationStatus {
   INACTIVE
 }
 
+enum FormStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum FormItemType {
+  // content blocks (no answer)
+  TITLE_TEXT
+  IMAGE
+  DIVIDER
+  SECTION
+  // questions
+  SHORT_TEXT
+  PARAGRAPH
+  MULTIPLE_CHOICE
+  DROPDOWN
+  CHECKBOXES
+  NUMBER
+  DATE
+  EMAIL
+  PHONE
+}
+
+enum AttendeeSystemField {
+  FIRST_NAME
+  SURNAME
+  EMAIL
+  PHONE
+  ORGANIZATION_NAME
+  ATTENDEE_TYPE
+  ATTENDEE_NUMBER
+}
+
 model User {
   id             String                   @id @default(uuid()) @db.Uuid
   name           String
@@ -80,6 +114,7 @@ model Organization {
   attendees           Attendee[]
   eventSeries         EventSeries[]
   attendeeTypes       AttendeeType[]
+  forms               Form[]
   requireAttendeeEmail  Boolean @default(false) @map("require_attendee_email")
   requireAttendeePhone  Boolean @default(false) @map("require_attendee_phone")
   requireAttendeeNumber Boolean @default(false) @map("require_attendee_number")
@@ -140,6 +175,7 @@ model EventSeries {
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   sessions               EventSession[]
+  forms                  Form[]
 
   @@index([organizationId])
   @@unique([organizationId, name])
@@ -180,6 +216,7 @@ model Attendee {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   attendance       AttendanceRecord[]
+  formResponses    FormResponse[]
 
   @@index([organizationId])
   @@map("attendees")
@@ -211,4 +248,94 @@ model AttendanceRecord {
   @@unique([attendeeId, eventSessionId])
   @@index([eventSessionId])
   @@map("attendance_records")
+}
+
+model Form {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  eventSeriesId  String?        @db.Uuid
+  eventSeries    EventSeries?   @relation(fields: [eventSeriesId], references: [id], onDelete: SetNull)
+  title          String
+  description    String?
+  status         FormStatus     @default(DRAFT)
+  publicToken    String         @unique @map("public_token")
+  theme          Json?
+  settings       Json?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  items          FormItem[]
+  responses      FormResponse[]
+
+  @@index([organizationId])
+  @@map("forms")
+}
+
+model FormItem {
+  id          String               @id @default(uuid()) @db.Uuid
+  formId      String               @db.Uuid
+  form        Form                 @relation(fields: [formId], references: [id], onDelete: Cascade)
+  type        FormItemType
+  systemField AttendeeSystemField? @map("system_field")
+  position    Int
+  label       String?
+  description String?
+  imageUrl    String?              @map("image_url")
+  required    Boolean              @default(false)
+  config      Json?
+  archivedAt  DateTime?            @map("archived_at")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  options     FormItemOption[]
+  answers     FormAnswer[]
+
+  @@unique([formId, systemField])
+  @@index([formId, position])
+  @@map("form_items")
+}
+
+model FormItemOption {
+  id         String    @id @default(uuid()) @db.Uuid
+  itemId     String    @db.Uuid
+  item       FormItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  label      String
+  imageUrl   String?   @map("image_url")
+  position   Int
+  archivedAt DateTime? @map("archived_at")
+
+  @@index([itemId, position])
+  @@map("form_item_options")
+}
+
+model FormResponse {
+  id                      String       @id @default(uuid()) @db.Uuid
+  formId                  String       @db.Uuid
+  form                    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  attendeeId              String?      @db.Uuid
+  attendee                Attendee?    @relation(fields: [attendeeId], references: [id], onDelete: SetNull)
+  matchedExistingAttendee Boolean      @default(false) @map("matched_existing_attendee")
+  submittedAt             DateTime     @default(now()) @map("submitted_at")
+  ipAddress               String?      @map("ip_address")
+  userAgent               String?      @map("user_agent")
+  answers                 FormAnswer[]
+
+  @@index([formId, submittedAt])
+  @@index([attendeeId])
+  @@map("form_responses")
+}
+
+model FormAnswer {
+  id          String       @id @default(uuid()) @db.Uuid
+  responseId  String       @db.Uuid
+  response    FormResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  itemId      String       @db.Uuid
+  item        FormItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  textValue   String?      @map("text_value")
+  numberValue Decimal?     @map("number_value")
+  dateValue   DateTime?    @map("date_value")
+  optionIds   String[]     @default([]) @map("option_ids") @db.Uuid
+
+  @@unique([responseId, itemId])
+  @@index([itemId])
+  @@map("form_answers")
 }

@@ -5,6 +5,7 @@ import { attendeeTypesRouter } from "../modules/attendee-types/attendee-types.ro
 import { attendeesRouter } from "../modules/attendees/attendees.routes";
 import { authRouter } from "../modules/auth/auth.routes";
 import { eventSeriesRouter } from "../modules/event-series/event-series.routes";
+import { formsRouter, publicFormsRouter } from "../modules/forms/forms.routes";
 import {
   organizationsRouter,
   publicOrganizationsRouter,
@@ -40,6 +41,7 @@ router.get("/health/ready", async (_request, response, next) => {
 router.use("/auth", authRouter);
 router.use("/organizations", publicOrganizationsRouter);
 router.use("/public/scan", publicScanRouter);
+router.use("/public/forms", publicFormsRouter);
 router.use(requireAuth);
 router.use("/organizations", organizationsRouter);
 router.use(requireActiveOrganization);
@@ -48,5 +50,6 @@ router.use("/attendees", attendeesRouter);
 router.use("/attendee-types", attendeeTypesRouter);
 router.use("/scan", scanRouter);
 router.use("/reports", reportsRouter);
+router.use("/forms", formsRouter);
 
 export { router };
