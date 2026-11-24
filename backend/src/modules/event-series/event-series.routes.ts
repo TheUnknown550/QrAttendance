@@ -12,6 +12,7 @@ import {
   updateEventSeries,
   updateEventSession,
 } from "./event-series.controller";
+import { checkInPhotoUpload } from "../scan/scan.upload";
 
 const eventSeriesRouter = Router();
 
@@ -24,7 +25,11 @@ eventSeriesRouter.post("/:id/sessions", createEventSession);
 eventSeriesRouter.get("/:id/sessions/:sessionId", getEventSession);
 eventSeriesRouter.patch("/:id/sessions/:sessionId", updateEventSession);
 eventSeriesRouter.delete("/:id/sessions/:sessionId", deleteEventSession);
-eventSeriesRouter.post("/:id/sessions/:sessionId/attendance", addSessionAttendance);
+eventSeriesRouter.post(
+  "/:id/sessions/:sessionId/attendance",
+  checkInPhotoUpload.single("photo"),
+  addSessionAttendance,
+);
 eventSeriesRouter.delete("/:id/sessions/:sessionId/attendance/:attendeeId", removeSessionAttendance);
 
 export { eventSeriesRouter };

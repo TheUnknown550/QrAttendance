@@ -195,6 +195,11 @@
     "copyUrl": "คัดลอก URL",
     "share": "แชร์",
     "chooseSessionFirst": "เลือกเซสชันก่อน",
+    "manualCheckIn": {
+      "title": "เช็คอินด้วยตนเอง",
+      "subtitle": "ค้นหาและเช็คอินผู้เข้าร่วมโดยไม่ต้องสแกนรหัส QR",
+      "searchPlaceholder": "ค้นหาชื่อ องค์กร ประเภท อีเมล โทรศัพท์"
+    },
     "latestScan": "การสแกนล่าสุด",
     "result": "ผลลัพธ์",
     "noTimestamp": "ไม่มีข้อมูลเวลา",
@@ -352,7 +357,15 @@
     "markAttended": "ทำเครื่องหมายว่าเข้าร่วม",
     "markNotAttended": "ทำเครื่องหมายว่าไม่เข้าร่วม",
     "marked": "ทำเครื่องหมายเมื่อ {{date}}",
-    "noAttendanceRecorded": "ยังไม่มีการบันทึกการเข้าร่วม"
+    "noAttendanceRecorded": "ยังไม่มีการบันทึกการเข้าร่วม",
+    "sort": {
+      "nameAsc": "ชื่อ (ก-ฮ)",
+      "nameDesc": "ชื่อ (ฮ-ก)",
+      "statusAttendedFirst": "สถานะ: เข้าร่วมก่อน",
+      "statusNotAttendedFirst": "สถานะ: ยังไม่เข้าร่วมก่อน",
+      "updatedNewestFirst": "อัปเดตล่าสุด: ใหม่ที่สุดก่อน",
+      "updatedOldestFirst": "อัปเดตล่าสุด: เก่าที่สุดก่อน"
+    }
   },
   "attendees": {
     "eyebrow": "ผู้เข้าร่วม",
@@ -377,6 +390,14 @@
     "bulkImport": "นำเข้าจำนวนมาก",
     "sendQrEmails": "ส่งอีเมล QR",
     "searchPlaceholder": "ค้นหาชื่อ องค์กร ประเภท อีเมล โทรศัพท์",
+    "sort": {
+      "numberAsc": "หมายเลขผู้เข้าร่วม (น้อย-มาก)",
+      "numberDesc": "หมายเลขผู้เข้าร่วม (มาก-น้อย)",
+      "nameAsc": "ชื่อ (ก-ฮ)",
+      "nameDesc": "ชื่อ (ฮ-ก)",
+      "newestFirst": "ใหม่ที่สุดก่อน",
+      "oldestFirst": "เก่าที่สุดก่อน"
+    },
     "sendingQrCodesToast": "กำลังส่งรหัส QR ให้ผู้เข้าร่วม {{count}} คน การดำเนินการนี้ทำงานอยู่เบื้องหลังและอาจใช้เวลาสักครู่สำหรับรายชื่อจำนวนมาก",
     "contact": "ติดต่อ",
     "actions": "การดำเนินการ",

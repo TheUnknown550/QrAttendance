@@ -12,6 +12,7 @@ import { SendQrEmailsModal } from "../components/attendees/send-qr-emails-modal"
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { Select } from "../components/ui/select";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAttendeeFormSchema } from "../lib/attendee-schema";
 import { useAuth } from "../lib/auth";
@@ -45,6 +46,10 @@ export function AttendeesPage() {
   const [sendQrEmailsOpen, setSendQrEmailsOpen] = useState(false);
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
   const [qrEmailsToast, setQrEmailsToast] = useState("");
+  const [sort, setSort] = useState<{ field: string; direction: "asc" | "desc" }>({
+    field: "attendeeNumber",
+    direction: "asc",
+  });
   const deferredSearch = useDeferredValue(search);
 
   const organizationQuery = useQuery({
@@ -69,7 +74,7 @@ export function AttendeesPage() {
   });
 
   const attendeesQuery = useQuery({
-    queryKey: ["attendees", auth?.activeOrganizationId, deferredSearch, page],
+    queryKey: ["attendees", auth?.activeOrganizationId, deferredSearch, page, sort.field, sort.direction],
     queryFn: async () =>
       unwrapResponse<PaginatedResult<Attendee>>(
         await api.get("/attendees", {
@@ -77,6 +82,8 @@ export function AttendeesPage() {
             search: deferredSearch || undefined,
             page,
             pageSize: 12,
+            sortField: sort.field,
+            sortDirection: sort.direction,
           },
         }),
       ),
@@ -290,6 +297,23 @@ export function AttendeesPage() {
                 value={search}
               />
             </div>
+
+            <Select
+              className="w-full sm:w-auto"
+              onChange={(event) => {
+                const [field, direction] = event.target.value.split(":") as [string, "asc" | "desc"];
+                setSort({ field, direction });
+                setPage(1);
+              }}
+              value={`${sort.field}:${sort.direction}`}
+            >
+              <option value="attendeeNumber:asc">{t("attendees.sort.numberAsc")}</option>
+              <option value="attendeeNumber:desc">{t("attendees.sort.numberDesc")}</option>
+              <option value="name:asc">{t("attendees.sort.nameAsc")}</option>
+              <option value="name:desc">{t("attendees.sort.nameDesc")}</option>
+              <option value="createdAt:desc">{t("attendees.sort.newestFirst")}</option>
+              <option value="createdAt:asc">{t("attendees.sort.oldestFirst")}</option>
+            </Select>
           </div>
         </div>
 

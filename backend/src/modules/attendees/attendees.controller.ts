@@ -60,6 +60,8 @@ export const listAttendees = asyncHandler(async (request, response) => {
   const requestedPageSize = Number(request.query.pageSize ?? env.DEFAULT_PAGE_SIZE) || env.DEFAULT_PAGE_SIZE;
   const pageSize = Math.min(Math.max(requestedPageSize, 1), env.MAX_PAGE_SIZE);
   const search = typeof request.query.search === "string" ? request.query.search.trim() : "";
+  const sortField = typeof request.query.sortField === "string" ? request.query.sortField : "";
+  const sortDirection = request.query.sortDirection === "desc" ? "desc" : "asc";
   const where = {
     organizationId,
     ...(search
@@ -106,20 +108,19 @@ export const listAttendees = asyncHandler(async (request, response) => {
       : {}),
   };
 
+  const orderByOptions: Record<string, Array<Record<string, unknown>>> = {
+    name: [{ firstName: sortDirection }, { surname: sortDirection }],
+    attendeeNumber: [{ attendeeNumber: { sort: sortDirection, nulls: "last" } }, { createdAt: "desc" }],
+    createdAt: [{ createdAt: sortDirection }],
+  };
+  const orderBy =
+    orderByOptions[sortField] ??
+    [{ attendeeNumber: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }];
+
   const [attendees, total] = await prisma.$transaction([
     prisma.attendee.findMany({
       where,
-      orderBy: [
-        {
-          attendeeNumber: {
-            sort: "asc",
-            nulls: "last",
-          },
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import {
   Camera,
@@ -7,15 +7,18 @@ import {
   Maximize2,
   OctagonAlert,
   ScanLine,
+  Search,
   Share2,
   Sheet,
   Smartphone,
+  UserSearch,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BrandBadge } from "../components/brand/brand-badge";
+import { PhotoCaptureOverlay } from "../components/scanner/photo-capture-overlay";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -29,6 +32,7 @@ import { formatDate, resolveMediaUrl } from "../lib/utils";
 import type {
   EventSeries,
   EventSeriesSettings,
+  EventSessionDetail,
   PublicScannerSession,
   ScanResult,
   ScannerShareLink,
@@ -151,172 +155,6 @@ function ImageLightbox({ image, onClose }: { image: { src: string; alt: string }
   );
 }
 
-function PhotoCaptureOverlay({
-  onConfirm,
-  onCancel,
-  isSubmitting,
-  submitError,
-}: {
-  onConfirm: (photo: Blob) => void;
-  onCancel: () => void;
-  isSubmitting: boolean;
-  submitError: string;
-}) {
-  const { t } = useTranslation();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [capturedPhoto, setCapturedPhoto] = useState<{ blob: Blob; previewUrl: string } | null>(null);
-  const [cameraError, setCameraError] = useState("");
-
-  useEffect(() => {
-    if (capturedPhoto) {
-      return;
-    }
-
-    let cancelled = false;
-
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false,
-        });
-
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-      } catch {
-        setCameraError(t("scanner.photoCapture.cameraError"));
-      }
-    }
-
-    void startCamera();
-
-    return () => {
-      cancelled = true;
-      streamRef.current?.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    };
-  }, [capturedPhoto, t]);
-
-  useEffect(() => {
-    return () => {
-      if (capturedPhoto) {
-        URL.revokeObjectURL(capturedPhoto.previewUrl);
-      }
-    };
-  }, [capturedPhoto]);
-
-  function handleCapture() {
-    const video = videoRef.current;
-    if (!video || video.videoWidth === 0) {
-      return;
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return;
-    }
-
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          setCapturedPhoto({ blob, previewUrl: URL.createObjectURL(blob) });
-        }
-      },
-      "image/jpeg",
-      0.9,
-    );
-
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-  }
-
-  function handleRetake() {
-    if (capturedPhoto) {
-      URL.revokeObjectURL(capturedPhoto.previewUrl);
-    }
-    setCapturedPhoto(null);
-  }
-
-  return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-black">
-      <div className="flex items-center justify-between px-5 pb-4 pt-6">
-        <p className="text-sm font-semibold text-white">{t("scanner.photoCapture.title")}</p>
-        <button
-          className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white"
-          onClick={onCancel}
-          type="button"
-        >
-          <X className="size-4" />
-        </button>
-      </div>
-
-      <div className="relative flex-1 overflow-hidden">
-        {capturedPhoto ? (
-          <img alt={t("scanner.photoCapture.capturedAlt")} className="h-full w-full object-cover" src={capturedPhoto.previewUrl} />
-        ) : (
-          <video autoPlay className="h-full w-full object-cover" muted playsInline ref={videoRef} />
-        )}
-
-        {cameraError ? (
-          <div className="absolute inset-x-4 top-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {cameraError}
-          </div>
-        ) : null}
-      </div>
-
-      {submitError ? (
-        <p className="mx-5 mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{submitError}</p>
-      ) : null}
-
-      <div className="flex items-center justify-center gap-4 px-6 py-8">
-        {capturedPhoto ? (
-          <>
-            <Button
-              disabled={isSubmitting}
-              icon={<X className="size-4" />}
-              onClick={handleRetake}
-              type="button"
-              variant="secondary"
-            >
-              {t("scanner.photoCapture.retake")}
-            </Button>
-            <Button
-              disabled={isSubmitting}
-              icon={<CircleCheckBig className="size-4" />}
-              onClick={() => onConfirm(capturedPhoto.blob)}
-              type="button"
-            >
-              {isSubmitting ? t("scanner.photoCapture.confirming") : t("scanner.photoCapture.confirmCheckIn")}
-            </Button>
-          </>
-        ) : (
-          <button
-            aria-label={t("scanner.photoCapture.takePhoto")}
-            className="flex size-16 items-center justify-center rounded-full border-4 border-white bg-white/20"
-            onClick={handleCapture}
-            type="button"
-          >
-            <span className="size-12 rounded-full bg-white" />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function ScannerPage() {
   const { token } = useParams();
   const [searchParams] = useSearchParams();
@@ -324,6 +162,7 @@ export function ScannerPage() {
   const { t } = useTranslation();
   const getStatusLabel = useStatusLabel();
   const { auth } = useAuth();
+  const queryClient = useQueryClient();
   const isPublicScanner = Boolean(token);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [lastResult, setLastResult] = useState<ScanResult | null>(null);
@@ -338,6 +177,8 @@ export function ScannerPage() {
   const [paused, setPaused] = useState(false);
   const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
   const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null);
+  const [manualSearch, setManualSearch] = useState("");
+  const [manualPhotoCaptureAttendeeId, setManualPhotoCaptureAttendeeId] = useState<string | null>(null);
 
   const seriesQuery = useQuery({
     queryKey: ["event-series", auth?.activeOrganizationId],
@@ -376,6 +217,94 @@ export function ScannerPage() {
   const currentSeriesSettings: EventSeriesSettings =
     (isPublicScanner ? publicSession?.eventSeries : seriesQuery.data?.find((series) => series.id === currentSeriesId)) ??
     DEFAULT_SETTINGS;
+
+  const manualCheckInSessionQuery = useQuery({
+    queryKey: ["event-session", auth?.activeOrganizationId, currentSeriesId, currentSessionId],
+    queryFn: async () =>
+      unwrapResponse<EventSessionDetail>(await api.get(`/event-series/${currentSeriesId}/sessions/${currentSessionId}`)),
+    enabled: !isPublicScanner && Boolean(currentSeriesId) && Boolean(currentSessionId),
+  });
+
+  const manualAttendedById = useMemo(
+    () => new Map((manualCheckInSessionQuery.data?.attendance ?? []).map((record) => [record.attendeeId, record])),
+    [manualCheckInSessionQuery.data?.attendance],
+  );
+
+  const manualCheckInRows = useMemo(() => {
+    const normalizedSearch = manualSearch.trim().toLowerCase();
+    const attendees = manualCheckInSessionQuery.data?.allAttendees ?? [];
+
+    return attendees
+      .filter((attendee) => {
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        return [
+          attendee.firstName,
+          attendee.surname,
+          attendee.organizationName ?? "",
+          attendee.attendeeType ?? "",
+          attendee.email ?? "",
+          attendee.phone ?? "",
+        ].some((value) => value.toLowerCase().includes(normalizedSearch));
+      })
+      .map((attendee) => ({
+        attendee,
+        attendanceRecord: manualAttendedById.get(attendee.id) ?? null,
+      }))
+      .sort((left, right) => {
+        const byFirstName = left.attendee.firstName.localeCompare(right.attendee.firstName);
+        if (byFirstName !== 0) {
+          return byFirstName;
+        }
+        return left.attendee.surname.localeCompare(right.attendee.surname);
+      });
+  }, [manualAttendedById, manualSearch, manualCheckInSessionQuery.data?.allAttendees]);
+
+  function invalidateManualCheckInQueries() {
+    queryClient.invalidateQueries({ queryKey: ["event-series", auth?.activeOrganizationId] });
+    queryClient.invalidateQueries({
+      queryKey: ["event-session", auth?.activeOrganizationId, currentSeriesId, currentSessionId],
+    });
+  }
+
+  const manualMarkAttendedMutation = useMutation({
+    mutationFn: async (attendeeId: string) =>
+      unwrapResponse(
+        await api.post(`/event-series/${currentSeriesId}/sessions/${currentSessionId}/attendance`, {
+          attendeeId,
+        }),
+      ),
+    onSuccess: () => {
+      invalidateManualCheckInQueries();
+    },
+  });
+
+  const manualMarkAttendedWithPhotoMutation = useMutation({
+    mutationFn: async ({ attendeeId, photo }: { attendeeId: string; photo: Blob }) => {
+      const formData = new FormData();
+      formData.append("attendeeId", attendeeId);
+      formData.append("photo", photo, "check-in.jpg");
+      return unwrapResponse(
+        await api.post(`/event-series/${currentSeriesId}/sessions/${currentSessionId}/attendance`, formData),
+      );
+    },
+    onSuccess: () => {
+      setManualPhotoCaptureAttendeeId(null);
+      invalidateManualCheckInQueries();
+    },
+  });
+
+  function handleManualMarkAttended(attendeeId: string) {
+    if (currentSeriesSettings.requireCheckInPhoto) {
+      manualMarkAttendedWithPhotoMutation.reset();
+      setManualPhotoCaptureAttendeeId(attendeeId);
+      return;
+    }
+
+    manualMarkAttendedMutation.mutate(attendeeId);
+  }
 
   useEffect(() => {
     if (isPublicScanner || selectedSessionId || sessionOptions.length === 0) {
@@ -943,6 +872,85 @@ export function ScannerPage() {
         </Card>
 
         <Card>
+          <div className="flex items-center gap-3">
+            <div className="rounded-[8px] bg-amber-50 p-3 text-amber-700">
+              <UserSearch className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{t("scanner.manualCheckIn.title")}</p>
+              <p className="text-sm text-slate-500">{t("scanner.manualCheckIn.subtitle")}</p>
+            </div>
+          </div>
+
+          {!currentSessionId ? (
+            <p className="mt-4 rounded-[8px] bg-[var(--color-surface-soft)] px-4 py-3 text-sm text-slate-500">
+              {t("scanner.chooseSessionFirst")}
+            </p>
+          ) : (
+            <>
+              <div className="relative mt-4">
+                <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
+                <Input
+                  className="pl-11"
+                  onChange={(event) => setManualSearch(event.target.value)}
+                  placeholder={t("scanner.manualCheckIn.searchPlaceholder")}
+                  value={manualSearch}
+                />
+              </div>
+
+              {(manualMarkAttendedMutation.isError || manualMarkAttendedWithPhotoMutation.isError) ? (
+                <p className="mt-4 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {getErrorMessage(manualMarkAttendedMutation.error ?? manualMarkAttendedWithPhotoMutation.error)}
+                </p>
+              ) : null}
+
+              <div className="mt-4 max-h-96 space-y-2 overflow-y-auto">
+                {manualCheckInRows.map(({ attendee, attendanceRecord }) => (
+                  <div
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-[8px] bg-[var(--color-surface-soft)] p-3"
+                    key={attendee.id}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <img
+                        alt={`${attendee.firstName} ${attendee.surname}`}
+                        className="size-10 rounded-[8px] object-cover ring-1 ring-[var(--color-border)]"
+                        src={resolveMediaUrl(attendee.profileImageUrl) ?? "https://placehold.co/120x120/f7f5f0/334155?text=QR"}
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-slate-900">
+                          {attendee.firstName} {attendee.surname}
+                        </p>
+                        <p className="truncate text-xs text-slate-500">{attendee.phone ?? t("scanner.noEmail")}</p>
+                      </div>
+                    </div>
+
+                    {attendanceRecord ? (
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        {t("session.attended")}
+                      </span>
+                    ) : (
+                      <Button
+                        disabled={manualMarkAttendedMutation.isPending || manualMarkAttendedWithPhotoMutation.isPending}
+                        icon={<CircleCheckBig className="size-4" />}
+                        onClick={() => handleManualMarkAttended(attendee.id)}
+                        type="button"
+                        variant="secondary"
+                      >
+                        {t("session.markAttended")}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+
+                {manualCheckInRows.length === 0 ? (
+                  <p className="p-3 text-sm text-slate-500">{t("session.noAttendeesMatch")}</p>
+                ) : null}
+              </div>
+            </>
+          )}
+        </Card>
+
+        <Card>
           <p className="text-sm font-semibold text-slate-900">{t("scanner.flow")}</p>
           <div className="mt-5 space-y-3">
             {[
@@ -962,6 +970,21 @@ export function ScannerPage() {
           </div>
         </Card>
       </div>
+
+      {manualPhotoCaptureAttendeeId ? (
+        <PhotoCaptureOverlay
+          isSubmitting={manualMarkAttendedWithPhotoMutation.isPending}
+          onCancel={() => setManualPhotoCaptureAttendeeId(null)}
+          onConfirm={(photo) =>
+            manualMarkAttendedWithPhotoMutation.mutate({ attendeeId: manualPhotoCaptureAttendeeId, photo })
+          }
+          submitError={
+            manualMarkAttendedWithPhotoMutation.isError
+              ? getErrorMessage(manualMarkAttendedWithPhotoMutation.error)
+              : ""
+          }
+        />
+      ) : null}
 
       {expandedImage ? <ImageLightbox image={expandedImage} onClose={() => setExpandedImage(null)} /> : null}
     </div>

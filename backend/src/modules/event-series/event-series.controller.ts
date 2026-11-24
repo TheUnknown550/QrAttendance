@@ -3,6 +3,7 @@ import { ApiError } from "../../utils/api-error";
 import { successResponse } from "../../utils/api-response";
 import { asyncHandler } from "../../utils/async-handler";
 import { touchOrganizationActivity } from "../organizations/organizations.activity";
+import { saveCheckInPhoto } from "../scan/scan.upload";
 import {
   createEventSeriesSchema,
   createEventSessionSchema,
@@ -34,6 +35,9 @@ async function requireScopedSession(eventSeriesId: string, sessionId: string, or
       eventSeries: {
         organizationId,
       },
+    },
+    include: {
+      eventSeries: true,
     },
   });
 
@@ -383,6 +387,10 @@ export const addSessionAttendance = asyncHandler(async (request, response) => {
     requireScopedAttendee(body.attendeeId, organizationId),
   ]);
 
+  if (session.eventSeries.requireCheckInPhoto && !request.file) {
+    throw new ApiError(400, "A check-in photo is required for this event");
+  }
+
   const existingRecord = await prisma.attendanceRecord.findUnique({
     where: {
       attendeeId_eventSessionId: {
@@ -397,10 +405,36 @@ export const addSessionAttendance = asyncHandler(async (request, response) => {
     return;
   }
 
+  let checkInPhotoUrl: string | undefined;
+
+  if (request.file) {
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+      },
+      select: {
+        name: true,
+      },
+    });
+
+    if (!organization) {
+      throw new ApiError(404, "Organization not found");
+    }
+
+    const photo = await saveCheckInPhoto({
+      tenantName: organization.name,
+      sessionId: session.id,
+      file: request.file,
+    });
+
+    checkInPhotoUrl = photo.publicUrl;
+  }
+
   const record = await prisma.attendanceRecord.create({
     data: {
       attendeeId: attendee.id,
       eventSessionId: session.id,
+      checkInPhotoUrl,
     },
   });
 

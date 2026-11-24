@@ -1,19 +1,68 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, CheckCircle2, Radio, Search, Trash2, XCircle } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CalendarClock,
+  CheckCircle2,
+  Radio,
+  Search,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
+import { PhotoCaptureOverlay } from "../components/scanner/photo-capture-overlay";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { Select } from "../components/ui/select";
 import { api, getErrorMessage, unwrapResponse } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { cn, formatAttendeeOrgType, formatDate, resolveMediaUrl } from "../lib/utils";
 import type { Attendee, EventSeriesSettings, EventSession, EventSessionDetail } from "../types/api";
+
+type SortField = "name" | "status" | "updatedAt";
+type SortDirection = "asc" | "desc";
+
+function SortableHeaderButton({
+  active,
+  direction,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  direction: SortDirection;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        "flex items-center gap-1 transition hover:text-slate-700",
+        active ? "text-slate-700" : "text-slate-500",
+      )}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+      {active ? (
+        direction === "asc" ? (
+          <ArrowUp className="size-3" />
+        ) : (
+          <ArrowDown className="size-3" />
+        )
+      ) : (
+        <ArrowUpDown className="size-3 opacity-40" />
+      )}
+    </button>
+  );
+}
 
 function attendeeTooltip(
   t: (key: string, options?: Record<string, unknown>) => string,
@@ -87,6 +136,19 @@ export function SessionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
+  const [sort, setSort] = useState<{ field: SortField; direction: SortDirection }>({
+    field: "name",
+    direction: "asc",
+  });
+  const [photoCaptureAttendeeId, setPhotoCaptureAttendeeId] = useState<string | null>(null);
+
+  function toggleSort(field: SortField) {
+    setSort((current) =>
+      current.field === field
+        ? { field, direction: current.direction === "asc" ? "desc" : "asc" }
+        : { field, direction: "asc" },
+    );
+  }
   const {
     register,
     handleSubmit,
@@ -150,6 +212,31 @@ export function SessionDetailPage() {
     },
   });
 
+  const markAttendedWithPhotoMutation = useMutation({
+    mutationFn: async ({ attendeeId, photo }: { attendeeId: string; photo: Blob }) => {
+      const formData = new FormData();
+      formData.append("attendeeId", attendeeId);
+      formData.append("photo", photo, "check-in.jpg");
+      return unwrapResponse(
+        await api.post(`/event-series/${id}/sessions/${sessionId}/attendance`, formData),
+      );
+    },
+    onSuccess: () => {
+      setPhotoCaptureAttendeeId(null);
+      invalidateSessionQueries(queryClient, auth?.activeOrganizationId, id, sessionId);
+    },
+  });
+
+  function handleMarkAttended(attendeeId: string) {
+    if (session?.eventSeries.requireCheckInPhoto) {
+      markAttendedWithPhotoMutation.reset();
+      setPhotoCaptureAttendeeId(attendeeId);
+      return;
+    }
+
+    markAttendedMutation.mutate(attendeeId);
+  }
+
   const markNotAttendedMutation = useMutation({
     mutationFn: async (attendeeId: string) =>
       unwrapResponse(await api.delete(`/event-series/${id}/sessions/${sessionId}/attendance/${attendeeId}`)),
@@ -190,27 +277,43 @@ export function SessionDetailPage() {
         attendanceRecord: attendedById.get(attendee.id) ?? null,
       }))
       .sort((left, right) => {
-        if (left.attendanceRecord && !right.attendanceRecord) {
-          return -1;
+        const directionMultiplier = sort.direction === "asc" ? 1 : -1;
+
+        if (sort.field === "name") {
+          const byFirstName = left.attendee.firstName.localeCompare(right.attendee.firstName);
+          if (byFirstName !== 0) {
+            return byFirstName * directionMultiplier;
+          }
+          return left.attendee.surname.localeCompare(right.attendee.surname) * directionMultiplier;
         }
 
-        if (!left.attendanceRecord && right.attendanceRecord) {
-          return 1;
+        if (sort.field === "status") {
+          const leftAttended = left.attendanceRecord ? 1 : 0;
+          const rightAttended = right.attendanceRecord ? 1 : 0;
+          if (leftAttended !== rightAttended) {
+            return (rightAttended - leftAttended) * directionMultiplier;
+          }
+        } else {
+          const leftTime = left.attendanceRecord ? new Date(left.attendanceRecord.checkedInAt).getTime() : null;
+          const rightTime = right.attendanceRecord ? new Date(right.attendanceRecord.checkedInAt).getTime() : null;
+          if (leftTime == null && rightTime != null) {
+            return 1;
+          }
+          if (leftTime != null && rightTime == null) {
+            return -1;
+          }
+          if (leftTime != null && rightTime != null && leftTime !== rightTime) {
+            return (leftTime - rightTime) * directionMultiplier;
+          }
         }
 
-        const byNumber = compareAttendeeNumber(left.attendee.attendeeNumber, right.attendee.attendeeNumber);
-        if (byNumber !== 0) {
-          return byNumber;
+        const byFirstName = left.attendee.firstName.localeCompare(right.attendee.firstName);
+        if (byFirstName !== 0) {
+          return byFirstName;
         }
-
-        const bySurname = left.attendee.surname.localeCompare(right.attendee.surname);
-        if (bySurname !== 0) {
-          return bySurname;
-        }
-
-        return left.attendee.firstName.localeCompare(right.attendee.firstName);
+        return left.attendee.surname.localeCompare(right.attendee.surname);
       });
-  }, [attendedById, deferredSearch, session?.allAttendees]);
+  }, [attendedById, deferredSearch, session?.allAttendees, sort]);
 
   if (!session) {
     return <Card>{sessionQuery.isError ? getErrorMessage(sessionQuery.error) : t("session.loading")}</Card>;
@@ -332,28 +435,66 @@ export function SessionDetailPage() {
             <h2 className="mt-2 text-3xl font-semibold text-slate-900">{session.allAttendees.length}</h2>
           </div>
 
-            <div className="relative w-full max-w-sm">
-              <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
-              <Input
-                className="pl-11"
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={t("session.searchAttendees")}
-                value={search}
-              />
+            <div className="flex w-full flex-wrap gap-3 sm:w-auto">
+              <div className="relative w-full max-w-sm">
+                <Search className="pointer-events-none absolute left-4 top-3.5 size-4 text-slate-400" />
+                <Input
+                  className="pl-11"
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={t("session.searchAttendees")}
+                  value={search}
+                />
+              </div>
+
+              <Select
+                className="w-full sm:w-auto"
+                onChange={(event) => {
+                  const [field, direction] = event.target.value.split(":") as [SortField, SortDirection];
+                  setSort({ field, direction });
+                }}
+                value={`${sort.field}:${sort.direction}`}
+              >
+                <option value="name:asc">{t("session.sort.nameAsc")}</option>
+                <option value="name:desc">{t("session.sort.nameDesc")}</option>
+                <option value="status:asc">{t("session.sort.statusAttendedFirst")}</option>
+                <option value="status:desc">{t("session.sort.statusNotAttendedFirst")}</option>
+                <option value="updatedAt:desc">{t("session.sort.updatedNewestFirst")}</option>
+                <option value="updatedAt:asc">{t("session.sort.updatedOldestFirst")}</option>
+              </Select>
             </div>
           </div>
 
-          {(markAttendedMutation.isError || markNotAttendedMutation.isError) && !sessionQuery.isLoading ? (
+          {(markAttendedMutation.isError ||
+            markNotAttendedMutation.isError ||
+            markAttendedWithPhotoMutation.isError) &&
+          !sessionQuery.isLoading ? (
             <p className="mt-6 rounded-[8px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {getErrorMessage(markAttendedMutation.error ?? markNotAttendedMutation.error)}
+              {getErrorMessage(
+                markAttendedMutation.error ?? markNotAttendedMutation.error ?? markAttendedWithPhotoMutation.error,
+              )}
             </p>
           ) : null}
 
           <div className="mt-6 hidden overflow-hidden rounded-[10px] bg-[var(--color-surface-soft)] md:block">
             <div className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_160px_160px] border-b border-[var(--color-border)] px-5 py-3 text-xs uppercase tracking-[0.22em] text-slate-500">
-              <span>{t("session.attendee")}</span>
-              <span>{t("session.status")}</span>
-              <span>{t("session.lastUpdate")}</span>
+              <SortableHeaderButton
+                active={sort.field === "name"}
+                direction={sort.direction}
+                label={t("session.attendee")}
+                onClick={() => toggleSort("name")}
+              />
+              <SortableHeaderButton
+                active={sort.field === "status"}
+                direction={sort.direction}
+                label={t("session.status")}
+                onClick={() => toggleSort("status")}
+              />
+              <SortableHeaderButton
+                active={sort.field === "updatedAt"}
+                direction={sort.direction}
+                label={t("session.lastUpdate")}
+                onClick={() => toggleSort("updatedAt")}
+              />
               <span className="text-right">{t("session.action")}</span>
             </div>
 
@@ -371,7 +512,7 @@ export function SessionDetailPage() {
                       return;
                     }
 
-                    markAttendedMutation.mutate(attendee.id);
+                    handleMarkAttended(attendee.id);
                   }}
                 />
               ))}
@@ -414,7 +555,7 @@ export function SessionDetailPage() {
                         return;
                       }
 
-                      markAttendedMutation.mutate(attendee.id);
+                      handleMarkAttended(attendee.id);
                     }}
                     type="button"
                     variant={attendanceRecord ? "ghost" : "secondary"}
@@ -436,6 +577,17 @@ export function SessionDetailPage() {
             ) : null}
           </div>
         </Card>
+
+      {photoCaptureAttendeeId ? (
+        <PhotoCaptureOverlay
+          isSubmitting={markAttendedWithPhotoMutation.isPending}
+          onCancel={() => setPhotoCaptureAttendeeId(null)}
+          onConfirm={(photo) => markAttendedWithPhotoMutation.mutate({ attendeeId: photoCaptureAttendeeId, photo })}
+          submitError={
+            markAttendedWithPhotoMutation.isError ? getErrorMessage(markAttendedWithPhotoMutation.error) : ""
+          }
+        />
+      ) : null}
     </div>
   );
 }
@@ -508,26 +660,6 @@ function invalidateSessionQueries(
   queryClient.invalidateQueries({ queryKey: ["event-series", activeOrganizationId] });
   queryClient.invalidateQueries({ queryKey: ["event-series", activeOrganizationId, eventSeriesId] });
   queryClient.invalidateQueries({ queryKey: ["event-session", activeOrganizationId, eventSeriesId, sessionId] });
-}
-
-function compareAttendeeNumber(left: number | null | undefined, right: number | null | undefined) {
-  const hasLeft = left != null;
-  const hasRight = right != null;
-
-  if (hasLeft && hasRight) {
-    return left - right;
-  }
-
-  // Attendees without a number sort after those that have one.
-  if (hasLeft) {
-    return -1;
-  }
-
-  if (hasRight) {
-    return 1;
-  }
-
-  return 0;
 }
 
 function toDateTimeLocal(value: string) {

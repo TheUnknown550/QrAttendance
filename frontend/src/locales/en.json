@@ -195,6 +195,11 @@
     "copyUrl": "Copy URL",
     "share": "Share",
     "chooseSessionFirst": "Choose a session first.",
+    "manualCheckIn": {
+      "title": "Manual check-in",
+      "subtitle": "Search and check in an attendee without scanning their QR code.",
+      "searchPlaceholder": "Search name, organization, type, email, phone"
+    },
     "latestScan": "Latest scan",
     "result": "Result",
     "noTimestamp": "No timestamp available",
@@ -352,7 +357,15 @@
     "markAttended": "Mark attended",
     "markNotAttended": "Mark not attended",
     "marked": "Marked {{date}}",
-    "noAttendanceRecorded": "No attendance recorded yet."
+    "noAttendanceRecorded": "No attendance recorded yet.",
+    "sort": {
+      "nameAsc": "Name (A–Z)",
+      "nameDesc": "Name (Z–A)",
+      "statusAttendedFirst": "Status: Attended first",
+      "statusNotAttendedFirst": "Status: Not attended first",
+      "updatedNewestFirst": "Last update: Newest first",
+      "updatedOldestFirst": "Last update: Oldest first"
+    }
   },
   "attendees": {
     "eyebrow": "Attendees",
@@ -377,6 +390,14 @@
     "bulkImport": "Bulk import",
     "sendQrEmails": "Send QR emails",
     "searchPlaceholder": "Search name, organization, type, email, phone",
+    "sort": {
+      "numberAsc": "Attendee # (low–high)",
+      "numberDesc": "Attendee # (high–low)",
+      "nameAsc": "Name (A–Z)",
+      "nameDesc": "Name (Z–A)",
+      "newestFirst": "Newest first",
+      "oldestFirst": "Oldest first"
+    },
     "sendingQrCodesToast": "Sending QR codes to {{count}} attendee. This runs in the background and may take a few minutes for large lists.",
     "sendingQrCodesToast_other": "Sending QR codes to {{count}} attendees. This runs in the background and may take a few minutes for large lists.",
     "contact": "Contact",
