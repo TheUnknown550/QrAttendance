@@ -1,0 +1,190 @@
+// EventQR - Form builder (attendee registration forms)
+// Paste into https://dbdiagram.io/d to view the diagram.
+// Tables marked "existing" are already in the database; only the form_* tables are new.
+
+Enum form_status {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+Enum form_item_type {
+  // content blocks (no answer)
+  TITLE_TEXT
+  IMAGE
+  DIVIDER
+  SECTION [note: 'page break, like Google Forms sections']
+  // questions
+  SHORT_TEXT
+  PARAGRAPH
+  MULTIPLE_CHOICE [note: 'pick one (radio)']
+  DROPDOWN [note: 'pick one']
+  CHECKBOXES [note: 'pick many']
+  NUMBER
+  DATE
+  EMAIL
+  PHONE
+}
+
+Enum attendee_system_field {
+  FIRST_NAME
+  SURNAME
+  EMAIL
+  PHONE
+  ORGANIZATION_NAME
+  ATTENDEE_TYPE
+  ATTENDEE_NUMBER
+}
+
+// ---------- existing tables (trimmed) ----------
+
+Table organizations [note: 'existing'] {
+  id uuid [pk]
+  name varchar
+  require_attendee_email boolean
+  require_attendee_phone boolean
+  require_attendee_number boolean
+}
+
+Table event_series [note: 'existing'] {
+  id uuid [pk]
+  organization_id uuid [not null]
+  name varchar
+}
+
+Table attendees [note: 'existing'] {
+  id uuid [pk]
+  organization_id uuid [not null]
+  first_name varchar [not null]
+  surname varchar [not null]
+  organization_name varchar
+  attendee_type varchar
+  email varchar
+  phone varchar
+  attendee_number integer
+  profile_image_url varchar
+  qr_token varchar [unique, not null]
+  emailed_at timestamp
+}
+
+// ---------- new tables ----------
+
+Table forms {
+  id uuid [pk]
+  organization_id uuid [not null]
+  event_series_id uuid [note: 'optional: people who submit are registered into this series']
+  title varchar [not null]
+  description text
+  status form_status [not null, default: 'DRAFT']
+  public_token varchar [unique, not null, note: 'public link /f/:token']
+  theme jsonb [note: '{ headerImageUrl, primaryColor, backgroundColor, font }']
+  settings jsonb [note: '{ sendQrEmailOnSubmit, confirmationMessage, closesAt, responseLimit }']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null]
+
+  indexes {
+    organization_id
+  }
+}
+
+Table form_items {
+  id uuid [pk]
+  form_id uuid [not null]
+  type form_item_type [not null]
+  system_field attendee_system_field [note: 'set = maps to an Attendee column, cannot be deleted']
+  position integer [not null, note: 'display order']
+  label varchar [note: 'question text / block title']
+  description text [note: 'help text']
+  image_url varchar [note: 'IMAGE block, or image attached to a question']
+  required boolean [not null, default: false]
+  config jsonb [note: 'type-specific: placeholder, min, max, allowOther, ...']
+  archived_at timestamp [note: 'soft delete so old answers still export']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null]
+
+  indexes {
+    (form_id, position)
+    (form_id, system_field) [unique, note: 'each system field at most once per form']
+  }
+}
+
+Table form_item_options {
+  id uuid [pk]
+  item_id uuid [not null]
+  label varchar [not null]
+  image_url varchar [note: 'optional picture choice']
+  position integer [not null]
+  archived_at timestamp
+
+  indexes {
+    (item_id, position)
+  }
+}
+
+Table form_responses {
+  id uuid [pk]
+  form_id uuid [not null]
+  attendee_id uuid [note: 'the attendee created/matched by this submission']
+  matched_existing_attendee boolean [not null, default: false, note: 'true = linked to an attendee who was already registered']
+  submitted_at timestamp [not null, default: `now()`]
+  ip_address varchar
+  user_agent varchar
+
+  indexes {
+    (form_id, submitted_at)
+    attendee_id
+  }
+}
+
+Table form_answers {
+  id uuid [pk]
+  response_id uuid [not null]
+  item_id uuid [not null]
+  text_value text [note: 'text, paragraph, email, phone, "Other" text']
+  number_value decimal
+  date_value timestamp
+  option_ids uuid[] [note: '1 id for radio/dropdown, many for checkboxes']
+
+  indexes {
+    (response_id, item_id) [unique]
+    item_id
+  }
+}
+
+// ---------- relations ----------
+
+Ref: forms.organization_id > organizations.id [delete: cascade]
+Ref: forms.event_series_id > event_series.id [delete: set null]
+Ref: event_series.organization_id > organizations.id
+Ref: attendees.organization_id > organizations.id
+
+Ref: form_items.form_id > forms.id [delete: cascade]
+Ref: form_item_options.item_id > form_items.id [delete: cascade]
+
+Ref: form_responses.form_id > forms.id [delete: cascade]
+Ref: form_responses.attendee_id > attendees.id [delete: set null]
+
+Ref: form_answers.response_id > form_responses.id [delete: cascade]
+Ref: form_answers.item_id > form_items.id [delete: cascade]
+
+// ---------- sample data ----------
+
+Records forms(id, title, status, public_token) {
+  '11111111-0000-0000-0000-000000000001', 'Workshop Registration', 'PUBLISHED', 'abc123'
+}
+
+Records form_items(id, form_id, type, system_field, position, label, required) {
+  '22222222-0000-0000-0000-000000000001', '11111111-0000-0000-0000-000000000001', 'SHORT_TEXT', 'FIRST_NAME', 0, 'First name', true
+  '22222222-0000-0000-0000-000000000002', '11111111-0000-0000-0000-000000000001', 'SHORT_TEXT', 'SURNAME', 1, 'Surname', true
+  '22222222-0000-0000-0000-000000000003', '11111111-0000-0000-0000-000000000001', 'EMAIL', 'EMAIL', 2, 'Email', true
+  '22222222-0000-0000-0000-000000000004', '11111111-0000-0000-0000-000000000001', 'DROPDOWN', null, 3, 'T-shirt size', false
+  '22222222-0000-0000-0000-000000000005', '11111111-0000-0000-0000-000000000001', 'CHECKBOXES', null, 4, 'Dietary needs', false
+}
+
+Records form_item_options(id, item_id, label, position) {
+  '33333333-0000-0000-0000-000000000001', '22222222-0000-0000-0000-000000000004', 'S', 0
+  '33333333-0000-0000-0000-000000000002', '22222222-0000-0000-0000-000000000004', 'M', 1
+  '33333333-0000-0000-0000-000000000003', '22222222-0000-0000-0000-000000000004', 'L', 2
+  '33333333-0000-0000-0000-000000000004', '22222222-0000-0000-0000-000000000005', 'Vegetarian', 0
+  '33333333-0000-0000-0000-000000000005', '22222222-0000-0000-0000-000000000005', 'Halal', 1
+}
