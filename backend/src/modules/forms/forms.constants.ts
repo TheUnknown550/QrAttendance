@@ -31,6 +31,7 @@ export const SYSTEM_FIELD_TYPES: Record<AttendeeSystemField, FormItemType> = {
   ORGANIZATION_NAME: FormItemType.SHORT_TEXT,
   ATTENDEE_TYPE: FormItemType.DROPDOWN,
   ATTENDEE_NUMBER: FormItemType.NUMBER,
+  PROFILE_PHOTO: FormItemType.PHOTO,
 };
 
 /** Attendee fields that can never be removed or made optional. */
@@ -48,6 +49,7 @@ const SYSTEM_FIELD_LABELS: Record<"en" | "th", Record<AttendeeSystemField, strin
     ORGANIZATION_NAME: "Organization",
     ATTENDEE_TYPE: "Attendee type",
     ATTENDEE_NUMBER: "Attendee number",
+    PROFILE_PHOTO: "Profile photo",
   },
   th: {
     FIRST_NAME: "ชื่อ",
@@ -57,6 +59,7 @@ const SYSTEM_FIELD_LABELS: Record<"en" | "th", Record<AttendeeSystemField, strin
     ORGANIZATION_NAME: "หน่วยงาน",
     ATTENDEE_TYPE: "ประเภทผู้เข้าร่วม",
     ATTENDEE_NUMBER: "ลำดับผู้เข้าร่วม",
+    PROFILE_PHOTO: "รูปโปรไฟล์",
   },
 };
 

@@ -40,6 +40,7 @@ enum FormItemType {
   DATE
   EMAIL
   PHONE
+  PHOTO
 }
 
 enum AttendeeSystemField {
@@ -50,6 +51,7 @@ enum AttendeeSystemField {
   ORGANIZATION_NAME
   ATTENDEE_TYPE
   ATTENDEE_NUMBER
+  PROFILE_PHOTO
 }
 
 model User {

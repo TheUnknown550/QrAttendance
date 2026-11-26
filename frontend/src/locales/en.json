@@ -1108,7 +1108,8 @@
       "NUMBER": "Number",
       "DATE": "Date",
       "EMAIL": "Email",
-      "PHONE": "Phone number"
+      "PHONE": "Phone number",
+      "PHOTO": "Photo upload"
     },
     "systemFields": {
       "FIRST_NAME": "First name",
@@ -1117,7 +1118,8 @@
       "PHONE": "Phone number",
       "ORGANIZATION_NAME": "Organization",
       "ATTENDEE_TYPE": "Attendee type",
-      "ATTENDEE_NUMBER": "Attendee number"
+      "ATTENDEE_NUMBER": "Attendee number",
+      "PROFILE_PHOTO": "Profile photo"
     },
     "list": {
       "eyebrow": "Registration",
@@ -1221,7 +1223,10 @@
       "formTitlePlaceholder": "Form title",
       "formDescriptionPlaceholder": "Form description (optional)",
       "imageTitlePlaceholder": "Image title (optional)",
-      "captionPlaceholder": "Caption (optional)"
+      "captionPlaceholder": "Caption (optional)",
+      "alignRight": "Right",
+      "sizeLarge": "Large",
+      "profilePhotoHint": "The photo is saved to the attendee's profile, so it shows when their QR code is scanned."
     },
     "design": {
       "general": "General",
@@ -1294,7 +1299,11 @@
       "colorAccent": "Accent",
       "colorBackground": "Background",
       "colorCard": "Cards",
-      "colorText": "Text"
+      "colorText": "Text",
+      "logo": "Logo",
+      "logoPosition": "Position",
+      "logoSize": "Size",
+      "logoHint": "Shown at the top of the header. A PNG with a transparent background looks best."
     },
     "renderer": {
       "choose": "Choose",
@@ -1309,7 +1318,13 @@
       "submitting": "Submitting...",
       "pageOf": "Page {{current}} of {{total}}",
       "noImage": "No image",
-      "untitledQuestion": "Untitled question"
+      "untitledQuestion": "Untitled question",
+      "uploadPhoto": "Upload a photo",
+      "photoHint": "JPEG, PNG or WebP, up to 5 MB",
+      "changePhoto": "Change photo",
+      "removePhoto": "Remove",
+      "photoTypeError": "Choose a JPEG, PNG or WebP image",
+      "photoSizeError": "The photo must be 5 MB or smaller"
     },
     "public": {
       "pageTitle": "Registration form",

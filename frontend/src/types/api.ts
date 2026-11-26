@@ -312,7 +312,8 @@ export type FormItemType =
   | "NUMBER"
   | "DATE"
   | "EMAIL"
-  | "PHONE";
+  | "PHONE"
+  | "PHOTO";
 
 export type AttendeeSystemField =
   | "FIRST_NAME"
@@ -321,7 +322,8 @@ export type AttendeeSystemField =
   | "PHONE"
   | "ORGANIZATION_NAME"
   | "ATTENDEE_TYPE"
-  | "ATTENDEE_NUMBER";
+  | "ATTENDEE_NUMBER"
+  | "PROFILE_PHOTO";
 
 export type FormLayout = "cards" | "single" | "minimal";
 export type FormRadius = "none" | "small" | "medium" | "large";
@@ -333,6 +335,9 @@ export type FormFont = "dm-sans" | "prompt" | "sarabun" | "kanit" | "ibm-plex-th
 export type FormTheme = {
   headerImageUrl?: string | null;
   backgroundImageUrl?: string | null;
+  logoUrl?: string | null;
+  logoAlign?: "left" | "center" | "right" | null;
+  logoSize?: "small" | "medium" | "large" | null;
   primaryColor?: string | null;
   backgroundColor?: string | null;
   cardColor?: string | null;
@@ -428,6 +433,7 @@ export type FormSubmitResult = {
 export type FormResponseColumn = {
   id: string;
   label: string;
+  type: FormItemType;
   systemField: AttendeeSystemField | null;
   archived: boolean;
 };

@@ -666,6 +666,9 @@ function SelectedItemEditor({
         ) : (
           <>
             <QuestionInput attendeeTypeOptions={attendeeTypeOptions} disabled item={toFormItem(item)} onChange={() => undefined} value={undefined} />
+            {item.systemField === "PROFILE_PHOTO" ? (
+              <p className="mt-2 text-xs text-[var(--form-muted)]">{t("forms.editor.profilePhotoHint")}</p>
+            ) : null}
             {item.systemField === "ATTENDEE_TYPE" ? (
               <p className="mt-2 text-xs text-[var(--form-muted)]">
                 {t("forms.editor.attendeeTypeHint", { types: attendeeTypeOptions.join(", ") || "-" })}

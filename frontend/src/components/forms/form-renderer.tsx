@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { isQuestion, resolveFormTheme } from "../../lib/forms";
@@ -19,7 +19,7 @@ import {
   useFormTheme,
 } from "./form-theme";
 
-export type FormAnswerValue = string | string[];
+export type FormAnswerValue = string | string[] | File;
 export type FormAnswers = Record<string, FormAnswerValue>;
 
 export type RenderableForm = {
@@ -46,8 +46,13 @@ type FormRendererProps = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
 function isEmpty(value: FormAnswerValue | undefined) {
-  return value === undefined || (Array.isArray(value) ? value.length === 0 : value.trim() === "");
+  if (value === undefined) return true;
+  if (value instanceof File) return false;
+  return Array.isArray(value) ? value.length === 0 : value.trim() === "";
 }
 
 /** Splits the items into pages at each SECTION block, like Google Forms sections. */
@@ -180,6 +185,15 @@ export function QuestionInput({
   }
 
   switch (item.type) {
+    case "PHOTO":
+      return (
+        <PhotoInput
+          disabled={disabled}
+          onChange={onChange}
+          round={item.systemField === "PROFILE_PHOTO"}
+          value={value instanceof File ? value : null}
+        />
+      );
     case "PARAGRAPH":
       return (
         <textarea
@@ -296,6 +310,88 @@ export function QuestionInput({
   }
 }
 
+/** Photo picker drawn in the form's theme; on phones it offers the camera or the gallery. */
+function PhotoInput({
+  value,
+  onChange,
+  disabled,
+  round,
+}: {
+  value: File | null;
+  onChange: (value: FormAnswerValue) => void;
+  disabled?: boolean;
+  round?: boolean;
+}) {
+  const { t } = useTranslation();
+  const preview = useMemo(() => (value ? URL.createObjectURL(value) : null), [value]);
+
+  useEffect(() => {
+    if (!preview) return;
+    return () => URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  const fileInput = (
+    <input
+      accept={PHOTO_TYPES.join(",")}
+      className="hidden"
+      disabled={disabled}
+      onChange={(event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (file) onChange(file);
+      }}
+      type="file"
+    />
+  );
+
+  if (preview && value) {
+    return (
+      <div className="flex flex-wrap items-center gap-4">
+        <img
+          alt=""
+          className={cn("size-28 border border-[var(--form-border)] object-cover", round ? "rounded-full" : "rounded-[var(--form-control-radius)]")}
+          src={preview}
+        />
+        <div className="min-w-0 space-y-2">
+          <p className="max-w-56 truncate text-sm text-[var(--form-muted)]">{value.name}</p>
+          <div className="flex flex-wrap gap-2">
+            <label className={cn(secondaryButtonClass, "cursor-pointer px-3 py-2 text-xs")}>
+              <Camera className="size-3.5" />
+              {t("forms.renderer.changePhoto")}
+              {fileInput}
+            </label>
+            <button className={cn(secondaryButtonClass, "px-3 py-2 text-xs")} onClick={() => onChange("")} type="button">
+              <X className="size-3.5" />
+              {t("forms.renderer.removePhoto")}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <label
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 rounded-[var(--form-control-radius)] border-2 border-dashed border-[var(--form-border)] px-4 py-8 text-center transition",
+        disabled ? "cursor-default" : "cursor-pointer hover:border-[var(--form-accent)] hover:bg-[var(--form-subtle)]",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-12 items-center justify-center bg-[color-mix(in_srgb,var(--form-accent)_14%,transparent)] text-[var(--form-accent)]",
+          round ? "rounded-full" : "rounded-[var(--form-control-radius)]",
+        )}
+      >
+        <Camera className="size-6" />
+      </span>
+      <span className="text-sm font-semibold">{t("forms.renderer.uploadPhoto")}</span>
+      <span className="text-xs text-[var(--form-muted)]">{t("forms.renderer.photoHint")}</span>
+      {fileInput}
+    </label>
+  );
+}
+
 export function FormItemView({
   item,
   value,
@@ -399,6 +495,22 @@ function QuestionHeading({ item }: { item: FormItem }) {
   );
 }
 
+const LOGO_HEIGHT = { small: "h-10", medium: "h-14", large: "h-20" } as const;
+const LOGO_JUSTIFY = { left: "justify-start", center: "justify-center", right: "justify-end" } as const;
+
+/** The organizer's logo, placed left, center or right in the header. */
+function FormLogo({ className }: { className?: string }) {
+  const theme = useFormTheme();
+  const logo = resolveMediaUrl(theme.logoUrl);
+  if (!logo) return null;
+
+  return (
+    <div className={cn("flex w-full", LOGO_JUSTIFY[theme.logoAlign], className)}>
+      <img alt="" className={cn("w-auto max-w-[70%] object-contain", LOGO_HEIGHT[theme.logoSize])} src={logo} />
+    </div>
+  );
+}
+
 /**
  * The title block. The editor passes `titleSlot` / `descriptionSlot` to edit the
  * text in place while everything around it stays exactly as the public form.
@@ -431,10 +543,16 @@ export function FormHeader({
           {headerImage ? (
             <>
               <img alt="" className="absolute inset-0 size-full object-cover" src={headerImage} />
+              {/* The logo sits under the darkening layer so it reads as part of the cover photo. */}
+              <div className="absolute inset-x-0 top-0 p-6 sm:p-8">
+                <FormLogo />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
             </>
           ) : null}
           <div className={cn("relative flex min-h-56 flex-col justify-end p-6 sm:p-8", center && "items-center text-center")}>
+            {/* With a photo, this copy only keeps the logo's space so the title never overlaps it. */}
+            <FormLogo className={cn("mb-auto pb-6", headerImage && "invisible")} />
             {meta ? <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">{meta}</p> : null}
             <h1 className="mt-2 w-full break-words text-3xl font-bold sm:text-4xl">{titleSlot ?? form.title}</h1>
             {description ? <div className="mt-3 w-full whitespace-pre-line text-sm leading-6 opacity-90">{description}</div> : null}
@@ -458,6 +576,7 @@ export function FormHeader({
         accentTop={theme.headerStyle === "banner" && theme.layout !== "single"}
         className={center ? "text-center" : undefined}
       >
+        <FormLogo className="mb-5" />
         {meta ? <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--form-accent)]">{meta}</p> : null}
         <h1 className="mt-2 break-words text-3xl font-semibold">{titleSlot ?? form.title}</h1>
         {description ? (
@@ -509,6 +628,11 @@ export function FormRenderer({
 
       if (item.type === "EMAIL" && typeof value === "string" && !emailPattern.test(value.trim())) {
         nextErrors[item.id] = t("forms.renderer.emailError");
+      }
+
+      if (value instanceof File) {
+        if (!PHOTO_TYPES.includes(value.type)) nextErrors[item.id] = t("forms.renderer.photoTypeError");
+        else if (value.size > MAX_PHOTO_BYTES) nextErrors[item.id] = t("forms.renderer.photoSizeError");
       }
     }
 

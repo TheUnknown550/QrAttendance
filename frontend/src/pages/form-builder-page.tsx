@@ -794,6 +794,40 @@ function DesignPanel({
         </div>
       </PanelSection>
 
+      <PanelSection title={t("forms.design.logo")}>
+        <ImagePicker compact onChange={(logoUrl) => onChange({ logoUrl })} uploadImage={uploadImage} value={theme.logoUrl ?? null} />
+        {theme.logoUrl ? (
+          <>
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-slate-600">{t("forms.design.logoPosition")}</span>
+              <Segmented
+                onChange={(logoAlign) => onChange({ logoAlign })}
+                options={[
+                  { value: "left" as const, label: t("forms.editor.alignLeft") },
+                  { value: "center" as const, label: t("forms.editor.alignCenter") },
+                  { value: "right" as const, label: t("forms.editor.alignRight") },
+                ]}
+                value={resolved.logoAlign}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-xs font-medium text-slate-600">{t("forms.design.logoSize")}</span>
+              <Segmented
+                onChange={(logoSize) => onChange({ logoSize })}
+                options={[
+                  { value: "small" as const, label: t("forms.editor.sizeSmall") },
+                  { value: "medium" as const, label: t("forms.editor.sizeMedium") },
+                  { value: "large" as const, label: t("forms.editor.sizeLarge") },
+                ]}
+                value={resolved.logoSize}
+              />
+            </div>
+          </>
+        ) : (
+          <p className="text-xs text-slate-500">{t("forms.design.logoHint")}</p>
+        )}
+      </PanelSection>
+
       <PanelSection title={t("forms.design.header")}>
         <Segmented
           onChange={(headerStyle) => onChange({ headerStyle })}

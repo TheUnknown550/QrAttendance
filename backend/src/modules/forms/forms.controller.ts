@@ -198,6 +198,7 @@ export const updateForm = asyncHandler(async (request, response) => {
   await assertEventSeriesInOrganization(body.eventSeriesId, organizationId);
   assertImageBelongsToForm(body.theme?.headerImageUrl, formId);
   assertImageBelongsToForm(body.theme?.backgroundImageUrl, formId);
+  assertImageBelongsToForm(body.theme?.logoUrl, formId);
 
   const form = await prisma.form.update({
     where: { id: formId },

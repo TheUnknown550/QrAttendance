@@ -6,10 +6,12 @@ import { asyncHandler } from "../../utils/async-handler";
 import { generateQrToken } from "../../utils/qr-token";
 import { ensureDefaultAttendeeTypes } from "../attendee-types/attendee-types.controller";
 import { buildOrganizationQrTemplate, dispatchAttendeeQrEmails } from "../attendees/attendees.qr-email";
+import { removeStoredAttendeeImage, saveAttendeeImage } from "../attendees/attendees.upload";
 import { touchOrganizationActivity } from "../organizations/organizations.activity";
 import { getRequiredSystemFields, isQuestionType } from "./forms.constants";
 import { formItemsInclude } from "./forms.controller";
 import { submitFormSchema, type FormSettings } from "./forms.schemas";
+import { removeFormResponsePhoto, saveFormResponsePhoto } from "./forms.upload";
 
 type ItemWithOptions = FormItem & { options: FormItemOption[] };
 
@@ -111,6 +113,14 @@ export const getPublicForm = asyncHandler(async (request, response) => {
   );
 });
 
+function safeJsonParse(value: string) {
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    throw new ApiError(400, "Invalid form answers");
+  }
+}
+
 function isEmptyValue(value: unknown) {
   return (
     value === undefined ||
@@ -200,7 +210,16 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
     throw new ApiError(410, "This form is no longer accepting responses");
   }
 
-  const body = submitFormSchema.parse(request.body);
+  // Forms with photo questions are sent as multipart: the answers arrive as a
+  // JSON string next to one file per photo question (field name = item id).
+  const rawAnswers =
+    typeof request.body?.answers === "string" ? safeJsonParse(request.body.answers) : request.body?.answers;
+  const body = submitFormSchema.parse({ answers: rawAnswers ?? {} });
+  const uploadedFiles = new Map<string, Express.Multer.File>();
+  for (const file of (request.files as Express.Multer.File[] | undefined) ?? []) {
+    if (!uploadedFiles.has(file.fieldname)) uploadedFiles.set(file.fieldname, file);
+  }
+  const pendingPhotos = new Map<string, Express.Multer.File>();
   const attendeeTypeLabels = await getAttendeeTypeLabels(form.organization.id);
   const requiredSystemFields = getRequiredSystemFields(form.organization);
   const fieldErrors: Record<string, string> = {};
@@ -212,6 +231,13 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
 
     const raw = body.answers[item.id];
     const required = item.required || (item.systemField ? requiredSystemFields.has(item.systemField) : false);
+
+    if (item.type === FormItemType.PHOTO) {
+      const file = uploadedFiles.get(item.id);
+      if (file) pendingPhotos.set(item.id, file);
+      else if (required) fieldErrors[item.id] = "Please upload a photo";
+      continue;
+    }
 
     if (isEmptyValue(raw)) {
       if (required) fieldErrors[item.id] = "This question is required";
@@ -233,6 +259,29 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
     throw new ApiError(400, "Please check your answers", { fieldErrors });
   }
 
+  // Photos are only stored once every other answer is valid.
+  const savedPhotoUrls: string[] = [];
+  let profilePhoto: Express.Multer.File | null = null;
+  const removeSavedPhotos = () => Promise.all(savedPhotoUrls.map((url) => removeFormResponsePhoto(form.id, url)));
+
+  for (const [itemId, file] of pendingPhotos) {
+    try {
+      const url = await saveFormResponsePhoto(form.id, file);
+      savedPhotoUrls.push(url);
+      parsedAnswers.set(itemId, { textValue: url, numberValue: null, dateValue: null, optionIds: [] });
+      if (form.items.find((item) => item.id === itemId)?.systemField === AttendeeSystemField.PROFILE_PHOTO) {
+        profilePhoto = file;
+      }
+    } catch {
+      fieldErrors[itemId] = "Upload a valid JPEG, PNG, or WebP image";
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    await removeSavedPhotos();
+    throw new ApiError(400, "Please check your answers", { fieldErrors });
+  }
+
   // Answers to attendee fields are passed straight into the attendee record.
   const attendeeValues = {
     firstName: answerAsText(systemValues.get(AttendeeSystemField.FIRST_NAME)),
@@ -251,6 +300,24 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
   const firstName = attendeeValues.firstName;
   const surname = attendeeValues.surname;
   const organizationId = form.organization.id;
+
+  // A profile photo becomes the attendee's photo (the one the scanner shows).
+  // It is stored apart from the response copy, because organizers can later
+  // replace or delete the attendee photo.
+  let attendeeImageUrl: string | null = null;
+  if (profilePhoto) {
+    try {
+      const saved = await saveAttendeeImage({
+        attendeeName: `${firstName} ${surname}`,
+        tenantName: form.organization.name,
+        file: profilePhoto,
+      });
+      attendeeImageUrl = saved?.publicUrl ?? null;
+    } catch (error) {
+      await removeSavedPhotos();
+      throw error;
+    }
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     // Re-use the attendee if they are already registered: match by email first,
@@ -297,6 +364,7 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
           organizationName: existing.organizationName ?? attendeeValues.organizationName,
           attendeeType: existing.attendeeType ?? attendeeValues.attendeeType,
           attendeeNumber: existing.attendeeNumber ?? attendeeValues.attendeeNumber,
+          profileImageUrl: existing.profileImageUrl ?? attendeeImageUrl,
         },
       });
     } else {
@@ -310,6 +378,7 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
           organizationName: attendeeValues.organizationName,
           attendeeType: attendeeValues.attendeeType,
           attendeeNumber: attendeeValues.attendeeNumber,
+          profileImageUrl: attendeeImageUrl,
           qrToken: generateQrToken(),
         },
       });
@@ -329,7 +398,16 @@ export const submitPublicForm = asyncHandler(async (request, response) => {
     });
 
     return { attendee, matchedExisting: Boolean(existing) };
+  }).catch(async (error: unknown) => {
+    await removeSavedPhotos();
+    await removeStoredAttendeeImage(attendeeImageUrl);
+    throw error;
   });
+
+  // An existing attendee keeps the photo they already had, so the new copy is not needed.
+  if (attendeeImageUrl && result.attendee.profileImageUrl !== attendeeImageUrl) {
+    await removeStoredAttendeeImage(attendeeImageUrl);
+  }
 
   await touchOrganizationActivity(organizationId);
 

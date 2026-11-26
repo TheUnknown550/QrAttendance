@@ -11,7 +11,7 @@ import {
 } from "./forms.controller";
 import { getPublicForm, submitPublicForm } from "./forms.public";
 import { deleteFormResponse, exportFormResponses, listFormResponses } from "./forms.responses";
-import { formImageUpload } from "./forms.upload";
+import { formImageUpload, formResponsePhotoUpload } from "./forms.upload";
 
 const formsRouter = Router();
 const publicFormsRouter = Router();
@@ -24,7 +24,7 @@ const submitRateLimit = createRateLimit({
 });
 
 publicFormsRouter.get("/:token", getPublicForm);
-publicFormsRouter.post("/:token/submit", submitRateLimit, submitPublicForm);
+publicFormsRouter.post("/:token/submit", submitRateLimit, formResponsePhotoUpload, submitPublicForm);
 
 formsRouter.get("/", listForms);
 formsRouter.post("/", createForm);

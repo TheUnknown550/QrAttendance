@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { api, getErrorMessage, unwrapResponse } from "../../lib/api";
-import { cn, formatDate } from "../../lib/utils";
+import { cn, formatDate, resolveMediaUrl } from "../../lib/utils";
 import type { FormResponsesPage } from "../../types/api";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -140,7 +140,18 @@ export function FormResponsesPanel({ formId, formTitle }: { formId: string; form
                   </td>
                   {columns.map((column) => (
                     <td key={column.id} className="max-w-72 whitespace-pre-line break-words px-4 py-3 text-slate-800">
-                      {row.values[column.id] || <span className="text-slate-300">—</span>}
+                      {column.type === "PHOTO" && row.values[column.id] ? (
+                        <a href={resolveMediaUrl(row.values[column.id]) ?? undefined} rel="noreferrer" target="_blank">
+                          <img
+                            alt={column.label}
+                            className="size-14 rounded-[8px] border border-[var(--color-border)] object-cover transition hover:opacity-80"
+                            loading="lazy"
+                            src={resolveMediaUrl(row.values[column.id]) ?? undefined}
+                          />
+                        </a>
+                      ) : (
+                        row.values[column.id] || <span className="text-slate-300">—</span>
+                      )}
                     </td>
                   ))}
                   <td className="px-4 py-3 text-right">

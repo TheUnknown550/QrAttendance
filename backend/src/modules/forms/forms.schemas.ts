@@ -25,6 +25,9 @@ export const formThemeSchema = z
   .object({
     headerImageUrl: uploadedImageUrl.nullish(),
     backgroundImageUrl: uploadedImageUrl.nullish(),
+    logoUrl: uploadedImageUrl.nullish(),
+    logoAlign: z.enum(["left", "center", "right"]).nullish(),
+    logoSize: z.enum(["small", "medium", "large"]).nullish(),
     primaryColor: hexColor.nullish(),
     backgroundColor: hexColor.nullish(),
     cardColor: hexColor.nullish(),

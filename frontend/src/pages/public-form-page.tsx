@@ -69,8 +69,17 @@ export function PublicFormPage() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: async (answers: FormAnswers) =>
-      unwrapResponse<FormSubmitResult>(await api.post(`/public/forms/${token}/submit`, { answers })),
+    mutationFn: async (answers: FormAnswers) => {
+      // Photos are sent as files next to the other answers (field name = question id).
+      const body = new FormData();
+      const values: Record<string, string | string[]> = {};
+      for (const [itemId, value] of Object.entries(answers)) {
+        if (value instanceof File) body.append(itemId, value);
+        else values[itemId] = value;
+      }
+      body.append("answers", JSON.stringify(values));
+      return unwrapResponse<FormSubmitResult>(await api.post(`/public/forms/${token}/submit`, body));
+    },
     onMutate: () => setServerErrors({}),
     onSuccess: (data) => {
       setResult(data);

@@ -1097,7 +1097,8 @@
       "NUMBER": "ตัวเลข",
       "DATE": "วันที่",
       "EMAIL": "อีเมล",
-      "PHONE": "เบอร์โทรศัพท์"
+      "PHONE": "เบอร์โทรศัพท์",
+      "PHOTO": "อัปโหลดรูปภาพ"
     },
     "systemFields": {
       "FIRST_NAME": "ชื่อ",
@@ -1106,7 +1107,8 @@
       "PHONE": "เบอร์โทรศัพท์",
       "ORGANIZATION_NAME": "หน่วยงาน",
       "ATTENDEE_TYPE": "ประเภทผู้เข้าร่วม",
-      "ATTENDEE_NUMBER": "ลำดับผู้เข้าร่วม"
+      "ATTENDEE_NUMBER": "ลำดับผู้เข้าร่วม",
+      "PROFILE_PHOTO": "รูปโปรไฟล์"
     },
     "list": {
       "eyebrow": "การลงทะเบียน",
@@ -1206,7 +1208,10 @@
       "formTitlePlaceholder": "ชื่อแบบฟอร์ม",
       "formDescriptionPlaceholder": "คำอธิบายแบบฟอร์ม (ไม่บังคับ)",
       "imageTitlePlaceholder": "หัวข้อรูปภาพ (ไม่บังคับ)",
-      "captionPlaceholder": "คำบรรยายภาพ (ไม่บังคับ)"
+      "captionPlaceholder": "คำบรรยายภาพ (ไม่บังคับ)",
+      "alignRight": "ขวา",
+      "sizeLarge": "ใหญ่",
+      "profilePhotoHint": "รูปจะถูกบันทึกเป็นรูปโปรไฟล์ของผู้เข้าร่วม และแสดงเมื่อสแกน QR Code"
     },
     "design": {
       "general": "ทั่วไป",
@@ -1279,7 +1284,11 @@
       "colorAccent": "สีหลัก",
       "colorBackground": "พื้นหลัง",
       "colorCard": "การ์ด",
-      "colorText": "ตัวอักษร"
+      "colorText": "ตัวอักษร",
+      "logo": "โลโก้",
+      "logoPosition": "ตำแหน่ง",
+      "logoSize": "ขนาด",
+      "logoHint": "แสดงที่ด้านบนของส่วนหัว ใช้ไฟล์ PNG พื้นหลังโปร่งใสจะดูดีที่สุด"
     },
     "renderer": {
       "choose": "เลือก",
@@ -1294,7 +1303,13 @@
       "submitting": "กำลังส่ง...",
       "pageOf": "หน้า {{current}} จาก {{total}}",
       "noImage": "ไม่มีรูปภาพ",
-      "untitledQuestion": "คำถามไม่มีชื่อ"
+      "untitledQuestion": "คำถามไม่มีชื่อ",
+      "uploadPhoto": "อัปโหลดรูปภาพ",
+      "photoHint": "ไฟล์ JPEG, PNG หรือ WebP ขนาดไม่เกิน 5 MB",
+      "changePhoto": "เปลี่ยนรูป",
+      "removePhoto": "ลบ",
+      "photoTypeError": "กรุณาเลือกไฟล์ JPEG, PNG หรือ WebP",
+      "photoSizeError": "รูปภาพต้องมีขนาดไม่เกิน 5 MB"
     },
     "public": {
       "pageTitle": "แบบฟอร์มลงทะเบียน",

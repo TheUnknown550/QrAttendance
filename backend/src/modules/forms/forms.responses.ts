@@ -1,4 +1,4 @@
-import type { FormAnswer, FormItem, FormItemOption } from "@prisma/client";
+import { FormItemType, type FormAnswer, type FormItem, type FormItemOption } from "@prisma/client";
 import XLSX from "xlsx";
 import { env } from "../../config/env";
 import { prisma } from "../../lib/prisma";
@@ -6,12 +6,14 @@ import { ApiError } from "../../utils/api-error";
 import { successResponse } from "../../utils/api-response";
 import { asyncHandler } from "../../utils/async-handler";
 import { isQuestionType } from "./forms.constants";
+import { removeFormResponsePhoto } from "./forms.upload";
 
 type ItemWithOptions = FormItem & { options: FormItemOption[] };
 
 type ResponseColumn = {
   id: string;
   label: string;
+  type: FormItem["type"];
   systemField: FormItem["systemField"];
   archived: boolean;
 };
@@ -42,6 +44,7 @@ function buildColumns(items: ItemWithOptions[]): ResponseColumn[] {
     .map((item, index) => ({
       id: item.id,
       label: item.label?.trim() || `Question ${index + 1}`,
+      type: item.type,
       systemField: item.systemField,
       archived: Boolean(item.archivedAt),
     }));
@@ -128,15 +131,16 @@ export const deleteFormResponse = asyncHandler(async (request, response) => {
 
   const existing = await prisma.formResponse.findFirst({
     where: { id: responseId, formId, form: { organizationId } },
-    select: { id: true },
+    select: { id: true, answers: { where: { item: { type: FormItemType.PHOTO } }, select: { textValue: true } } },
   });
 
   if (!existing) {
     throw new ApiError(404, "Response not found");
   }
 
-  // Only the form response is removed; the attendee it created stays.
+  // Only the form response (and its uploaded photos) is removed; the attendee it created stays.
   await prisma.formResponse.delete({ where: { id: existing.id } });
+  await Promise.all(existing.answers.map((answer) => removeFormResponsePhoto(formId, answer.textValue)));
 
   response.json(successResponse(null, "Response deleted"));
 });
@@ -191,7 +195,28 @@ export const exportFormResponses = asyncHandler(async (request, response) => {
     ];
   });
 
+  // Photo answers are stored as paths; Excel gets a full, clickable link instead.
+  const firstQuestionColumn = 3;
+  const photoColumns = columns
+    .map((column, index) => (column.type === FormItemType.PHOTO ? firstQuestionColumn + index : -1))
+    .filter((index) => index >= 0);
+
+  for (const row of rows) {
+    for (const columnIndex of photoColumns) {
+      const value = row[columnIndex];
+      if (typeof value === "string" && value.startsWith("/uploads/")) row[columnIndex] = `${env.APP_URL}${value}`;
+    }
+  }
+
   const sheet = XLSX.utils.aoa_to_sheet([header, ...rows], { cellDates: true, dateNF: "yyyy-mm-dd hh:mm" });
+
+  rows.forEach((row, rowIndex) => {
+    for (const columnIndex of photoColumns) {
+      const value = row[columnIndex];
+      const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex + 1, c: columnIndex })];
+      if (cell && typeof value === "string" && value.startsWith("http")) cell.l = { Target: value };
+    }
+  });
   sheet["!cols"] = header.map((title, index) => ({ wch: index === 0 ? 5 : Math.min(Math.max(String(title).length + 4, 14), 50) }));
 
   const workbook = XLSX.utils.book_new();

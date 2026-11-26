@@ -1,6 +1,7 @@
 import {
   AlignLeft,
   Calendar,
+  Camera,
   CheckSquare,
   ChevronDownSquare,
   CircleDot,
@@ -41,6 +42,7 @@ export const QUESTION_ITEM_TYPES: FormItemType[] = [
   "DATE",
   "EMAIL",
   "PHONE",
+  "PHOTO",
 ];
 
 export const ALL_SYSTEM_FIELDS: AttendeeSystemField[] = [
@@ -51,6 +53,7 @@ export const ALL_SYSTEM_FIELDS: AttendeeSystemField[] = [
   "ORGANIZATION_NAME",
   "ATTENDEE_TYPE",
   "ATTENDEE_NUMBER",
+  "PROFILE_PHOTO",
 ];
 
 export const SYSTEM_FIELD_TYPES: Record<AttendeeSystemField, FormItemType> = {
@@ -61,6 +64,7 @@ export const SYSTEM_FIELD_TYPES: Record<AttendeeSystemField, FormItemType> = {
   ORGANIZATION_NAME: "SHORT_TEXT",
   ATTENDEE_TYPE: "DROPDOWN",
   ATTENDEE_NUMBER: "NUMBER",
+  PROFILE_PHOTO: "PHOTO",
 };
 
 export const ITEM_TYPE_ICONS: Record<FormItemType, LucideIcon> = {
@@ -77,6 +81,7 @@ export const ITEM_TYPE_ICONS: Record<FormItemType, LucideIcon> = {
   DATE: Calendar,
   EMAIL: Mail,
   PHONE: Phone,
+  PHOTO: Camera,
 };
 
 export const DEFAULT_FORM_ACCENT = "#d97706";
@@ -112,6 +117,9 @@ export type ResolvedFormTheme = {
   text: string;
   backgroundImageUrl: string | null;
   headerImageUrl: string | null;
+  logoUrl: string | null;
+  logoAlign: "left" | "center" | "right";
+  logoSize: "small" | "medium" | "large";
   font: FormFont;
   layout: FormLayout;
   radius: FormRadius;
@@ -130,6 +138,9 @@ export function resolveFormTheme(theme: FormTheme | null | undefined): ResolvedF
     text: theme?.textColor || DEFAULT_FORM_TEXT,
     backgroundImageUrl: theme?.backgroundImageUrl ?? null,
     headerImageUrl: theme?.headerImageUrl ?? null,
+    logoUrl: theme?.logoUrl ?? null,
+    logoAlign: theme?.logoAlign ?? "left",
+    logoSize: theme?.logoSize ?? "medium",
     font: theme?.font && theme.font in FORM_FONTS ? theme.font : "dm-sans",
     layout: theme?.layout ?? "cards",
     radius: theme?.radius ?? "medium",
